@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-02T10:15:50.000Z",
+  "title": "Design System: LostStuff2",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Chestnut Brown",
+        "canonical": "#784D34",
+        "tonalRamp": ["#2D2016", "#3D2B1F", "#543624", "#784D34", "#A26A4A", "#B49A85", "#D8CABF", "#F5F0EB"]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Mocha Espresso",
+        "canonical": "#543624",
+        "tonalRamp": ["#1A120B", "#2D2016", "#3D2B1F", "#543624", "#784D34", "#A26A4A", "#B49A85", "#ECE5DE"]
+      },
+      "accent-caramel": {
+        "role": "secondary",
+        "displayName": "Warm Caramel",
+        "canonical": "#A26A4A",
+        "tonalRamp": ["#3D2416", "#543624", "#784D34", "#A26A4A", "#C48866", "#D8A888", "#EBD0BD", "#FAF2EB"]
+      },
+      "neutral-paper": {
+        "role": "neutral",
+        "displayName": "Paper White Ground",
+        "canonical": "#FAFAF8",
+        "tonalRamp": ["#2D2016", "#543624", "#784D34", "#B49A85", "#D8CABF", "#ECE5DE", "#F5F0EB", "#FAFAF8"]
+      },
+      "neutral-cream": {
+        "role": "neutral",
+        "displayName": "Oatmeal Cream Container",
+        "canonical": "#F5F0EB",
+        "tonalRamp": ["#2D2016", "#543624", "#784D34", "#B49A85", "#D8CABF", "#ECE5DE", "#F5F0EB", "#FAFAF8"]
+      },
+      "neutral-sand": {
+        "role": "neutral",
+        "displayName": "Warm Sand Border",
+        "canonical": "#ECE5DE",
+        "tonalRamp": ["#2D2016", "#543624", "#784D34", "#B49A85", "#D8CABF", "#ECE5DE", "#F5F0EB", "#FAFAF8"]
+      },
+      "neutral-espresso": {
+        "role": "neutral",
+        "displayName": "Deep Espresso Text",
+        "canonical": "#2D2016",
+        "tonalRamp": ["#1A120B", "#2D2016", "#3D2B1F", "#543624", "#784D34", "#B49A85", "#D8CABF", "#F5F0EB"]
+      },
+      "status-lost": {
+        "role": "status",
+        "displayName": "Amber Lost",
+        "canonical": "#D97706",
+        "tonalRamp": ["#78350F", "#92400E", "#B45309", "#D97706", "#F59E0B", "#FBBF24", "#FDE68A", "#FEF3C7"]
+      },
+      "status-found": {
+        "role": "status",
+        "displayName": "Sage Emerald Found",
+        "canonical": "#15803D",
+        "tonalRamp": ["#14532D", "#166534", "#15803D", "#16A34A", "#22C55E", "#4ADE80", "#BBF7D0", "#DCFCE7"]
+      },
+      "status-match": {
+        "role": "status",
+        "displayName": "Cyan Auto-Match",
+        "canonical": "#0284C7",
+        "tonalRamp": ["#0C4A6E", "#075985", "#0369A1", "#0284C7", "#0EA5E9", "#38BDF8", "#BAE6FD", "#E0F2FE"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Hero", "purpose": "Hero banner headline headlines and key university recovery metrics." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles and dialog modal headers." },
+      "title": { "displayName": "Card Title", "purpose": "Item listing titles and notification alert lines." },
+      "body": { "displayName": "Body", "purpose": "Item descriptions, location details, and FAQ answers." },
+      "label": { "displayName": "Label & Category", "purpose": "Pills, building codes, time chips, and form labels." },
+      "caption": { "displayName": "Caption & Micro Badge", "purpose": "Status pills, match score badges, and kbd shortcuts." }
+    },
+    "shadows": [
+      { "name": "warm-sm", "value": "0 1px 3px rgba(45, 32, 22, 0.06)", "purpose": "Default rest state for search inputs and subtle badges." },
+      { "name": "warm-md", "value": "0 4px 16px -2px rgba(45, 32, 22, 0.08)", "purpose": "Item card rest state." },
+      { "name": "warm-lg", "value": "0 10px 25px -4px rgba(45, 32, 22, 0.1)", "purpose": "Item card hover elevation." },
+      { "name": "warm-xl", "value": "0 20px 35px -5px rgba(45, 32, 22, 0.12)", "purpose": "Modals, dialogs, and toast notifications." }
+    ],
+    "motion": [
+      { "name": "ease-smooth", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Smooth exponential deceleration for modals, cards, and toasts." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Chestnut brown primary action button with tactile elevation.",
+      "html": "<button class=\"ds-btn-primary\"><span>แจ้งเก็บของได้</span></button>",
+      "css": ".ds-btn-primary { background: #784D34; color: #FAFAF8; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 2px 6px rgba(45, 32, 22, 0.08); transition: background 0.2s, transform 0.15s; } .ds-btn-primary:hover { background: #543624; transform: translateY(-1px); } .ds-btn-primary:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Lost Report CTA Button",
+      "kind": "button",
+      "refersTo": "button-lost",
+      "description": "Warm amber soft alert button for reporting lost belongings.",
+      "html": "<button class=\"ds-btn-lost\"><span>แจ้งทำของหาย</span></button>",
+      "css": ".ds-btn-lost { background: #FEF3C7; color: #B45309; font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 12px; border: 1px solid #FDE68A; cursor: pointer; transition: background 0.2s, transform 0.15s; } .ds-btn-lost:hover { background: rgba(254, 243, 199, 0.7); transform: translateY(-1px); }"
+    },
+    {
+      "name": "Item Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Tactile card in Warm White & Brown with rounded-3xl geometry.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-badge\">ของหาย</div><h3 class=\"ds-card-title\">iPad Air 5 Space Gray</h3><p class=\"ds-card-loc\">สำนักหอสมุดกลาง ชั้น 3</p></div>",
+      "css": ".ds-card { background: #FAFAF8; border: 1px solid rgba(216, 202, 191, 0.8); border-radius: 24px; padding: 16px; box-shadow: 0 4px 16px -2px rgba(45, 32, 22, 0.08); font-family: 'Prompt', sans-serif; transition: transform 0.2s, box-shadow 0.2s; } .ds-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -4px rgba(45, 32, 22, 0.1); } .ds-card-badge { display: inline-block; background: #FEF3C7; color: #B45309; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; margin-bottom: 8px; } .ds-card-title { color: #2D2016; font-size: 14px; font-weight: 700; margin: 0 0 4px 0; } .ds-card-loc { color: #543624; opacity: 0.8; font-size: 12px; margin: 0; }"
+    },
+    {
+      "name": "Search Input Bar",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "High-contrast search bar with warm caramel focus ring.",
+      "html": "<div class=\"ds-search-bar\"><input type=\"text\" class=\"ds-search-input\" placeholder=\"พิมพ์ค้นหาสิ่งของ...\" /><span class=\"ds-search-kbd\">/</span></div>",
+      "css": ".ds-search-bar { display: flex; align-items: center; background: #FAFAF8; border: 1px solid #ECE5DE; border-radius: 16px; padding: 6px 12px; box-shadow: 0 4px 16px rgba(45, 32, 22, 0.08); } .ds-search-bar:focus-within { border-color: #A26A4A; box-shadow: 0 0 20px -3px rgba(162, 106, 74, 0.25); } .ds-search-input { border: none; background: transparent; color: #2D2016; font-family: 'Prompt', sans-serif; font-size: 13px; width: 100%; outline: none; } .ds-search-kbd { background: #F5F0EB; color: #B49A85; font-family: monospace; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid #ECE5DE; }"
+    },
+    {
+      "name": "Toast Notification",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Floating warm notification banner with status side stripe.",
+      "html": "<div class=\"ds-toast\"><div class=\"ds-toast-stripe\"></div><div class=\"ds-toast-body\"><strong>บันทึกคำขอรับคืนแล้ว</strong><p>กรุณาติดต่อที่เคาน์เตอร์บริการยืม-คืน หอสมุดกลาง</p></div></div>",
+      "css": ".ds-toast { display: flex; background: #FAFAF8; border: 1px solid #ECE5DE; border-radius: 16px; padding: 12px 16px; box-shadow: 0 20px 35px -5px rgba(45, 32, 22, 0.12); font-family: 'Prompt', sans-serif; position: relative; overflow: hidden; } .ds-toast-stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #15803D; } .ds-toast-body strong { color: #2D2016; font-size: 13px; display: block; margin-bottom: 2px; } .ds-toast-body p { color: #543624; opacity: 0.8; font-size: 11px; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Warm Campus Sanctuary",
+    "overview": "LostStuff2 adopts a tactile, reassuring, and community-centric aesthetic built upon a Warm White & Brown palette. Misplacing an essential personal item is an inherently anxious experience. The design system counters that distress with calming, warm alabaster surfaces, rich cocoa typography, earthy caramel accents, and high-trust clarity.",
+    "keyCharacteristics": [
+      "Warmth & Reassurance: Clean paper white ground (#FAFAF8) layered with soft oatmeal cream (#F5F0EB) and deep espresso typography (#2D2016).",
+      "High-Contrast Scannability: Distinct color-coded status badges (Warm Amber for Lost, Emerald for Found/Returned, Cerulean Blue for Auto-Matches).",
+      "Tactile Soft Geometry: Generous rounded corners (24px), soft warm shadows, and subtle translucent glassmorphic navigation."
+    ],
+    "rules": [
+      {
+        "name": "The Warm Contrast Rule",
+        "body": "Pure cold blacks (#000000) and pure cold grays are forbidden. All dark neutrals must contain a hint of rich roasted coffee/espresso tone (#2D2016).",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do maintain the Warm White & Brown palette across all new screens and modals.",
+      "Do provide bilingual Thai/English string equivalents in src/data/i18n.js for every new UI label.",
+      "Do highlight matching scores with the cyan match badge whenever score >= 60%.",
+      "Do use Prompt for Thai typography and Inter for numbers and metric labels."
+    ],
+    "donts": [
+      "Don't introduce harsh saturated neon colors or stark cold grays (#666666, #000000).",
+      "Don't use bounce or elastic easing animations; stick to smooth exponential transitions.",
+      "Don't hide verification guidelines when displaying item claim actions."
+    ]
+  }
+}

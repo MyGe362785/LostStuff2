@@ -1,0 +1,148 @@
+# Implementation Plan: ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย (University Lost & Found Portal Demo)
+
+พัฒนาเว็บแอปพลิเคชันต้นแบบ (Interactive Demo) สำหรับกลุ่มที่ 6 **"ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย"** ด้วย **Vue 3 (Composition API) + Vite** พร้อม Mock Data เสมือนจริง ระบบจับคู่ของหายและของที่เก็บได้อัตโนมัติ (Automated Matching Engine) และระบบแจ้งเตือนเจ้าของ (Smart Notification Center)
+
+---
+
+## 1. System Architecture & Core Features
+
+```mermaid
+flowchart TD
+    User([นักศึกษา / ผู้ใช้งานในมหาวิทยาลัย]) --> Navbar[Navigation & Notification Center]
+    
+    subgraph Core_Modules [โมดูลหลักของระบบ]
+        PostLost[1. ฟอร์มแจ้งของหาย - Report Lost]
+        PostFound[2. ฟอร์มแจ้งเก็บของได้ - Report Found]
+        SearchHub[3. คลังค้นหาและประวัติย้อนหลัง - Search & Discovery Hub]
+        MyPosts[4. รายการของฉัน & สถานะการรับคืน - My Reports & Claim Tracker]
+    end
+
+    User --> PostLost
+    User --> PostFound
+    User --> SearchHub
+    User --> MyPosts
+
+    subgraph Auto_Matching_Engine [ระบบประมวลผลการจับคู่อัตโนมัติ]
+        MatchCalc[เปรียบเทียบ Category + เวลา/ช่วงวันที่ + สถานที่/อาคาร + คำสำคัญ]
+        ScoreGen[คำนวณ Match Score % & ระดับความน่าจะเป็น]
+    end
+
+    PostLost --> Auto_Matching_Engine
+    PostFound --> Auto_Matching_Engine
+
+    Auto_Matching_Engine --> MatchModal[Instant Match Alert Modal: แจ้งเตือนทันทีหลังโพสต์]
+    Auto_Matching_Engine --> NotifCenter[In-App Notification Bell: ถาดแจ้งเตือนรายการที่แมตช์]
+    
+    MatchModal --> ClaimFlow[กระบวนการยืนยันความเป็นเจ้าของ & นัดหมายส่งมอบ]
+    NotifCenter --> ClaimFlow
+    SearchHub --> ClaimFlow
+```
+
+---
+
+## 2. Proposed Features & Structure
+
+### A. โครงสร้างข้อมูล (Shared Data Structure for Lost & Found)
+ตามความต้องการ ทั้งคนทำของหายและคนเก็บได้จะกรอกข้อมูลที่มีโครงสร้างสอดคล้องกัน:
+- **ID & Type**: `id`, `type: 'lost' | 'found'`, `status: 'searching' | 'pending_claim' | 'returned'`
+- **Category (หมวดหมู่)**: อุปกรณ์อิเล็กทรอนิกส์ (Electronics), บัตร/กระเป๋าสตางค์ (Cards/Wallets), เครื่องเขียน/หนังสือ (Stationery/Books), ของใช้ส่วนตัว (Personal Items), กุญแจ/ยานพาหนะ (Keys/Vehicles), อื่นๆ (Others)
+- **Time & Date Range**: วันที่เกิดเหตุ, ช่วงเวลาโดยประมาณ (เช่น เช้า, บ่าย, เย็น หรือระบุเวลา)
+- **Location & Range**: อาคารในมหาวิทยาลัย (เช่น อาคารเรียนรวม, สำนักหอสมุดกลาง, โรงอาหารกลาง, ลานกิจกรรม, โรงยิม, อาคาร SC), ชั้น, ห้อง/จุดสังเกต
+- **Item Details**: ชื่อสิ่งของ, แบรนด์, สีหลัก, ลักษณะเด่น/ตำหนิ, รูปภาพ (รองรับ URL / Mock image upload)
+- **Contact & Handover Point**: ชื่อผู้แจ้ง, ช่องทางติดต่อ (LINE ID/เบอร์โทร), จุดฝากของ (เช่น ป้อม รปภ. กลาง, ห้องกิจการนักศึกษา)
+
+### B. อัลกอริทึมจับคู่อัตโนมัติ (Automated Matching Engine)
+1. **Category Weight (35%)**: หมวดหมู่ตรงกัน
+2. **Location Weight (30%)**: อาคาร/สถานที่เดียวกัน หรือโซนใกล้เคียง
+3. **Date Proximity Weight (20%)**: วันที่เกิดเหตุใกล้เคียงกัน (± 3-5 วัน)
+4. **Keyword & Attribute Similarity (15%)**: คำค้นหาตรงกับชื่อ, สี, แบรนด์
+5. **Threshold & Action**:
+   - คะแนน $\ge 60\%$: ขึ้นสถานะ **"พบรายการที่น่าจะตรงกัน (Potential Match)"**
+   - แสดง **Match Score Badge (เช่น 95% ตรงกันมาก)** และเปิด Modal แจ้งเตือนทันที
+
+### C. หน้าและคอมโพเนนต์สำคัญ (Key UI Views)
+1. **Header & Smart Notification Bar**:
+   - กระดิ่งแจ้งเตือนแบบ Real-time มีตัวเลขนับ (Badge) แสดงรายการที่ระบบจับคู่ให้อัตโนมัติ
+   - ปุ่มเปลี่ยนแท็บด่วน: หน้าแรก, ค้นหาของหาย/เก็บได้, แจ้งของหาย, แจ้งเก็บได้, รายการของฉัน
+2. **Interactive Hero & Quick Match Banner**:
+   - แสดงสถิติสิ่งของที่ส่งคืนสำเร็จในมหาวิทยาลัย
+   - ปุ่มด่วน 2 ปุ่มเด่นชัด: `[+ แจ้งทำของหาย]` และ `[+ แจ้งเก็บของได้]`
+3. **Discovery & History Hub (ค้นหาย้อนหลัง)**:
+   - ค้นหาด้วย Keyword แบบทันที (Live Search)
+   - ฟิลเตอร์ละเอียด: ประเภท (ของหาย / ของที่เก็บได้ / คืนแล้ว), หมวดหมู่, วันที่, อาคารใน มหาวิทยาลัย
+   - Toggle สลับมุมมองการ์ด (Grid View) / ตารางประวัติ (List View)
+4. **Post Modal / Forms**:
+   - ฟอร์มกรอกง่าย มี Step ชัดเจน พร้อมตัวช่วยเลือกอาคารและหมวดหมู่ยอดนิยม
+   - เมื่อกดส่ง -> ระบบรัน Engine ทันที -> หากพบรายการแมตช์จะเด้ง **Match Alert Modal** แสดงรายการของฝั่งตรงข้ามที่ตรงกันทันที
+5. **Item Details & Claim Verification Modal**:
+   - ดูข้อมูลสิ่งของอย่างละเอียด
+   - ปุ่ม "นี่คือของของฉัน (Claim Item)" แสดงขั้นตอนยืนยันและจุดรับของที่ปลอดภัยในมหาวิทยาลัย
+
+---
+
+## 3. Technology Stack & Design System
+
+- **Framework**: Vue 3 (`<script setup>`, Composition API)
+- **Bundler**: Vite (Fast HMR & build)
+- **Styling**: Tailwind CSS + Custom Thai Typography (Prompt & Inter fonts from Google Fonts)
+- **Icons**: Lucide Icons (Vue)
+- **State & Storage**: Reactive Vue State + `localStorage` (ข้อมูลที่ผู้ใช้ลองกรอกจะบันทึกและรันได้จริง รีเฟรชไม่หาย และมีปุ่ม Reset Mock Data สะดวกต่อการนำเสนอ)
+- **Aesthetics**: Modern University Portal Theme (Deep Sapphire Blue & Emerald/Cyan accents, Glassmorphism cards, smooth badge animations, micro-interactions)
+
+---
+
+## 4. Proposed File Structure
+
+```
+LosingStuff/
+├── index.html
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+├── postcss.config.js
+├── src/
+│   ├── main.js
+│   ├── App.vue
+│   ├── style.css
+│   ├── data/
+│   │   ├── mockItems.js       # ข้อมูลจำลองของหาย/เก็บได้ในมหาวิทยาลัย (สมจริง ครอบคลุมทุกอาคาร)
+│   │   └── campusLocations.js # รายชื่ออาคาร คณะ และจุดฝากของใน มหาวิทยาลัย
+│   ├── utils/
+│   │   └── matchingEngine.js  # อัลกอริทึมคำนวณความสอดคล้องและการจับคู่อัตโนมัติ
+│   └── components/
+│       ├── Navbar.vue         # แถบเมนูด้านบน + กระดิ่ง Notification Center
+│       ├── HeroBanner.vue     # ส่วนหัวต้อนรับ สถิติ และปุ่ม Action หลัก
+│       ├── ItemCard.vue       # การ์ดแสดงรายการสิ่งของพร้อมป้ายสถานะและ Match Score
+│       ├── ItemDetailModal.vue # Modal ดูรายละเอียดสิ่งของและวิธียืนยันรับคืน
+│       ├── ReportModal.vue    # ฟอร์มแจ้งของหาย / เก็บของได้ (มี Step & Match detection)
+│       ├── MatchAlertModal.vue # Modal แจ้งเตือนทันทีเมื่อตรวจพบของที่ตรงกัน
+│       ├── FilterSidebar.vue  # แถบค้นหา หมวดหมู่ อาคาร และช่วงเวลา
+│       ├── MyItemsTracker.vue # แดชบอร์ดติดตามรายการที่ตัวเองเคยโพสต์ไว้
+│       └── NotificationTray.vue # ถาดลิสต์การแจ้งเตือนการจับคู่
+```
+
+---
+
+## 5. Verification & Demo Flow Plan
+
+### Automated / Manual Verification
+1. **Initial Build & Dev Server**:
+   - รัน `npm run build` และเปิด `npm run dev` ตรวจสอบความถูกต้องของคอมโพเนนต์
+2. **Scenario Test 1: Search & Filter History**:
+   - ทดสอบค้นหาด้วย Keyword (เช่น "iPad", "บัตรนักศึกษา", "กุญแจรถ")
+   - ทดสอบฟิลเตอร์ตามอาคาร (เช่น "สำนักหอสมุดกลาง") และหมวดหมู่
+3. **Scenario Test 2: Auto-Matching Trigger**:
+   - กดปุ่ม "แจ้งทำของหาย" กรอกข้อมูลจำลอง เช่น *iPad Air สี Space Gray หายที่สำนักหอสมุดกลาง ชั้น 3 เมื่อวานนี้*
+   - ระบบจะตรวจจับพบรายการของที่คนเก็บได้ที่ตรงกันทันที และเด้ง **Match Alert Modal (ความตรงกัน 95%)**
+4. **Scenario Test 3: Notification & Claim**:
+   - เปิดดู Notification Tray เพื่อดูรายการแมตช์ย้อนหลัง
+   - กดปุ่ม "ขอรับคืน / นัดหมายส่งมอบ" เพื่อดูขั้นตอนการประสานงานจุดปลอดภัย
+5. **Scenario Test 4: LocalStorage & Reset**:
+   - รีเฟรชหน้าเว็บ ข้อมูลที่โพสต์ใหม่ยังคงอยู่ และสามารถกดปุ่ม "รีเซ็ตข้อมูล Mock Data" เพื่อเริ่มสาธิตใหม่ได้ตลอดเวลา
+
+---
+
+## 6. User Review Required
+
+> [!IMPORTANT]
+> ระบบจะจัดเตรียมข้อมูล Mock Data สถานการณ์ยอดนิยมในมหาวิทยาลัยไว้ล่วงหน้า (เช่น ไอแพด, กระเป๋าสตางค์, บัตรนักศึกษา, ร่ม, หูฟังไร้สาย, กุญแจหอพัก) เพื่อให้พร้อมสำหรับการกดทดสอบฟังก์ชันจับคู่ได้ทันที
