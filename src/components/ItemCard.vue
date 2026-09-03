@@ -16,13 +16,13 @@
       
       <!-- Top Badges Overlay -->
       <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 pointer-events-none">
-        <!-- Status Badge -->
+        <!-- 5-Stage Status Badge -->
         <span 
-          class="px-2 py-0.5 rounded-md text-[11px] font-bold shadow-warm-sm flex items-center gap-1.5"
-          :class="getStatusClass(item.status, item.type)"
+          class="px-2 py-0.5 rounded-md text-[11px] font-bold shadow-warm-sm flex items-center gap-1.5 border"
+          :class="getStatusBadgeClass(item.status, item.type)"
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDotClass(item.status, item.type)"></span>
-          {{ getStatusText(item.status, item.type) }}
+          {{ getStatusLabel(item.status, item.type) }}
         </span>
 
         <!-- Match Score Badge (if high confidence) -->
@@ -37,7 +37,7 @@
 
       <!-- Category Overlay -->
       <div class="absolute bottom-2.5 left-2.5 pointer-events-none">
-        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-paper text-brand-chestnut border border-brand-sand shadow-warm-sm flex items-center gap-1.5">
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-brand-paper/95 text-brand-chestnut border border-brand-sand shadow-warm-sm flex items-center gap-1.5">
           <component :is="getCategoryIcon(item.category)" class="w-3 h-3" />
           {{ getCategoryName(item.category) }}
         </span>
@@ -47,6 +47,24 @@
     <!-- Content Details -->
     <div class="p-4 flex-1 flex flex-col justify-between">
       <div>
+        <!-- Color & Brand Tag Row (Proposal 3.2) -->
+        <div class="flex flex-wrap items-center gap-1.5 mb-2">
+          <span 
+            v-if="item.color || item.colorNameTh" 
+            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-cream/80 text-brand-mocha border border-brand-sand/60 flex items-center gap-1"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-espresso/60"></span>
+            {{ isTh ? (item.colorNameTh || item.color) : (item.colorNameEn || item.color) }}
+          </span>
+
+          <span 
+            v-if="item.brand" 
+            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-sand/60 text-brand-chestnut border border-brand-tan/50"
+          >
+            {{ item.brand }}
+          </span>
+        </div>
+
         <h3 class="font-bold text-sm text-brand-espresso group-hover:text-brand-chestnut transition-colors line-clamp-2 leading-snug mb-1.5">
           {{ isTh ? item.titleTh : item.titleEn }}
         </h3>
@@ -103,17 +121,26 @@
       <!-- Details -->
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-1.5 mb-1">
-          <!-- Status -->
+          <!-- 5-Stage Status -->
           <span 
-            class="px-2 py-0.5 rounded-md text-[10px] font-bold"
-            :class="getStatusClass(item.status, item.type)"
+            class="px-2 py-0.5 rounded-md text-[10px] font-bold border"
+            :class="getStatusBadgeClass(item.status, item.type)"
           >
-            {{ getStatusText(item.status, item.type) }}
+            {{ getStatusLabel(item.status, item.type) }}
           </span>
 
           <!-- Category -->
           <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-brand-cream text-brand-mocha">
             {{ getCategoryName(item.category) }}
+          </span>
+
+          <!-- Color / Brand -->
+          <span v-if="item.color || item.colorNameTh" class="px-1.5 py-0.5 rounded text-[10px] bg-brand-paper border border-brand-sand text-brand-latte">
+            {{ isTh ? (item.colorNameTh || item.color) : (item.colorNameEn || item.color) }}
+          </span>
+
+          <span v-if="item.brand" class="px-1.5 py-0.5 rounded text-[10px] bg-brand-sand/40 text-brand-chestnut">
+            {{ item.brand }}
           </span>
 
           <span v-if="item.matchScore" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-match-light text-match-dark border border-match-border">
@@ -182,20 +209,35 @@ defineEmits(['select-item'])
 
 const isTh = computed(() => props.currentLang === 'th')
 
-function getStatusClass(status, type) {
-  if (status === 'returned') return 'bg-returned-light text-returned-dark border border-returned-border'
-  if (type === 'lost') return 'bg-lost-light text-lost-dark border border-lost-border'
-  return 'bg-found-light text-found-dark border border-found-border'
+// 5-Stage Status badge stylings (Proposal 3.2)
+function getStatusBadgeClass(status, type) {
+  if (status === 'pending_review') return 'bg-amber-100 text-amber-900 border-amber-300'
+  if (status === 'pending_confirm') return 'bg-purple-100 text-purple-900 border-purple-300'
+  if (status === 'matched') return 'bg-blue-100 text-blue-900 border-blue-300'
+  if (status === 'returned') return 'bg-returned-light text-returned-dark border-returned-border'
+  if (status === 'closed') return 'bg-stone-200 text-stone-700 border-stone-300'
+  
+  // Default searching:
+  if (type === 'lost') return 'bg-lost-light text-lost-dark border-lost-border'
+  return 'bg-found-light text-found-dark border-found-border'
 }
 
 function getStatusDotClass(status, type) {
+  if (status === 'pending_review') return 'bg-amber-500 animate-pulse'
+  if (status === 'pending_confirm') return 'bg-purple-500 animate-pulse'
+  if (status === 'matched') return 'bg-blue-500'
   if (status === 'returned') return 'bg-returned'
+  if (status === 'closed') return 'bg-stone-500'
   if (type === 'lost') return 'bg-lost'
   return 'bg-found'
 }
 
-function getStatusText(status, type) {
-  if (status === 'returned') return props.t('badgeReturned')
+function getStatusLabel(status, type) {
+  if (status === 'pending_review') return props.t('statusPendingReview')
+  if (status === 'pending_confirm') return props.t('statusPendingConfirm')
+  if (status === 'matched') return props.t('statusMatched')
+  if (status === 'returned') return props.t('statusReturned')
+  if (status === 'closed') return props.t('statusClosed')
   if (type === 'lost') return props.t('badgeLost')
   return props.t('badgeFound')
 }

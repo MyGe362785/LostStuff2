@@ -25,7 +25,7 @@
               {{ reportType === 'lost' ? t('navReportLost') : t('navReportFound') }}
             </h3>
             <p class="text-[11px] text-brand-mocha/70">
-              {{ isTh ? 'กรอกข้อมูลเพื่อให้ระบบ AI ช่วยประมวลผลจับคู่' : 'Fill details for AI auto-matching' }}
+              {{ isTh ? 'กรอกข้อมูล 5 มิติ เพื่อให้ระบบคำนวณจับคู่ได้อย่างแม่นยำ' : 'Fill 5-factor details for accurate auto-matching' }}
             </p>
           </div>
         </div>
@@ -72,7 +72,7 @@
       <!-- Form Body -->
       <form @submit.prevent="handleSubmit" class="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
         
-        <!-- STEP 1: Item Information -->
+        <!-- STEP 1: Item Information (Category, Title, Color, Brand, Distinctive Marks) -->
         <div v-if="currentStep === 1" class="space-y-4 animate-in fade-in duration-150">
           
           <!-- Category Selector -->
@@ -109,14 +109,72 @@
             />
           </div>
 
-          <!-- Description & Distinctive Marks -->
+          <!-- Color & Brand Row (Proposal 3.2) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Color Selector -->
+            <div>
+              <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+                {{ t('fieldColor') }} <span class="text-lost">*</span>
+              </label>
+              
+              <!-- Color quick chips -->
+              <div class="flex flex-wrap gap-1.5 mb-2">
+                <button
+                  type="button"
+                  v-for="c in colorOptions"
+                  :key="c.id"
+                  @click="selectColor(c)"
+                  class="px-2 py-1 rounded-lg text-[11px] font-semibold border flex items-center gap-1.5 transition-all"
+                  :class="formData.color === c.id ? 'bg-brand-chestnut text-white border-brand-chestnut shadow-warm-sm' : 'bg-brand-paper hover:bg-brand-cream border-brand-sand text-brand-mocha'"
+                >
+                  <span class="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0" :style="{ backgroundColor: c.hex }"></span>
+                  <span>{{ isTh ? c.nameTh : c.nameEn }}</span>
+                </button>
+              </div>
+
+              <input 
+                v-model="formData.colorCustom"
+                type="text" 
+                :placeholder="t('fieldColorPlaceholder')"
+                class="w-full px-3 py-2 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
+              />
+            </div>
+
+            <!-- Brand / Maker -->
+            <div>
+              <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+                {{ t('fieldBrand') }}
+              </label>
+              <input 
+                v-model="formData.brand"
+                type="text" 
+                :placeholder="t('fieldBrandPlaceholder')"
+                class="w-full px-3 py-2 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel mt-0 sm:mt-8"
+              />
+            </div>
+          </div>
+
+          <!-- Distinctive Marks (จุดสังเกตเฉพาะ - Proposal 3.2) -->
+          <div>
+            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+              {{ t('fieldDistinctiveMarks') }}
+            </label>
+            <input 
+              v-model="formData.distinctiveMarks"
+              type="text" 
+              :placeholder="t('fieldDistinctiveMarksPlaceholder')"
+              class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
+            />
+          </div>
+
+          <!-- Description -->
           <div>
             <label class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldDescription') }}
             </label>
             <textarea 
               v-model="formData.description"
-              rows="3"
+              rows="2"
               :placeholder="t('fieldDescPlaceholder')"
               class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
             ></textarea>
@@ -174,7 +232,7 @@
               </div>
             </div>
 
-            <!-- Alternative URL input toggle / Presets -->
+            <!-- Presets -->
             <div class="mt-2.5 space-y-1.5">
               <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <span class="text-[10px] text-brand-latte font-semibold shrink-0">{{ isTh ? 'หรือเลือกภาพตัวอย่าง:' : 'Sample presets:' }}</span>
@@ -319,7 +377,7 @@
           type="button"
           v-if="currentStep > 1"
           @click="currentStep--"
-          class="px-4 py-2 rounded-xl text-xs font-bold text-brand-mocha hover:bg-brand-sand/60 transition-colors"
+          class="px-4 py-2 rounded-xl text-xs font-semibold text-brand-mocha hover:bg-brand-sand/50 transition-colors"
         >
           {{ t('btnBack') }}
         </button>
@@ -328,15 +386,7 @@
         <div class="flex items-center gap-2">
           <button 
             type="button"
-            @click="$emit('close')"
-            class="px-4 py-2 rounded-xl text-xs font-semibold text-brand-mocha hover:bg-brand-sand/50 transition-colors"
-          >
-            {{ t('modalClose') }}
-          </button>
-
-          <button 
             v-if="currentStep < 3"
-            type="button"
             @click="handleNextStep"
             class="px-5 py-2.5 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white text-xs font-bold shadow-warm-sm transition-all"
           >
@@ -344,8 +394,8 @@
           </button>
 
           <button 
-            v-else
             type="button"
+            v-else
             @click="handleSubmit"
             class="px-6 py-2.5 rounded-xl text-white text-xs font-bold shadow-warm-md transition-all flex items-center gap-1.5"
             :class="reportType === 'lost' ? 'bg-lost hover:bg-lost-dark' : 'bg-brand-chestnut hover:bg-brand-mocha'"
@@ -423,6 +473,20 @@ function processFile(file) {
   reader.readAsDataURL(file)
 }
 
+const colorOptions = [
+  { id: 'black', hex: '#1C1917', nameTh: 'สีดำ', nameEn: 'Black' },
+  { id: 'white', hex: '#FFFFFF', nameTh: 'สีขาว', nameEn: 'White' },
+  { id: 'gray', hex: '#78716C', nameTh: 'สีเทา', nameEn: 'Gray' },
+  { id: 'navy', hex: '#1E3A8A', nameTh: 'สีน้ำเงิน', nameEn: 'Navy' },
+  { id: 'brown', hex: '#78350F', nameTh: 'สีน้ำตาล', nameEn: 'Brown' },
+  { id: 'pink', hex: '#F472B6', nameTh: 'สีชมพู', nameEn: 'Pink' }
+]
+
+function selectColor(c) {
+  formData.value.color = c.id
+  formData.value.colorCustom = isTh.value ? c.nameTh : c.nameEn
+}
+
 const sampleImages = [
   { name: 'iPad / Tablet', url: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80' },
   { name: 'Cardholder', url: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&auto=format&fit=crop&q=80' },
@@ -437,6 +501,10 @@ const today = new Date().toISOString().split('T')[0]
 const formData = ref({
   category: 'electronics',
   title: '',
+  color: 'black',
+  colorCustom: 'สีดำ',
+  brand: '',
+  distinctiveMarks: '',
   description: '',
   imageUrl: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
   buildingId: 'bld_library',
@@ -477,13 +545,21 @@ function handleSubmit() {
   const bld = campusBuildings.find(b => b.id === formData.value.buildingId)
   const bldName = bld ? (isTh.value ? bld.nameTh : bld.nameEn) : ''
 
+  const finalColor = formData.value.colorCustom || formData.value.color
+
   const newItem = {
     id: `item-${Date.now().toString().slice(-4)}`,
     type: props.reportType,
-    status: 'searching',
+    // When submitted by user, it goes to 'pending_review' or 'searching'
+    status: 'pending_review',
     titleTh: formData.value.title,
     titleEn: formData.value.title,
     category: formData.value.category,
+    color: formData.value.color,
+    colorNameTh: finalColor,
+    colorNameEn: finalColor,
+    brand: formData.value.brand || '',
+    distinctiveMarks: formData.value.distinctiveMarks || '',
     buildingId: formData.value.buildingId,
     locationDetailTh: `${bldName} ${formData.value.locationDetail}`,
     locationDetailEn: `${bldName} ${formData.value.locationDetail}`,
