@@ -9,6 +9,7 @@ function requireBackend() {
 export async function getCurrentUser() {
   requireBackend()
   const { data, error } = await supabase.auth.getUser()
+  if (error?.name === 'AuthSessionMissingError') return null
   if (error) throw error
   return data.user
 }
