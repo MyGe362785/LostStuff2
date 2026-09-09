@@ -26,11 +26,15 @@
         :currentLang="currentLang"
         :myReportsCount="myItems.length"
         :emailsCount="unreadEmailsCount"
+        :user="currentUser"
+        :backendConfigured="isBackendConfigured"
         :t="t"
         @nav-change="handleNavChange"
         @lang-change="handleLangChange"
         @open-report="openReportModal"
         @open-emails="isEmailModalOpen = true"
+        @sign-in="isAuthModalOpen = true"
+        @sign-out="signOut"
       />
 
       <!-- Main Content Container -->
@@ -252,6 +256,7 @@
             :myItems="myItems"
             :currentLang="currentLang"
             :t="t"
+            :allowStatusChanges="!isBackendConfigured"
             @open-report="openReportModal"
             @select-item="openItemDetail"
             @mark-returned="markItemReturned"
@@ -334,6 +339,7 @@
       :item="selectedItem"
       :currentLang="currentLang"
       :t="t"
+      :backendConfigured="isBackendConfigured"
       @close="selectedItem = null"
       @mark-returned="markItemReturned"
       @approve-item="handleApproveItem"
@@ -358,6 +364,12 @@
       :t="t"
       @close="isEmailModalOpen = false"
       @clear-emails="clearEmails"
+    />
+
+    <AuthModal
+      v-if="isAuthModalOpen && isBackendConfigured"
+      :currentLang="currentLang"
+      @close="isAuthModalOpen = false"
     />
 
     <!-- Toast Notifications Container -->
@@ -388,16 +400,20 @@ import ToastNotification from './components/ToastNotification.vue'
 import AdminPortal from './components/AdminPortal.vue'
 import ClaimModal from './components/ClaimModal.vue'
 import EmailInboxModal from './components/EmailInboxModal.vue'
+import AuthModal from './components/AuthModal.vue'
 
 import { initialMockItems } from './data/mockItems'
 import { initialAuditLogs } from './data/auditLogs'
 import { translations } from './data/i18n'
 import { findMatches } from './utils/matchingEngine'
 import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emailNotifier'
+import { isBackendConfigured, supabase } from './lib/supabase'
+import { createClaim, createItem, getCurrentProfile, getCurrentUser, listVisibleItems, updateItemStatus } from './services/lostFoundRepository'
 
 // Routing State
 const currentPath = ref(window.location.pathname || '/')
 const isAdminRoute = computed(() => {
+  if (isBackendConfigured) return ['staff', 'admin'].includes(currentProfile.value?.role)
   return currentPath.value === '/admin' || 
          currentPath.value.startsWith('/admin') || 
          window.location.hash === '#/admin' ||
@@ -416,6 +432,8 @@ const activeTab = ref('home')
 const items = ref([])
 const auditLogs = ref([])
 const emails = ref([])
+const currentUser = ref(null)
+const currentProfile = ref(null)
 
 // Filters
 const searchQuery = ref('')
@@ -438,6 +456,7 @@ const activeMatchData = ref(null)
 const isClaimModalOpen = ref(false)
 const claimingTargetItem = ref(null)
 const isEmailModalOpen = ref(false)
+const isAuthModalOpen = ref(false)
 
 // i18n Translation Helper
 function t(key) {
@@ -504,8 +523,21 @@ function handleKeydown(e) {
   }
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadData()
+  if (isBackendConfigured) {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      currentUser.value = session?.user || null
+      void refreshCurrentProfile().catch((error) => {
+        console.error('Unable to refresh user profile', error)
+      })
+      if (session?.user) isAuthModalOpen.value = false
+      void loadBackendItems().catch((error) => {
+        console.error('Unable to refresh Supabase data', error)
+        showToast({ title: isTh.value ? 'รีเฟรชข้อมูลไม่สำเร็จ' : 'Could not refresh data', message: error.message, type: 'info' })
+      })
+    })
+  }
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('popstate', handlePopState)
   window.addEventListener('hashchange', handlePopState)
@@ -517,7 +549,20 @@ onUnmounted(() => {
   window.removeEventListener('hashchange', handlePopState)
 })
 
-function loadData() {
+async function loadData() {
+  if (isBackendConfigured) {
+    try {
+      currentUser.value = await getCurrentUser()
+      currentProfile.value = await getCurrentProfile()
+      await loadBackendItems()
+      auditLogs.value = []
+      emails.value = []
+      return
+    } catch (error) {
+      console.error('Unable to load Supabase data', error)
+      showToast({ title: isTh.value ? 'เชื่อมต่อข้อมูลไม่สำเร็จ' : 'Could not load data', message: error.message, type: 'info' })
+    }
+  }
   const savedItems = localStorage.getItem(STORAGE_KEY)
   if (savedItems) {
     try {
@@ -543,6 +588,23 @@ function loadData() {
   }
 
   emails.value = loadEmails()
+}
+
+async function loadBackendItems() {
+  if (!isBackendConfigured) return
+  items.value = await listVisibleItems()
+}
+
+async function refreshCurrentProfile() {
+  currentProfile.value = currentUser.value ? await getCurrentProfile() : null
+}
+
+async function signOut() {
+  await supabase.auth.signOut()
+  currentUser.value = null
+  currentProfile.value = null
+  await loadBackendItems()
+  showToast({ title: isTh.value ? 'ออกจากระบบแล้ว' : 'Signed out', message: isTh.value ? 'คุณสามารถดูรายการสาธารณะได้ตามปกติ' : 'Public listings remain available.', type: 'success' })
 }
 
 function saveData() {
@@ -669,6 +731,11 @@ function resetFilters() {
 }
 
 function openReportModal(type = 'lost') {
+  if (isBackendConfigured && !currentUser.value) {
+    isAuthModalOpen.value = true
+    showToast({ title: isTh.value ? 'กรุณาเข้าสู่ระบบก่อน' : 'Sign in required', message: isTh.value ? 'เข้าสู่ระบบก่อนแจ้งรายการใหม่' : 'Please sign in before creating a report.', type: 'info' })
+    return
+  }
   activeReportType.value = type
   isReportModalOpen.value = true
 }
@@ -678,7 +745,16 @@ function openItemDetail(item) {
 }
 
 // Staff & Status Actions
-function markItemReturned(itemId) {
+async function markItemReturned(itemId) {
+  if (isBackendConfigured) {
+    try {
+      await updateItemStatus(itemId, 'returned', 'return_confirmed')
+      await loadBackendItems()
+    } catch (error) {
+      showToast({ title: 'Could not update item', message: error.message, type: 'info' })
+    }
+    return
+  }
   const target = items.value.find(i => i.id === itemId)
   if (target) {
     target.status = 'returned'
@@ -708,7 +784,17 @@ function markItemReturned(itemId) {
   }
 }
 
-function handleApproveItem(itemId) {
+async function handleApproveItem(itemId) {
+  if (isBackendConfigured) {
+    try {
+      await updateItemStatus(itemId, 'searching', 'item_approved')
+      await loadBackendItems()
+      showToast({ title: isTh.value ? 'อนุมัติรายการแล้ว' : 'Item approved', message: isTh.value ? 'รายการเผยแพร่แล้ว' : 'The item is now published.', type: 'success' })
+    } catch (error) {
+      showToast({ title: 'Could not approve item', message: error.message, type: 'info' })
+    }
+    return
+  }
   const target = items.value.find(i => i.id === itemId)
   if (target) {
     target.status = 'searching'
@@ -756,7 +842,16 @@ function handleApproveItem(itemId) {
   }
 }
 
-function handleRejectItem(itemId) {
+async function handleRejectItem(itemId) {
+  if (isBackendConfigured) {
+    try {
+      await updateItemStatus(itemId, 'closed', 'item_closed')
+      await loadBackendItems()
+    } catch (error) {
+      showToast({ title: 'Could not close item', message: error.message, type: 'info' })
+    }
+    return
+  }
   const target = items.value.find(i => i.id === itemId)
   if (target) {
     target.status = 'closed'
@@ -785,7 +880,16 @@ function handleRejectItem(itemId) {
   }
 }
 
-function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) {
+async function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) {
+  if (isBackendConfigured) {
+    try {
+      await updateItemStatus(itemId, 'returned', 'return_confirmed')
+      await loadBackendItems()
+    } catch (error) {
+      showToast({ title: 'Could not confirm return', message: error.message, type: 'info' })
+    }
+    return
+  }
   const target = items.value.find(i => i.id === itemId)
   if (target) {
     target.status = 'returned'
@@ -835,11 +939,25 @@ function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) {
 
 // Ownership Claim Flow Handlers
 function handleClaimItem(item) {
+  if (isBackendConfigured && !currentUser.value) {
+    isAuthModalOpen.value = true
+    return
+  }
   claimingTargetItem.value = item
   isClaimModalOpen.value = true
 }
 
-function handleSubmitClaim(claimData) {
+async function handleSubmitClaim(claimData) {
+  if (isBackendConfigured) {
+    try {
+      await createClaim({ itemId: claimData.itemId, proof: `${claimData.secretDetails}\nStudent ID: ${claimData.claimantId}`, preferredContact: claimData.claimantContact })
+      isClaimModalOpen.value = false
+      showToast({ title: isTh.value ? 'ยื่นคำขอสำเร็จ' : 'Claim submitted', message: isTh.value ? 'เจ้าหน้าที่จะตรวจสอบหลักฐานของคุณ' : 'Staff will review your proof.', type: 'success' })
+    } catch (error) {
+      showToast({ title: isTh.value ? 'ส่งคำขอไม่สำเร็จ' : 'Could not submit claim', message: error.message, type: 'info' })
+    }
+    return
+  }
   const target = items.value.find(i => i.id === claimData.itemId)
   if (target) {
     target.status = 'pending_confirm'
@@ -891,7 +1009,18 @@ function handleSubmitClaim(claimData) {
 }
 
 // Report Submission & Real-time 5-Factor Matching Trigger (Email as primary notification)
-function handleReportSubmitted(newItem) {
+async function handleReportSubmitted(newItem) {
+  if (isBackendConfigured) {
+    try {
+      await createItem({ item: newItem, imageFile: newItem.imageFile })
+      await loadBackendItems()
+      isReportModalOpen.value = false
+      showToast({ title: isTh.value ? 'ส่งรายการแล้ว' : 'Report submitted', message: isTh.value ? 'รายการเข้าสู่คิวตรวจสอบแล้ว' : 'Your report is now awaiting review.', type: 'success' })
+    } catch (error) {
+      showToast({ title: isTh.value ? 'ส่งรายการไม่สำเร็จ' : 'Could not submit report', message: error.message, type: 'info' })
+    }
+    return
+  }
   items.value.unshift(newItem)
 
   // Log in staff audit log

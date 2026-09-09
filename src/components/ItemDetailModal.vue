@@ -173,7 +173,7 @@
         <div class="flex items-center gap-2">
           <!-- If pending_review, provide Approve button -->
           <button 
-            v-if="item.status === 'pending_review'"
+            v-if="!backendConfigured && item.status === 'pending_review'"
             @click="$emit('approve-item', item.id)"
             class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white transition-colors flex items-center gap-1.5"
           >
@@ -183,7 +183,7 @@
 
           <!-- If active/searching, mark returned -->
           <button 
-            v-else-if="item.status !== 'returned' && item.status !== 'closed'"
+            v-else-if="!backendConfigured && item.status !== 'returned' && item.status !== 'closed'"
             @click="$emit('mark-returned', item.id)"
             class="px-4 py-2 rounded-xl text-xs font-bold text-brand-mocha hover:text-brand-espresso hover:bg-brand-sand/60 transition-colors flex items-center gap-1.5"
           >
@@ -247,7 +247,8 @@ const props = defineProps({
   t: {
     type: Function,
     required: true
-  }
+  },
+  backendConfigured: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['close', 'mark-returned', 'approve-item', 'claim-item'])
