@@ -81,7 +81,7 @@
           </button>
 
           <button 
-            v-if="item.status !== 'returned'"
+            v-if="allowStatusChanges && item.status !== 'returned'"
             @click="$emit('mark-returned', item.id)"
             class="px-2.5 py-1.5 rounded-lg bg-found-light hover:bg-found/20 text-found-dark text-xs font-bold border border-found-border transition-colors flex items-center gap-1"
           >
@@ -115,7 +115,8 @@ const props = defineProps({
   t: {
     type: Function,
     required: true
-  }
+  },
+  allowStatusChanges: { type: Boolean, default: true }
 })
 
 defineEmits(['open-report', 'select-item', 'mark-returned'])

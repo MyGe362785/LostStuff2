@@ -92,6 +92,14 @@
             </button>
           </div>
 
+          <button
+            v-if="backendConfigured"
+            @click="$emit(user ? 'sign-out' : 'sign-in')"
+            class="hidden sm:inline-flex px-3 py-2 rounded-xl text-xs font-bold border border-brand-sand text-brand-chestnut hover:bg-brand-cream"
+          >
+            {{ user ? (isTh ? 'ออกจากระบบ' : 'Sign out') : (isTh ? 'เข้าสู่ระบบ' : 'Sign in') }}
+          </button>
+
           <!-- Unified Post Triggers -->
           <button 
             @click="$emit('open-report', 'lost')"
@@ -135,6 +143,8 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  user: { type: Object, default: null },
+  backendConfigured: { type: Boolean, default: false },
   t: {
     type: Function,
     required: true
@@ -145,7 +155,9 @@ defineEmits([
   'nav-change', 
   'lang-change', 
   'open-report', 
-  'open-emails'
+  'open-emails',
+  'sign-in',
+  'sign-out'
 ])
 
 const isTh = props.currentLang === 'th'

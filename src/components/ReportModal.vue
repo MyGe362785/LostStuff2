@@ -438,6 +438,7 @@ const emit = defineEmits(['close', 'submit-report'])
 const currentStep = ref(1)
 const fileInputRef = ref(null)
 const isDragging = ref(false)
+const selectedImageFile = ref(null)
 const isTh = computed(() => props.currentLang === 'th')
 
 function triggerFileInput() {
@@ -466,6 +467,7 @@ function processFile(file) {
     alert(isTh.value ? 'กรุณาเลือกไฟล์รูปภาพ' : 'Please select an image file')
     return
   }
+  selectedImageFile.value = file
   const reader = new FileReader()
   reader.onload = (event) => {
     formData.value.imageUrl = event.target?.result || ''
@@ -575,7 +577,8 @@ function handleSubmit() {
     handoverPointTh: formData.value.handoverPoint || (bld ? bld.handoverPointTh : 'ศูนย์ประสานงานของหายกลาง'),
     handoverPointEn: formData.value.handoverPoint || (bld ? bld.handoverPointEn : 'Central Lost & Found Office'),
     createdAt: new Date().toISOString(),
-    isMyPost: true
+    isMyPost: true,
+    imageFile: selectedImageFile.value
   }
 
   emit('submit-report', newItem)
