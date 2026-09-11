@@ -2,6 +2,22 @@ import { isBackendConfigured, supabase } from '../lib/supabase'
 
 const IMAGE_BUCKET = 'loststuff-images'
 
+const FALLBACK_IMAGE_BY_CATEGORY = {
+  electronics: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
+  cards_wallets: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&auto=format&fit=crop&q=80',
+  keys_vehicles: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=600&auto=format&fit=crop&q=80',
+  stationery_books: 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=600&auto=format&fit=crop&q=80',
+  clothing_apparel: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80',
+  personal_items: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=600&auto=format&fit=crop&q=80',
+  others: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&auto=format&fit=crop&q=80',
+}
+
+function fallbackImageUrl(record) {
+  return Object.hasOwn(FALLBACK_IMAGE_BY_CATEGORY, record.category)
+    ? FALLBACK_IMAGE_BY_CATEGORY[record.category]
+    : FALLBACK_IMAGE_BY_CATEGORY.others
+}
+
 function requireBackend() {
   if (!isBackendConfigured || !supabase) throw new Error('Supabase is not configured.')
 }
@@ -45,7 +61,7 @@ async function mapItem(record, currentUserId) {
     timeDetailTh: record.occurred_time_range || '', timeDetailEn: record.occurred_time_range || '',
     handoverPointTh: record.handover_point_th || 'ศูนย์ประสานงานของหายกลาง',
     handoverPointEn: record.handover_point_en || record.handover_point_th || 'Central Lost & Found Office',
-    imageUrl: (await signedImageUrl(image?.storage_path)) || 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
+    imageUrl: (await signedImageUrl(image?.storage_path)) || fallbackImageUrl(record),
     createdAt: record.created_at, isMyPost: record.owner_id === currentUserId,
   }
 }
