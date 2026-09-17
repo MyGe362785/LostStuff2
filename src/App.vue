@@ -488,6 +488,26 @@ function dismissToast(id) {
   toasts.value = toasts.value.filter(t => t.id !== id)
 }
 
+// Supabase returns OAuth failures (for example the Before User Created hook
+// rejecting a non-KKU account) as error parameters on the redirect URL.
+function showAuthRedirectError() {
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const queryParams = new URLSearchParams(window.location.search)
+  const errorCode = hashParams.get('error') || queryParams.get('error')
+  if (!errorCode) return
+  const description = hashParams.get('error_description') || queryParams.get('error_description') || ''
+  const isDomainRejected = /kkumail/i.test(description)
+  showToast({
+    title: isTh.value ? 'เข้าสู่ระบบไม่สำเร็จ' : 'Sign-in failed',
+    message: isDomainRejected
+      ? (isTh.value ? 'ใช้ได้เฉพาะบัญชี @kkumail.com เท่านั้น' : 'Only @kkumail.com accounts can sign in.')
+      : (isTh.value ? 'โปรดลองเข้าสู่ระบบด้วย Google อีกครั้ง' : 'Please try signing in with Google again.'),
+    type: 'info',
+    duration: 8000,
+  })
+  window.history.replaceState(null, '', window.location.pathname)
+}
+
 // Global Keyboard & Navigation Listeners
 function handlePopState() {
   currentPath.value = window.location.pathname
@@ -524,6 +544,7 @@ function handleKeydown(e) {
 }
 
 onMounted(async () => {
+  showAuthRedirectError()
   await loadData()
   if (isBackendConfigured) {
     supabase.auth.onAuthStateChange((_event, session) => {

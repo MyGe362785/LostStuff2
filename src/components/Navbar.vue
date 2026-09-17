@@ -124,6 +124,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { Compass, AlertCircle, PlusCircle, Mail } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -160,5 +161,5 @@ defineEmits([
   'sign-out'
 ])
 
-const isTh = props.currentLang === 'th'
+const isTh = computed(() => props.currentLang === 'th')
 </script>
