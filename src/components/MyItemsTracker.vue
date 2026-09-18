@@ -88,13 +88,44 @@
             <CheckCircle2 class="w-3.5 h-3.5" />
             <span>{{ t('btnMarkReturned') }}</span>
           </button>
-          <span v-else class="text-xs font-bold text-found flex items-center gap-1">
+          <span v-else-if="item.status === 'returned'" class="text-xs font-bold text-found flex items-center gap-1">
             <CheckCircle2 class="w-3.5 h-3.5" />
             {{ isTh ? 'รับคืนแล้ว' : 'Returned' }}
+          </span>
+          <span v-else class="text-[11px] font-semibold text-brand-mocha">
+            {{ t(ITEM_STATUS_KEYS[item.status] || 'statusSearching') }}
           </span>
         </div>
       </div>
     </div>
+
+    <!-- Claims this user filed on other people's items -->
+    <section v-if="myClaims.length > 0" class="space-y-3">
+      <h3 class="text-sm font-extrabold text-brand-espresso">{{ t('myClaimsTitle') }}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div
+          v-for="claim in myClaims"
+          :key="claim.id"
+          class="p-4 rounded-xl bg-brand-paper border border-brand-sand shadow-warm-sm space-y-1.5"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <h4 class="font-bold text-sm text-brand-espresso min-w-0 truncate">
+              {{ (isTh ? claim.itemTitleTh : claim.itemTitleEn) || t('claimItemUnavailable') }}
+            </h4>
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0" :class="CLAIM_STATUS_CLASSES[claim.status]">
+              {{ t(CLAIM_STATUS_KEYS[claim.status]) }}
+            </span>
+          </div>
+          <p class="text-[11px] text-brand-latte">{{ formatDateTime(claim.createdAt, isTh) }}</p>
+          <p v-if="claim.status === 'approved'" class="text-xs font-semibold text-found-dark">
+            {{ t('myClaimApprovedHint') }} {{ isTh ? claim.handoverPointTh : claim.handoverPointEn }}
+          </p>
+          <p v-if="claim.staffNote" class="text-xs text-brand-mocha">
+            <strong>{{ t('claimStaffNoteLabel') }}:</strong> {{ claim.staffNote }}
+          </p>
+        </div>
+      </div>
+    </section>
 
   </div>
 </template>
@@ -102,9 +133,23 @@
 <script setup>
 import { computed } from 'vue'
 import { Inbox, CheckCircle2 } from 'lucide-vue-next'
+import { CLAIM_STATUS_CLASSES, CLAIM_STATUS_KEYS, formatDateTime } from '../utils/claimStatus'
+
+const ITEM_STATUS_KEYS = {
+  pending_review: 'statusPendingReview',
+  searching: 'statusSearching',
+  pending_confirm: 'statusPendingConfirm',
+  matched: 'statusMatched',
+  returned: 'statusReturned',
+  closed: 'statusClosed',
+}
 
 const props = defineProps({
   myItems: {
+    type: Array,
+    default: () => []
+  },
+  myClaims: {
     type: Array,
     default: () => []
   },

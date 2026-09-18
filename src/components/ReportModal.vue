@@ -215,13 +215,18 @@
                 @change="handleFileChange"
               />
 
+              <!-- While a picked photo is being resized -->
+              <p v-if="imageProcessing" class="py-4 text-xs font-bold text-brand-mocha">
+                {{ t('imagePreparing') }}
+              </p>
+
               <!-- If image is already selected/uploaded -->
-              <div v-if="formData.imageUrl" class="relative group/preview w-full flex items-center justify-center">
+              <div v-else-if="formData.imageUrl" class="relative group/preview w-full flex items-center justify-center">
                 <div class="w-36 h-24 rounded-xl overflow-hidden border border-brand-sand shadow-warm-sm relative">
                   <img :src="formData.imageUrl" alt="Preview" class="w-full h-full object-cover" />
-                  <button 
+                  <button
                     type="button"
-                    @click.stop="formData.imageUrl = ''"
+                    @click.stop="removeImage"
                     class="absolute top-1 right-1 w-6 h-6 rounded-full bg-brand-espresso/80 text-white flex items-center justify-center text-xs hover:bg-lost transition-colors"
                     title="Remove image"
                   >
@@ -239,20 +244,24 @@
                   {{ isTh ? 'คลิกถ่ายภาพ / อัปโหลดรูปภาพ' : 'Click to take photo / upload' }}
                 </p>
                 <p class="text-[11px] text-brand-latte">
-                  {{ isTh ? 'รองรับไฟล์ PNG, JPG หรือลากไฟล์มาวาง' : 'Supports PNG, JPG or drag & drop' }}
+                  {{ t('imageUploadHint') }}
                 </p>
               </div>
             </div>
 
-            <!-- Presets -->
-            <div class="mt-2.5 space-y-1.5">
+            <p v-if="imageError" class="mt-1.5 text-[11px] font-semibold text-lost-dark" role="alert">
+              {{ imageError }}
+            </p>
+
+            <!-- Presets: demo mode only, since the backend saves uploaded files alone -->
+            <div v-if="!backendConfigured" class="mt-2.5 space-y-1.5">
               <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <span class="text-[10px] text-brand-latte font-semibold shrink-0">{{ isTh ? 'หรือเลือกภาพตัวอย่าง:' : 'Sample presets:' }}</span>
-                <button 
+                <button
                   type="button"
-                  v-for="sample in sampleImages" 
+                  v-for="sample in sampleImages"
                   :key="sample.name"
-                  @click="formData.imageUrl = sample.url"
+                  @click="useSampleImage(sample.url)"
                   class="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-brand-paper hover:bg-brand-cream text-brand-mocha shrink-0 border border-brand-sand/80 shadow-warm-sm transition-all"
                 >
                   {{ sample.name }}
@@ -409,11 +418,13 @@
             type="button"
             v-else
             @click="handleSubmit"
-            class="px-6 py-2.5 rounded-xl text-white text-xs font-bold shadow-warm-md transition-all flex items-center gap-1.5"
+            :disabled="submitting || imageProcessing"
+            class="px-6 py-2.5 rounded-xl text-white text-xs font-bold shadow-warm-md transition-all flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-wait"
             :class="reportType === 'lost' ? 'bg-lost hover:bg-lost-dark' : 'bg-brand-chestnut hover:bg-brand-mocha'"
           >
             <Sparkles class="w-4 h-4" />
-            <span>{{ reportType === 'lost' ? t('btnSubmitLost') : t('btnSubmitFound') }}</span>
+            <span v-if="submitting">{{ t('reportSubmitting') }}</span>
+            <span v-else>{{ reportType === 'lost' ? t('btnSubmitLost') : t('btnSubmitFound') }}</span>
           </button>
         </div>
       </div>
@@ -430,6 +441,7 @@ import {
 } from 'lucide-vue-next'
 import { itemCategories, campusBuildings } from '../data/campusLocations'
 import { colorOptions, getColorHex } from '../data/colors'
+import { ImageUploadError, prepareImageForUpload } from '../utils/imageUpload'
 
 const props = defineProps({
   reportType: {
@@ -443,7 +455,10 @@ const props = defineProps({
   t: {
     type: Function,
     required: true
-  }
+  },
+  backendConfigured: { type: Boolean, default: false },
+  // The parent is saving the report; blocks double submits.
+  submitting: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['close', 'submit-report'])
@@ -452,7 +467,15 @@ const currentStep = ref(1)
 const fileInputRef = ref(null)
 const isDragging = ref(false)
 const selectedImageFile = ref(null)
+const imageProcessing = ref(false)
+const imageError = ref('')
 const isTh = computed(() => props.currentLang === 'th')
+
+const IMAGE_ERROR_KEYS = {
+  not_image: 'imageErrorNotImage',
+  unsupported: 'imageErrorUnsupported',
+  too_large: 'imageErrorTooLarge',
+}
 
 function triggerFileInput() {
   if (fileInputRef.value) {
@@ -475,17 +498,53 @@ function handleFileDrop(e) {
   }
 }
 
-function processFile(file) {
-  if (!file.type.startsWith('image/')) {
-    alert(isTh.value ? 'กรุณาเลือกไฟล์รูปภาพ' : 'Please select an image file')
-    return
+function readAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (event) => resolve(event.target?.result || '')
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
+}
+
+// Bumped on every pick, so a slow resize of an earlier photo cannot overwrite a newer one.
+let latestPick = 0
+
+// Resize and check the photo as soon as it is picked, so problems show up
+// here instead of after the report has been created.
+async function processFile(file) {
+  const pick = ++latestPick
+  imageError.value = ''
+  imageProcessing.value = true
+  try {
+    const prepared = await prepareImageForUpload(file)
+    const dataUrl = await readAsDataUrl(prepared)
+    if (pick !== latestPick) return
+    formData.value.imageUrl = dataUrl
+    selectedImageFile.value = prepared
+  } catch (error) {
+    if (pick !== latestPick) return
+    removeImage()
+    const key = error instanceof ImageUploadError ? IMAGE_ERROR_KEYS[error.code] : 'imageErrorUnsupported'
+    imageError.value = props.t(key)
+  } finally {
+    if (pick === latestPick) imageProcessing.value = false
   }
-  selectedImageFile.value = file
-  const reader = new FileReader()
-  reader.onload = (event) => {
-    formData.value.imageUrl = event.target?.result || ''
-  }
-  reader.readAsDataURL(file)
+}
+
+function removeImage() {
+  formData.value.imageUrl = ''
+  selectedImageFile.value = null
+  // Let the same file be picked again after removing it.
+  if (fileInputRef.value) fileInputRef.value.value = ''
+}
+
+function useSampleImage(url) {
+  latestPick++ // drop any photo still being resized
+  imageProcessing.value = false
+  removeImage()
+  imageError.value = ''
+  formData.value.imageUrl = url
 }
 
 const currentColorHex = computed(() => {
@@ -518,7 +577,8 @@ const formData = ref({
   brand: '',
   distinctiveMarks: '',
   description: '',
-  imageUrl: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
+  // The demo shows a sample photo; the real backend only saves what the user uploads.
+  imageUrl: props.backendConfigured ? '' : 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
   buildingId: 'bld_library',
   locationDetail: '',
   date: today,
@@ -549,6 +609,7 @@ function handleNextStep() {
 }
 
 function handleSubmit() {
+  if (props.submitting || imageProcessing.value) return
   if (!formData.value.reporterName.trim() || !formData.value.reporterContact.trim()) {
     alert(isTh.value ? 'กรุณาระบุข้อมูลติดต่อ' : 'Please enter contact information')
     return
