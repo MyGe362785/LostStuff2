@@ -6,7 +6,6 @@ export const translations = {
     appSubtitle: 'ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย',
     navHome: 'หน้าหลัก',
     navSearch: 'คลังค้นหา & รายการ',
-    navReportLost: 'แจ้งทำของหาย',
     navReportFound: 'แจ้งเก็บของได้',
     navMyReports: 'รายการของฉัน',
     navLocations: 'จุดรับ-ส่งของ',
@@ -19,7 +18,6 @@ export const translations = {
     // Hero
     heroBadge: 'ระบบจับคู่อัจฉริยะ (Automated Matching Engine)',
     heroHeading: 'ศูนย์รวมแจ้งเตือนและ\nค้นหาของหายในมหาวิทยาลัยขอนแก่น',
-    heroDescription: 'ระบบช่วยจับคู่ของหายและของที่เก็บได้อัตโนมัติจาก 5 ปัจจัย (ประเภท, สี, สถานที่, ช่วงเวลา, ยี่ห้อ/คีย์เวิร์ด) แจ้งเตือนทันทีเมื่อพบรายการที่ตรงกัน ช่วยให้นักศึกษาและบุคลากรได้รับของคืนอย่างรวดเร็วและปลอดภัย',
     heroSearchPlaceholder: 'พิมพ์ค้นหาสิ่งของ (เช่น iPad, สีดำ, บัตรนักศึกษา, กุญแจหอพัก, MUJI)...',
     btnSearch: 'ค้นหา',
     btnReportLostMain: 'แจ้งทำของหาย',
@@ -211,7 +209,6 @@ export const translations = {
     appSubtitle: 'University Lost-and-Found Notification & Tracking System',
     navHome: 'Home',
     navSearch: 'Discovery & Feed',
-    navReportLost: 'Report Lost',
     navReportFound: 'Report Found',
     navMyReports: 'My Reports',
     navLocations: 'Safe Drop-off Zones',
@@ -224,7 +221,6 @@ export const translations = {
     // Hero
     heroBadge: '5-Factor Automated Matching Engine',
     heroHeading: 'Khon Kaen University Campus\nLost & Found Community Hub',
-    heroDescription: 'An automated matching portal that instantly connects lost item reports with found belongings based on Category, Color, Location, Time Proximity, and Brand/Keywords, ensuring swift and secure reunions.',
     heroSearchPlaceholder: 'Search items (e.g. iPad, Black, Student ID, Dorm Keys, MUJI)...',
     btnSearch: 'Search',
     btnReportLostMain: 'Report Lost Item',

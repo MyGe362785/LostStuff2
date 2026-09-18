@@ -47,35 +47,13 @@
     <!-- Content Details -->
     <div class="p-4 flex-1 flex flex-col justify-between">
       <div>
-        <!-- Color & Brand Tag Row (Proposal 3.2) -->
-        <div class="flex flex-wrap items-center gap-1.5 mb-2">
-          <span 
-            v-if="item.color || item.colorNameTh" 
-            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-cream/80 text-brand-mocha border border-brand-sand/60 flex items-center gap-1"
-          >
-            <span class="w-1.5 h-1.5 rounded-full bg-brand-espresso/60"></span>
-            {{ isTh ? (item.colorNameTh || item.color) : (item.colorNameEn || item.color) }}
-          </span>
-
-          <span 
-            v-if="item.brand" 
-            class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-brand-sand/60 text-brand-chestnut border border-brand-tan/50"
-          >
-            {{ item.brand }}
-          </span>
-        </div>
-
-        <h3 class="font-bold text-sm text-brand-espresso group-hover:text-brand-chestnut transition-colors line-clamp-2 leading-snug mb-1.5">
+        <h3 class="font-bold text-sm text-brand-espresso group-hover:text-brand-chestnut transition-colors line-clamp-2 leading-snug">
           {{ isTh ? item.titleTh : item.titleEn }}
         </h3>
-
-        <p class="text-xs text-brand-mocha/75 line-clamp-2 leading-relaxed mb-3">
-          {{ isTh ? item.descriptionTh : item.descriptionEn }}
-        </p>
       </div>
 
       <!-- Location & Date Meta -->
-      <div class="pt-2.5 border-t border-brand-sand/60 space-y-1 text-xs text-brand-mocha/80">
+      <div class="mt-3 pt-3 border-t border-brand-sand/60 space-y-1.5 text-xs text-brand-mocha/80">
         <div class="flex items-start gap-1.5">
           <MapPin class="w-3.5 h-3.5 text-brand-caramel shrink-0 mt-0.5" />
           <span class="truncate font-medium text-[11px]">{{ isTh ? item.locationDetailTh : item.locationDetailEn }}</span>
@@ -132,15 +110,6 @@
           <!-- Category -->
           <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-brand-cream text-brand-mocha">
             {{ getCategoryName(item.category) }}
-          </span>
-
-          <!-- Color / Brand -->
-          <span v-if="item.color || item.colorNameTh" class="px-1.5 py-0.5 rounded text-[10px] bg-brand-paper border border-brand-sand text-brand-latte">
-            {{ isTh ? (item.colorNameTh || item.color) : (item.colorNameEn || item.color) }}
-          </span>
-
-          <span v-if="item.brand" class="px-1.5 py-0.5 rounded text-[10px] bg-brand-sand/40 text-brand-chestnut">
-            {{ item.brand }}
           </span>
 
           <span v-if="item.matchScore" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-match-light text-match-dark border border-match-border">
