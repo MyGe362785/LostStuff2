@@ -12,12 +12,9 @@
 
       <!-- High-Conviction Display Headline & Subtitle -->
       <div class="text-center max-w-4xl lg:max-w-5xl mx-auto mb-9">
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-brand-espresso tracking-tight leading-[1.12] mb-4 whitespace-pre-line">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-brand-espresso tracking-tight leading-[1.12] whitespace-pre-line">
           {{ t('heroHeading') }}
         </h1>
-        <p class="text-xs sm:text-sm md:text-base text-brand-mocha/85 leading-relaxed font-medium max-w-xl mx-auto">
-          {{ t('heroDescription') }}
-        </p>
       </div>
 
       <!-- Bold Search Centerpiece -->
@@ -58,7 +55,6 @@
 
       <!-- Quick Popular Search Tags -->
       <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-8 text-[11px] font-medium text-brand-mocha/70">
-        <span class="text-brand-latte mr-1">{{ t('popularTagsLabel') || (isTh ? 'ค้นหายอดนิยม:' : 'Popular:') }}</span>
         <button 
           v-for="tag in popularTags" 
           :key="tag"
@@ -69,21 +65,25 @@
         </button>
       </div>
 
-      <!-- Sharp Dual Action Triggers -->
-      <div class="flex flex-wrap items-center justify-center gap-3">
+      <!-- Primary Report Actions -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
         <button 
           @click="$emit('open-report', 'lost')"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-lost-light hover:bg-lost/20 text-lost-dark border border-lost-border font-bold text-xs sm:text-sm shadow-warm-sm transition-all"
+          class="group min-h-14 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-lost-light hover:bg-amber-100 text-lost-dark border border-lost-border font-extrabold text-sm shadow-warm-md hover:shadow-warm-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lost focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
         >
-          <AlertTriangle class="w-4 h-4" />
+          <span class="w-8 h-8 rounded-lg bg-lost/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-lost/15">
+            <AlertTriangle class="w-4.5 h-4.5" />
+          </span>
           <span>{{ t('btnReportLostMain') }}</span>
         </button>
 
         <button 
           @click="$emit('open-report', 'found')"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-chestnut hover:bg-brand-mocha text-white font-bold text-xs sm:text-sm shadow-warm-sm transition-all"
+          class="group min-h-14 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white font-extrabold text-sm shadow-warm-md hover:shadow-warm-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
         >
-          <PlusCircle class="w-4 h-4" />
+          <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-white/15">
+            <PlusCircle class="w-4.5 h-4.5" />
+          </span>
           <span>{{ t('btnReportFoundMain') }}</span>
         </button>
       </div>

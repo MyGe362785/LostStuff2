@@ -100,15 +100,7 @@
             {{ user ? (isTh ? 'ออกจากระบบ' : 'Sign out') : (isTh ? 'เข้าสู่ระบบ' : 'Sign in') }}
           </button>
 
-          <!-- Unified Post Triggers -->
-          <button 
-            @click="$emit('open-report', 'lost')"
-            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-cream hover:bg-brand-sand text-brand-chestnut border border-brand-sand transition-colors cursor-pointer"
-          >
-            <AlertCircle class="w-3.5 h-3.5" />
-            <span>{{ t('navReportLost') }}</span>
-          </button>
-
+          <!-- Primary Post Trigger -->
           <button 
             @click="$emit('open-report', 'found')"
             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer"
@@ -125,7 +117,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Compass, AlertCircle, PlusCircle, Mail } from 'lucide-vue-next'
+import { Compass, PlusCircle, Mail } from 'lucide-vue-next'
 
 const props = defineProps({
   activeTab: {
