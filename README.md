@@ -13,3 +13,4 @@ The project is ready to use Supabase for authentication, database storage, priva
 Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` belong in the browser. Never expose a Supabase service-role key in Vite or Vercel frontend variables. The sign-in page also checks the `@kkumail.com` format, while the Auth hook and RLS policies enforce the rule server-side.
 
 Until `.env.local` is configured, the existing localStorage demo remains available.
+test
