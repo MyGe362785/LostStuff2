@@ -109,34 +109,46 @@
             />
           </div>
 
-          <!-- Color & Brand Row (Proposal 3.2) -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- Color Selector -->
+          <!-- Color & Brand Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+            <!-- Color Selector (Dropdown) -->
             <div>
               <label class="block text-xs font-bold text-brand-espresso mb-1.5">
                 {{ t('fieldColor') }} <span class="text-lost">*</span>
               </label>
               
-              <!-- Color quick chips -->
-              <div class="flex flex-wrap gap-1.5 mb-2">
-                <button
-                  type="button"
-                  v-for="c in colorOptions"
-                  :key="c.id"
-                  @click="selectColor(c)"
-                  class="px-2 py-1 rounded-lg text-[11px] font-semibold border flex items-center gap-1.5 transition-all"
-                  :class="formData.color === c.id ? 'bg-brand-chestnut text-white border-brand-chestnut shadow-warm-sm' : 'bg-brand-paper hover:bg-brand-cream border-brand-sand text-brand-mocha'"
+              <div class="relative">
+                <select 
+                  v-model="formData.color"
+                  @change="onColorChange"
+                  required
+                  class="w-full pl-9 pr-8 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-semibold text-brand-espresso focus:outline-none focus:border-brand-caramel cursor-pointer appearance-none"
                 >
-                  <span class="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0" :style="{ backgroundColor: c.hex }"></span>
-                  <span>{{ isTh ? c.nameTh : c.nameEn }}</span>
-                </button>
+                  <option 
+                    v-for="c in colorOptions" 
+                    :key="c.id" 
+                    :value="c.id"
+                  >
+                    {{ isTh ? c.nameTh : c.nameEn }} ({{ isTh ? c.nameEn : c.nameTh }})
+                  </option>
+                </select>
+
+                <!-- Color Swatch Indicator Dot -->
+                <span 
+                  class="w-3.5 h-3.5 rounded-full border border-black/15 shadow-xs absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors"
+                  :style="{ backgroundColor: currentColorHex }"
+                ></span>
+
+                <!-- Dropdown Arrow -->
+                <ChevronDown class="w-3.5 h-3.5 text-brand-latte absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
+              <!-- Fine-tune / Specific Shade (Optional) -->
               <input 
                 v-model="formData.colorCustom"
                 type="text" 
-                :placeholder="t('fieldColorPlaceholder')"
-                class="w-full px-3 py-2 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
+                :placeholder="isTh ? 'ระบุเฉดสีหรือลวดลายเฉพาะ (ถ้ามี)' : 'Specific shade / pattern (optional)'"
+                class="w-full px-3 py-1.5 mt-1.5 rounded-xl bg-brand-cream/40 border border-brand-sand/80 text-[11px] font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
               />
             </div>
 
@@ -149,7 +161,7 @@
                 v-model="formData.brand"
                 type="text" 
                 :placeholder="t('fieldBrandPlaceholder')"
-                class="w-full px-3 py-2 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel mt-0 sm:mt-8"
+                class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
               />
             </div>
           </div>
@@ -413,10 +425,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { 
-  X, Plus, AlertCircle, Sparkles, Camera,
+  X, Plus, AlertCircle, Sparkles, Camera, ChevronDown,
   Laptop, CreditCard, BookOpen, Watch, Key, HelpCircle 
 } from 'lucide-vue-next'
 import { itemCategories, campusBuildings } from '../data/campusLocations'
+import { colorOptions, getColorHex } from '../data/colors'
 
 const props = defineProps({
   reportType: {
@@ -475,18 +488,15 @@ function processFile(file) {
   reader.readAsDataURL(file)
 }
 
-const colorOptions = [
-  { id: 'black', hex: '#1C1917', nameTh: 'สีดำ', nameEn: 'Black' },
-  { id: 'white', hex: '#FFFFFF', nameTh: 'สีขาว', nameEn: 'White' },
-  { id: 'gray', hex: '#78716C', nameTh: 'สีเทา', nameEn: 'Gray' },
-  { id: 'navy', hex: '#1E3A8A', nameTh: 'สีน้ำเงิน', nameEn: 'Navy' },
-  { id: 'brown', hex: '#78350F', nameTh: 'สีน้ำตาล', nameEn: 'Brown' },
-  { id: 'pink', hex: '#F472B6', nameTh: 'สีชมพู', nameEn: 'Pink' }
-]
+const currentColorHex = computed(() => {
+  return getColorHex(formData.value.color)
+})
 
-function selectColor(c) {
-  formData.value.color = c.id
-  formData.value.colorCustom = isTh.value ? c.nameTh : c.nameEn
+function onColorChange() {
+  const chosen = colorOptions.find(c => c.id === formData.value.color)
+  if (chosen) {
+    formData.value.colorCustom = isTh.value ? chosen.nameTh : chosen.nameEn
+  }
 }
 
 const sampleImages = [
@@ -503,8 +513,8 @@ const today = new Date().toISOString().split('T')[0]
 const formData = ref({
   category: 'electronics',
   title: '',
-  color: 'black',
-  colorCustom: 'สีดำ',
+  color: 'red',
+  colorCustom: 'สีแดง',
   brand: '',
   distinctiveMarks: '',
   description: '',
@@ -547,7 +557,12 @@ function handleSubmit() {
   const bld = campusBuildings.find(b => b.id === formData.value.buildingId)
   const bldName = bld ? (isTh.value ? bld.nameTh : bld.nameEn) : ''
 
-  const finalColor = formData.value.colorCustom || formData.value.color
+  const chosenColor = colorOptions.find(c => c.id === formData.value.color)
+  const defaultTh = chosenColor ? chosenColor.nameTh : formData.value.color
+  const defaultEn = chosenColor ? chosenColor.nameEn : formData.value.color
+  const customColor = formData.value.colorCustom?.trim()
+  const finalColorTh = customColor || defaultTh
+  const finalColorEn = customColor || defaultEn
 
   const newItem = {
     id: `item-${Date.now().toString().slice(-4)}`,
@@ -558,8 +573,8 @@ function handleSubmit() {
     titleEn: formData.value.title,
     category: formData.value.category,
     color: formData.value.color,
-    colorNameTh: finalColor,
-    colorNameEn: finalColor,
+    colorNameTh: finalColorTh,
+    colorNameEn: finalColorEn,
     brand: formData.value.brand || '',
     distinctiveMarks: formData.value.distinctiveMarks || '',
     buildingId: formData.value.buildingId,

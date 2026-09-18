@@ -761,8 +761,12 @@ const filteredItems = computed(() => {
   // Color Filter
   if (selectedColor.value) {
     result = result.filter(item => {
+      const target = selectedColor.value.toLowerCase()
+      if (item.color && item.color.toLowerCase() === target) return true
       const colorVal = (item.color || item.colorNameTh || item.colorNameEn || '').toLowerCase()
-      return colorVal.includes(selectedColor.value.toLowerCase())
+      if (target === 'navy' && (colorVal.includes('น้ำเงิน') || colorVal.includes('navy') || colorVal.includes('กรม'))) return true
+      if (target === 'lightblue' && (colorVal.includes('ฟ้า') || colorVal.includes('lightblue') || colorVal.includes('light blue') || colorVal.includes('sky'))) return true
+      return colorVal.includes(target)
     })
   }
 

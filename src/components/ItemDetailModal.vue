@@ -69,7 +69,10 @@
               {{ t('badgeColor') }}
             </span>
             <div class="font-bold text-brand-espresso flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full border border-black/10 shrink-0 bg-brand-chestnut"></span>
+              <span 
+                class="w-2.5 h-2.5 rounded-full border border-black/15 shrink-0" 
+                :style="{ backgroundColor: getColorHex(item.color || item.colorNameTh || item.colorNameEn) }"
+              ></span>
               <span class="truncate">{{ isTh ? (item.colorNameTh || item.color || '-') : (item.colorNameEn || item.color || '-') }}</span>
             </div>
           </div>
@@ -234,6 +237,7 @@ import {
   AlertCircle, CheckCircle2, HandHeart, Sparkles 
 } from 'lucide-vue-next'
 import { itemCategories } from '../data/campusLocations'
+import { getColorHex } from '../data/colors'
 
 const props = defineProps({
   item: {

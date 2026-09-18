@@ -157,12 +157,14 @@
             : 'bg-brand-paper hover:bg-brand-cream text-brand-mocha border-brand-sand hover:border-brand-sand/80'"
         >
           <option value="" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'ทุกสี' : 'All Colors' }}</option>
-          <option value="black" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'สีดำ (Black)' : 'Black' }}</option>
-          <option value="white" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'สีขาว (White)' : 'White' }}</option>
-          <option value="gray" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'สีเทา/เงิน (Gray/Silver)' : 'Gray/Silver' }}</option>
-          <option value="navy" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'สีน้ำเงิน/กรม (Navy)' : 'Navy Blue' }}</option>
-          <option value="brown" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'สีน้ำตาล (Brown)' : 'Brown' }}</option>
-          <option value="pink" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'สีชมพู (Pink)' : 'Pink' }}</option>
+          <option 
+            v-for="c in colorOptions" 
+            :key="c.id" 
+            :value="c.id" 
+            class="bg-brand-paper text-brand-espresso"
+          >
+            {{ isTh ? c.nameTh : c.nameEn }} ({{ isTh ? c.nameEn : c.nameTh }})
+          </option>
         </select>
         
         <!-- Swatch preview circle or palette icon -->
@@ -199,6 +201,7 @@ import {
   Laptop, CreditCard, BookOpen, Watch, Key, HelpCircle 
 } from 'lucide-vue-next'
 import { itemCategories, campusBuildings } from '../data/campusLocations'
+import { colorOptions, getColorHex } from '../data/colors'
 
 const props = defineProps({
   selectedStatus: {
@@ -261,17 +264,6 @@ function clearAllFilters() {
   emit('update:selectedSort', 'newest')
 }
 
-function getColorHex(colorKey) {
-  const map = {
-    black: '#1F1E1D',
-    white: '#FFFFFF',
-    gray: '#8E8E93',
-    navy: '#1D3557',
-    brown: '#8D5B4C',
-    pink: '#F4A261'
-  }
-  return map[colorKey] || '#784D34'
-}
 
 function getCategoryIcon(iconName) {
   const iconMap = {

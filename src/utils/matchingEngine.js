@@ -14,13 +14,13 @@
 const colorDictionary = {
   black: ['ดำ', 'สีดำ', 'black', 'dark', 'matte black', 'ดำด้าน'],
   white: ['ขาว', 'สีขาว', 'white', 'ivory', 'cream'],
-  gray: ['เทา', 'สีเทา', 'gray', 'grey', 'space gray', 'สเปซเกรย์'],
-  silver: ['เงิน', 'สีเงิน', 'silver', 'chrome'],
-  navy: ['น้ำเงิน', 'กรม', 'navy', 'navy blue', 'สีน้ำเงิน', 'สีน้ำเงินเข้ม'],
-  blue: ['ฟ้า', 'สีฟ้า', 'blue', 'sky blue'],
+  gray: ['เทา', 'สีเทา', 'gray', 'grey', 'space gray', 'สเปซเกรย์', 'เงิน', 'สีเงิน', 'silver', 'chrome'],
+  navy: ['น้ำเงิน', 'กรม', 'navy', 'navy blue', 'สีน้ำเงิน', 'สีน้ำเงินเข้ม', 'dark blue'],
+  lightblue: ['ฟ้า', 'สีฟ้า', 'lightblue', 'light blue', 'sky blue', 'blue'],
   brown: ['น้ำตาล', 'สีน้ำตาล', 'brown', 'tan', 'dark brown'],
   pink: ['ชมพู', 'สีชมพู', 'pink', 'pastel pink', 'rose gold'],
   red: ['แดง', 'สีแดง', 'red', 'crimson'],
+  orange: ['ส้ม', 'สีส้ม', 'orange', 'แสด'],
   green: ['เขียว', 'สีเขียว', 'green', 'olive'],
   yellow: ['เหลือง', 'สีเหลือง', 'yellow', 'gold'],
   purple: ['ม่วง', 'สีม่วง', 'purple', 'violet', 'lavender']
@@ -85,12 +85,14 @@ export function calculatePairScore(sourceItem, candidateItem) {
       reasonsTh.push(`โทนสีตรงกัน (${sourceColorFamily}) (+20)`)
       reasonsEn.push(`Exact Color Match: ${sourceColorFamily} (+20)`)
     } else {
-      // Near color tone check (e.g. gray & silver, navy & blue)
+      // Near color tone check (e.g. navy & lightblue, red & orange, red & pink)
       const isToneNear = 
-        (sourceColorFamily === 'gray' && candidateColorFamily === 'silver') ||
-        (sourceColorFamily === 'silver' && candidateColorFamily === 'gray') ||
-        (sourceColorFamily === 'navy' && candidateColorFamily === 'blue') ||
-        (sourceColorFamily === 'blue' && candidateColorFamily === 'navy')
+        (sourceColorFamily === 'navy' && candidateColorFamily === 'lightblue') ||
+        (sourceColorFamily === 'lightblue' && candidateColorFamily === 'navy') ||
+        (sourceColorFamily === 'red' && candidateColorFamily === 'orange') ||
+        (sourceColorFamily === 'orange' && candidateColorFamily === 'red') ||
+        (sourceColorFamily === 'red' && candidateColorFamily === 'pink') ||
+        (sourceColorFamily === 'pink' && candidateColorFamily === 'red')
       if (isToneNear) {
         colorScore = 12
         reasonsTh.push(`โทนสีใกล้เคียงกัน (${sourceColorFamily} ~ ${candidateColorFamily}) (+12)`)
