@@ -18,7 +18,7 @@
       </div>
 
       <!-- Bold Search Centerpiece -->
-      <div class="max-w-2xl mx-auto mb-8">
+      <div class="max-w-2xl mx-auto mb-4">
         <div class="p-2 rounded-xl bg-brand-paper shadow-warm-md border border-brand-sand flex flex-col sm:flex-row gap-2 transition-all focus-within:border-brand-caramel focus-within:shadow-glow-caramel">
           <div class="flex-1 flex items-center px-3.5 gap-3">
             <Search class="w-4.5 h-4.5 text-brand-latte shrink-0" />
@@ -53,6 +53,18 @@
         </div>
       </div>
 
+      <!-- Quick Popular Search Tags -->
+      <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-8 text-[11px] font-medium text-brand-mocha/70">
+        <button 
+          v-for="tag in popularTags" 
+          :key="tag"
+          @click="selectQuickTag(tag)"
+          class="px-2.5 py-1 rounded-md bg-brand-cream/70 hover:bg-brand-sand/80 hover:text-brand-espresso text-brand-mocha border border-brand-sand/60 transition-colors"
+        >
+          {{ tag }}
+        </button>
+      </div>
+
       <!-- Primary Report Actions -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
         <button 
@@ -81,8 +93,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { 
-  Search, X, ArrowRight, AlertTriangle, PlusCircle
+  Sparkles, Search, X, ArrowRight, AlertTriangle, PlusCircle
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -104,5 +117,18 @@ const props = defineProps({
   }
 })
 
-defineEmits(['update:searchQuery', 'trigger-search', 'open-report'])
+const emit = defineEmits(['update:searchQuery', 'trigger-search', 'open-report'])
+
+const isTh = computed(() => props.currentLang === 'th')
+
+const popularTags = computed(() => {
+  return isTh.value 
+    ? ['AirPods', 'บัตรนักศึกษา', 'กุญแจรถ', 'กระเป๋าสตางค์', 'iPad'] 
+    : ['AirPods', 'Student ID', 'Car Keys', 'Wallet', 'iPad']
+})
+
+function selectQuickTag(tag) {
+  emit('update:searchQuery', tag)
+  emit('trigger-search')
+}
 </script>

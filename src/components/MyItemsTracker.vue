@@ -48,13 +48,7 @@
       >
         <div class="flex gap-3.5">
           <div class="w-18 h-18 rounded-lg overflow-hidden bg-brand-cream shrink-0 border border-brand-sand">
-            <img
-              :src="item.imageUrl"
-              :alt="isTh ? item.titleTh : item.titleEn"
-              class="block w-full h-full max-w-full object-cover object-center"
-              loading="lazy"
-              decoding="async"
-            />
+            <img :src="item.imageUrl" alt="" class="w-full h-full object-cover" />
           </div>
 
           <div class="flex-1 min-w-0">

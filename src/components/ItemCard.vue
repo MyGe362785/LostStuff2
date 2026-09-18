@@ -93,13 +93,7 @@
     <div class="flex gap-3 items-start sm:items-center min-w-0 flex-1">
       <!-- Thumbnail -->
       <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-lg overflow-hidden bg-brand-cream/60 shrink-0 border border-brand-sand relative">
-        <img
-          :src="item.imageUrl"
-          :alt="isTh ? item.titleTh : item.titleEn"
-          class="block w-full h-full max-w-full object-cover object-center group-hover:scale-103 transition-transform"
-          loading="lazy"
-          decoding="async"
-        />
+        <img :src="item.imageUrl" alt="" class="w-full h-full object-cover group-hover:scale-103 transition-transform" />
       </div>
 
       <!-- Details -->
