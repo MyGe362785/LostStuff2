@@ -74,10 +74,26 @@ export async function listVisibleItems() {
   return Promise.all(data.map((item) => mapItem(item, user?.id)))
 }
 
+/**
+ * Upload the photo first, then create the item, so a failed upload leaves
+ * nothing behind. Once the item exists the report counts as saved: a failure
+ * after that point comes back as `imageError` rather than a throw, because a
+ * throw would invite the user to submit a duplicate.
+ * @returns {Promise<{ id: string, imageError: Error | null }>}
+ */
 export async function createItem({ item, imageFile }) {
   requireBackend()
   const user = await getCurrentUser()
   if (!user) throw new Error('Sign in is required before creating a report.')
+
+  let storagePath = null
+  if (imageFile) {
+    const safeName = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    storagePath = `${user.id}/${crypto.randomUUID()}-${safeName}`
+    const { error: uploadError } = await supabase.storage.from(IMAGE_BUCKET).upload(storagePath, imageFile, { contentType: imageFile.type, upsert: false })
+    if (uploadError) throw uploadError
+  }
+
   const { data: itemId, error: itemError } = await supabase.rpc('create_item_with_contact', {
     p_type: item.type, p_category: item.category, p_title_th: item.titleTh, p_title_en: item.titleEn,
     p_description_th: item.descriptionTh, p_description_en: item.descriptionEn,
@@ -88,28 +104,94 @@ export async function createItem({ item, imageFile }) {
     p_handover_point_th: item.handoverPointTh, p_handover_point_en: item.handoverPointEn,
     p_contact: item.reporterContact,
   })
-  if (itemError) throw itemError
-  if (imageFile) {
-    const safeName = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const storagePath = `${user.id}/${itemId}/${Date.now()}-${safeName}`
-    const { error: uploadError } = await supabase.storage.from(IMAGE_BUCKET).upload(storagePath, imageFile, { contentType: imageFile.type, upsert: false })
-    if (uploadError) throw uploadError
-    const { error: imageError } = await supabase.from('item_images').insert({ item_id: itemId, storage_path: storagePath, alt_text: item.titleTh })
-    if (imageError) {
-      await supabase.storage.from(IMAGE_BUCKET).remove([storagePath])
-      throw imageError
-    }
+  if (itemError) {
+    if (storagePath) await supabase.storage.from(IMAGE_BUCKET).remove([storagePath])
+    throw itemError
   }
-  return { id: itemId }
+  if (!storagePath) return { id: itemId, imageError: null }
+
+  const { error: imageError } = await supabase.from('item_images').insert({ item_id: itemId, storage_path: storagePath, alt_text: item.titleTh })
+  if (imageError) {
+    await supabase.storage.from(IMAGE_BUCKET).remove([storagePath])
+    return { id: itemId, imageError }
+  }
+  return { id: itemId, imageError: null }
 }
+
+export const DUPLICATE_CLAIM = 'duplicate_claim'
 
 export async function createClaim({ itemId, proof, preferredContact }) {
   requireBackend()
   const user = await getCurrentUser()
   if (!user) throw new Error('Sign in is required before submitting a claim.')
   const { data, error } = await supabase.from('claims').insert({ item_id: itemId, claimant_id: user.id, proof, preferred_contact: preferredContact }).select().single()
+  // claims has unique (item_id, claimant_id); a second claim on the same item lands here.
+  if (error?.code === '23505') throw Object.assign(new Error(DUPLICATE_CLAIM), { code: DUPLICATE_CLAIM })
   if (error) throw error
   return data
+}
+
+function mapClaim(record) {
+  return {
+    id: record.id,
+    itemId: record.item_id,
+    claimantId: record.claimant_id,
+    claimantName: record.claimant?.display_name || null,
+    proof: record.proof,
+    preferredContact: record.preferred_contact,
+    status: record.status,
+    staffNote: record.staff_note,
+    createdAt: record.created_at,
+    reviewedAt: record.reviewed_at,
+    itemTitleTh: record.item?.title_th || null,
+    itemTitleEn: record.item?.title_en || record.item?.title_th || null,
+    itemStatus: record.item?.status || null,
+    itemType: record.item?.type || null,
+    handoverPointTh: record.item?.handover_point_th || null,
+    handoverPointEn: record.item?.handover_point_en || record.item?.handover_point_th || null,
+  }
+}
+
+const CLAIM_ITEM_COLUMNS = 'item:items(title_th, title_en, status, type, handover_point_th, handover_point_en)'
+
+/** Every claim, newest first. RLS returns rows only to staff. */
+export async function listClaimsForStaff() {
+  requireBackend()
+  const { data, error } = await supabase
+    .from('claims')
+    .select(`id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, claimant:profiles!claims_claimant_id_fkey(display_name), ${CLAIM_ITEM_COLUMNS}`)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data.map(mapClaim)
+}
+
+/** The signed-in user's own claims, newest first. */
+export async function listMyClaims() {
+  requireBackend()
+  const user = await getCurrentUser()
+  if (!user) return []
+  const { data, error } = await supabase
+    .from('claims')
+    .select(`id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, ${CLAIM_ITEM_COLUMNS}`)
+    .eq('claimant_id', user.id)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data.map(mapClaim)
+}
+
+/**
+ * Staff decision on a claim; the database moves the item and writes the audit
+ * event in the same transaction.
+ * @param {{ claimId: string, decision: 'approved' | 'rejected' | 'completed', note?: string }} review
+ */
+export const ITEM_UNAVAILABLE = 'item_unavailable'
+
+export async function reviewClaim({ claimId, decision, note }) {
+  requireBackend()
+  const { error } = await supabase.rpc('review_claim', { p_claim_id: claimId, p_decision: decision, p_note: note || null })
+  // 55000: the item was returned or closed outside the claim flow.
+  if (error?.code === '55000') throw Object.assign(new Error(ITEM_UNAVAILABLE), { code: ITEM_UNAVAILABLE })
+  if (error) throw error
 }
 
 export async function updateItemStatus(itemId, status, action) {

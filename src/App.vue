@@ -8,12 +8,16 @@
         :auditLogs="auditLogs"
         :currentLang="currentLang"
         :t="t"
+        :claimsEnabled="isBackendConfigured"
+        :claims="claims"
+        :busyClaimId="reviewingClaimId"
         @navigate-home="navigateTo('/')"
         @lang-change="handleLangChange"
         @approve-item="handleApproveItem"
         @reject-item="handleRejectItem"
         @confirm-return="handleStaffConfirmReturn"
         @reset-data="resetDemoData"
+        @review-claim="handleReviewClaim"
       />
     </div>
 
@@ -252,8 +256,9 @@
 
         <!-- TAB: MY REPORTS TRACKER -->
         <div v-else-if="activeTab === 'my-posts'" class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <MyItemsTracker 
+          <MyItemsTracker
             :myItems="myItems"
+            :myClaims="myClaims"
             :currentLang="currentLang"
             :t="t"
             :allowStatusChanges="!isBackendConfigured"
@@ -328,11 +333,13 @@
     <!-- MODALS -->
 
     <!-- 1. Report Modal (Lost / Found) with 5-Factor attributes -->
-    <ReportModal 
+    <ReportModal
       v-if="isReportModalOpen"
       :reportType="activeReportType"
       :currentLang="currentLang"
       :t="t"
+      :backendConfigured="isBackendConfigured"
+      :submitting="isSubmittingReport"
       @close="isReportModalOpen = false"
       @submit-report="handleReportSubmitted"
     />
@@ -442,7 +449,10 @@ import { translations } from './data/i18n'
 import { findMatches } from './utils/matchingEngine'
 import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emailNotifier'
 import { isBackendConfigured, supabase } from './lib/supabase'
-import { createClaim, createItem, getCurrentProfile, getCurrentUser, listVisibleItems, updateItemStatus } from './services/lostFoundRepository'
+import {
+  createClaim, createItem, DUPLICATE_CLAIM, getCurrentProfile, getCurrentUser, ITEM_UNAVAILABLE,
+  listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, updateItemStatus,
+} from './services/lostFoundRepository'
 
 // Routing State
 const currentPath = ref(window.location.pathname || '/')
@@ -472,6 +482,10 @@ const emails = ref([])
 const currentUser = ref(null)
 const currentProfile = ref(null)
 const profileLoadFailed = ref(false)
+const claims = ref([]) // staff: every claim
+const myClaims = ref([]) // the signed-in user's own claims
+const reviewingClaimId = ref(null)
+const isSubmittingReport = ref(false)
 
 // Filters
 const searchQuery = ref('')
@@ -606,7 +620,8 @@ onMounted(async () => {
   if (isBackendConfigured) {
     supabase.auth.onAuthStateChange((_event, session) => {
       currentUser.value = session?.user || null
-      void refreshCurrentProfile().catch((error) => {
+      // Claims depend on the role, so load them once the profile is in.
+      void refreshCurrentProfile().then(loadClaimsSafely).catch((error) => {
         console.error('Unable to refresh user profile', error)
       })
       if (session?.user) isAuthModalOpen.value = false
@@ -633,6 +648,7 @@ async function loadData() {
       currentUser.value = await getCurrentUser()
       await refreshCurrentProfile()
       await loadBackendItems()
+      await loadClaimsSafely()
       auditLogs.value = []
       emails.value = []
       return
@@ -683,10 +699,61 @@ async function refreshCurrentProfile() {
   }
 }
 
+// Staff see every claim; everyone else only needs their own.
+async function loadClaims() {
+  if (!isBackendConfigured || !currentUser.value) {
+    claims.value = []
+    myClaims.value = []
+    return
+  }
+  const [staffClaims, ownClaims] = await Promise.all([
+    isStaff.value ? listClaimsForStaff() : Promise.resolve([]),
+    listMyClaims(),
+  ])
+  claims.value = staffClaims
+  myClaims.value = ownClaims
+}
+
+// Missing claims should not push the whole app into the offline demo.
+async function loadClaimsSafely() {
+  try {
+    await loadClaims()
+  } catch (error) {
+    console.error('Unable to load claims', error)
+    showToast({ title: t('claimsLoadFailedTitle'), message: error.message, type: 'warning' })
+  }
+}
+
+const CLAIM_DECISION_MESSAGES = {
+  approved: 'claimApprovedMessage',
+  rejected: 'claimRejectedMessage',
+  completed: 'claimCompletedMessage',
+}
+
+async function handleReviewClaim({ claimId, decision, note }) {
+  if (reviewingClaimId.value) return
+  reviewingClaimId.value = claimId
+  try {
+    await reviewClaim({ claimId, decision, note })
+    showToast({ title: t('claimReviewedTitle'), message: t(CLAIM_DECISION_MESSAGES[decision]), type: 'success' })
+  } catch (error) {
+    const message = error.code === ITEM_UNAVAILABLE ? t('claimItemNoLongerAvailable') : error.message
+    showToast({ title: t('claimReviewFailedTitle'), message, type: 'warning', duration: 8000 })
+  } finally {
+    reviewingClaimId.value = null
+  }
+  // Refresh either way: a failure usually means someone changed the item first.
+  await Promise.all([loadBackendItems(), loadClaims()]).catch((error) => {
+    console.error('Unable to refresh after reviewing a claim', error)
+  })
+}
+
 async function signOut() {
   await supabase.auth.signOut()
   currentUser.value = null
   currentProfile.value = null
+  claims.value = []
+  myClaims.value = []
   await loadBackendItems()
   showToast({ title: isTh.value ? 'ออกจากระบบแล้ว' : 'Signed out', message: isTh.value ? 'คุณสามารถดูรายการสาธารณะได้ตามปกติ' : 'Public listings remain available.', type: 'success' })
 }
@@ -1040,10 +1107,13 @@ async function handleSubmitClaim(claimData) {
     try {
       await createClaim({ itemId: claimData.itemId, proof: `${claimData.secretDetails}\nStudent ID: ${claimData.claimantId}`, preferredContact: claimData.claimantContact })
       isClaimModalOpen.value = false
-      showToast({ title: isTh.value ? 'ยื่นคำขอสำเร็จ' : 'Claim submitted', message: isTh.value ? 'เจ้าหน้าที่จะตรวจสอบหลักฐานของคุณ' : 'Staff will review your proof.', type: 'success' })
+      showToast({ title: isTh.value ? 'ยื่นคำขอสำเร็จ' : 'Claim submitted', message: isTh.value ? 'เจ้าหน้าที่จะตรวจสอบหลักฐานของคุณ ติดตามสถานะได้ที่รายการของฉัน' : 'Staff will review your proof. Track it under My Reports.', type: 'success' })
     } catch (error) {
-      showToast({ title: isTh.value ? 'ส่งคำขอไม่สำเร็จ' : 'Could not submit claim', message: error.message, type: 'info' })
+      const message = error.code === DUPLICATE_CLAIM ? t('claimDuplicate') : error.message
+      showToast({ title: isTh.value ? 'ส่งคำขอไม่สำเร็จ' : 'Could not submit claim', message, type: 'info' })
+      return
     }
+    await loadClaimsSafely()
     return
   }
   const target = items.value.find(i => i.id === claimData.itemId)
@@ -1099,14 +1169,28 @@ async function handleSubmitClaim(claimData) {
 // Report Submission & Real-time 5-Factor Matching Trigger (Email as primary notification)
 async function handleReportSubmitted(newItem) {
   if (isBackendConfigured) {
+    if (isSubmittingReport.value) return
+    isSubmittingReport.value = true
+    let result
     try {
-      await createItem({ item: newItem, imageFile: newItem.imageFile })
-      await loadBackendItems()
-      isReportModalOpen.value = false
-      showToast({ title: isTh.value ? 'ส่งรายการแล้ว' : 'Report submitted', message: isTh.value ? 'รายการเข้าสู่คิวตรวจสอบแล้ว' : 'Your report is now awaiting review.', type: 'success' })
+      result = await createItem({ item: newItem, imageFile: newItem.imageFile })
     } catch (error) {
       showToast({ title: isTh.value ? 'ส่งรายการไม่สำเร็จ' : 'Could not submit report', message: error.message, type: 'info' })
+      return
+    } finally {
+      isSubmittingReport.value = false
     }
+    // From here the report exists, so never tell the user it failed.
+    isReportModalOpen.value = false
+    if (result.imageError) {
+      console.error('Report saved without its photo', result.imageError)
+      showToast({ title: t('reportSavedNoImageTitle'), message: t('reportSavedNoImageMessage'), type: 'warning', duration: 8000 })
+    } else {
+      showToast({ title: isTh.value ? 'ส่งรายการแล้ว' : 'Report submitted', message: isTh.value ? 'รายการเข้าสู่คิวตรวจสอบแล้ว' : 'Your report is now awaiting review.', type: 'success' })
+    }
+    await loadBackendItems().catch((error) => {
+      console.error('Unable to refresh items after a report', error)
+    })
     return
   }
   items.value.unshift(newItem)

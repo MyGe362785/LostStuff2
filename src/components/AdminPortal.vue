@@ -36,8 +36,20 @@
                 {{ pendingItems.length }}
               </span>
             </button>
-            
-            <button 
+
+            <button
+              v-if="claimsEnabled"
+              @click="activeSection = 'claims'"
+              class="transition-colors py-1 relative flex items-center gap-1.5 cursor-pointer"
+              :class="activeSection === 'claims' ? 'text-white font-bold border-b-2 border-brand-caramel' : 'text-[#C4B3A5] hover:text-white'"
+            >
+              <span>{{ t('staffTabClaims') }}</span>
+              <span v-if="pendingClaimCount > 0" class="px-1.5 py-0.2 rounded-full text-[10px] bg-lost text-white font-bold">
+                {{ pendingClaimCount }}
+              </span>
+            </button>
+
+            <button
               @click="activeSection = 'active'"
               class="transition-colors py-1 relative cursor-pointer"
               :class="activeSection === 'active' ? 'text-white font-bold border-b-2 border-brand-caramel' : 'text-[#C4B3A5] hover:text-white'"
@@ -78,6 +90,7 @@
               class="md:hidden px-2.5 py-1.5 rounded-xl bg-[#3A2A1E] border border-[#4D3828] text-xs font-bold text-amber-200 focus:outline-hidden cursor-pointer"
             >
               <option value="pending">{{ isTh ? 'คิวรอตรวจสอบ' : 'Pending' }}</option>
+              <option v-if="claimsEnabled" value="claims">{{ t('staffTabClaims') }}</option>
               <option value="active">{{ isTh ? 'จัดการรายการ' : 'All Items' }}</option>
               <option value="audit">{{ isTh ? 'ประวัติ Audit' : 'Audit Logs' }}</option>
               <option value="benchmark">{{ isTh ? 'ทดสอบความแม่นยำ' : 'Benchmark' }}</option>
@@ -264,6 +277,108 @@
                 <CheckCircle2 class="w-4 h-4" />
                 <span>{{ t('staffBtnApprove') }}</span>
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- SECTION 1B: OWNERSHIP CLAIMS (backend only) -->
+      <!-- ========================================== -->
+      <div v-else-if="activeSection === 'claims'" class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-xl font-extrabold text-brand-espresso tracking-tight">{{ t('staffClaimsTitle') }}</h2>
+            <p class="text-xs text-brand-mocha/80 mt-0.5">{{ t('staffClaimsSubtitle') }}</p>
+          </div>
+          <span class="text-xs text-brand-mocha font-semibold bg-brand-paper px-3 py-1.5 rounded-xl border border-brand-sand">
+            {{ openClaimCount }} {{ t('staffClaimsOpenCount') }}
+          </span>
+        </div>
+
+        <div v-if="claims.length === 0" class="py-16 text-center bg-brand-paper rounded-3xl border border-brand-sand/80 p-8 shadow-warm-sm">
+          <Inbox class="w-10 h-10 text-brand-tan mx-auto mb-3" />
+          <h3 class="text-base font-bold text-brand-espresso">{{ t('staffClaimsEmpty') }}</h3>
+        </div>
+
+        <div v-else class="grid grid-cols-1 gap-4">
+          <div
+            v-for="claim in sortedClaims"
+            :key="claim.id"
+            class="p-5 sm:p-6 rounded-3xl bg-brand-paper border border-brand-sand shadow-warm-sm space-y-3"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border" :class="CLAIM_STATUS_CLASSES[claim.status]">
+                {{ t(CLAIM_STATUS_KEYS[claim.status]) }}
+              </span>
+              <h4 class="font-bold text-base text-brand-espresso leading-snug">
+                {{ (isTh ? claim.itemTitleTh : claim.itemTitleEn) || t('claimItemUnavailable') }}
+              </h4>
+            </div>
+
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-xs">
+              <div>
+                <dt class="text-brand-latte">{{ t('claimantLabel') }}</dt>
+                <dd class="font-semibold text-brand-espresso">{{ claim.claimantName || '-' }}</dd>
+              </div>
+              <div>
+                <dt class="text-brand-latte">{{ t('claimContactLabel') }}</dt>
+                <dd class="font-semibold text-brand-espresso break-all">{{ claim.preferredContact }}</dd>
+              </div>
+              <div class="sm:col-span-2">
+                <dt class="text-brand-latte">{{ t('claimProofLabel') }}</dt>
+                <dd class="text-brand-mocha whitespace-pre-line break-words">{{ claim.proof }}</dd>
+              </div>
+              <div v-if="claim.staffNote" class="sm:col-span-2">
+                <dt class="text-brand-latte">{{ t('claimStaffNoteLabel') }}</dt>
+                <dd class="text-brand-mocha">{{ claim.staffNote }}</dd>
+              </div>
+            </dl>
+            <p class="text-[11px] text-brand-latte">{{ formatDateTime(claim.createdAt, isTh) }}</p>
+
+            <div
+              v-if="claim.status === 'pending' || claim.status === 'approved'"
+              class="pt-3 border-t border-brand-sand/60 flex flex-col sm:flex-row sm:items-center gap-2.5"
+            >
+              <!-- Keyed by status as well, so the note clears once the claim moves on. -->
+              <input
+                v-model="claimNotes[`${claim.id}:${claim.status}`]"
+                type="text"
+                maxlength="300"
+                :placeholder="t('claimNotePlaceholder')"
+                :aria-label="t('claimNotePlaceholder')"
+                class="flex-1 min-w-0 px-3 py-2 rounded-xl border border-brand-sand bg-brand-cream/40 text-xs text-brand-espresso focus:outline-none focus:ring-2 focus:ring-brand-caramel"
+              />
+              <div class="flex items-center gap-2 justify-end">
+                <button
+                  type="button"
+                  :disabled="busyClaimId !== null"
+                  @click="reviewClaim(claim, 'rejected')"
+                  class="px-3.5 py-2 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+                >
+                  {{ t('claimBtnReject') }}
+                </button>
+                <button
+                  v-if="claim.status === 'pending'"
+                  type="button"
+                  :disabled="busyClaimId !== null"
+                  @click="reviewClaim(claim, 'approved')"
+                  class="px-4 py-2 rounded-xl bg-found hover:bg-found-dark text-white text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+                >
+                  <CheckCircle2 class="w-4 h-4" />
+                  <span>{{ t('claimBtnApprove') }}</span>
+                </button>
+                <button
+                  v-else
+                  type="button"
+                  :disabled="busyClaimId !== null"
+                  @click="reviewClaim(claim, 'completed')"
+                  class="px-4 py-2 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-wait"
+                >
+                  <CheckSquare class="w-4 h-4" />
+                  <span>{{ t('claimBtnComplete') }}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -789,6 +904,7 @@ import {
 } from 'lucide-vue-next'
 import { runMatchingBenchmark } from '../data/benchmarkDataset'
 import { calculatePairScore } from '../utils/matchingEngine'
+import { CLAIM_STATUS_CLASSES, CLAIM_STATUS_KEYS, formatDateTime } from '../utils/claimStatus'
 
 const props = defineProps({
   items: {
@@ -806,20 +922,40 @@ const props = defineProps({
   t: {
     type: Function,
     required: true
-  }
+  },
+  // Claims only exist with a backend; the demo tracks them on the item instead.
+  claimsEnabled: { type: Boolean, default: false },
+  claims: { type: Array, default: () => [] },
+  busyClaimId: { type: String, default: null }
 })
 
 const emit = defineEmits([
-  'navigate-home', 
-  'lang-change', 
-  'approve-item', 
-  'reject-item', 
+  'navigate-home',
+  'lang-change',
+  'approve-item',
+  'reject-item',
   'confirm-return',
-  'reset-data'
+  'reset-data',
+  'review-claim'
 ])
 
 const isTh = computed(() => props.currentLang === 'th')
 const activeSection = ref('pending')
+
+// Open claims first, newest first within each status.
+const CLAIM_ORDER = { pending: 0, approved: 1, rejected: 2, completed: 3 }
+const sortedClaims = computed(() =>
+  [...props.claims].sort((a, b) =>
+    (CLAIM_ORDER[a.status] - CLAIM_ORDER[b.status]) || (new Date(b.createdAt) - new Date(a.createdAt))
+  )
+)
+const pendingClaimCount = computed(() => props.claims.filter(c => c.status === 'pending').length)
+const openClaimCount = computed(() => props.claims.filter(c => c.status === 'pending' || c.status === 'approved').length)
+const claimNotes = ref({})
+
+function reviewClaim(claim, decision) {
+  emit('review-claim', { claimId: claim.id, decision, note: claimNotes.value[`${claim.id}:${claim.status}`] || '' })
+}
 
 // Computed subsets
 const pendingItems = computed(() => {
