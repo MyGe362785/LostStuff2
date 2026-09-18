@@ -4,7 +4,7 @@
     <section role="dialog" aria-modal="true" aria-labelledby="auth-title" class="relative w-full max-w-md rounded-2xl bg-brand-paper p-6 shadow-warm-xl border border-brand-sand">
       <button class="absolute right-4 top-4 text-brand-mocha hover:text-brand-espresso" aria-label="Close" @click="$emit('close')"><X class="w-5 h-5" /></button>
       <div class="w-11 h-11 rounded-xl bg-brand-chestnut text-white flex items-center justify-center mb-4"><LogIn class="w-5 h-5" /></div>
-      <h2 id="auth-title" class="text-xl font-extrabold text-brand-espresso">{{ isTh ? 'เข้าสู่ระบบ LostStuff2' : 'Sign in to LostStuff2' }}</h2>
+      <h2 id="auth-title" class="text-xl font-extrabold text-brand-espresso">{{ isTh ? 'เข้าสู่ระบบ Foundit-KKU' : 'Sign in to Foundit-KKU' }}</h2>
       <p class="mt-2 text-sm text-brand-mocha/75">{{ isTh ? 'ใช้บัญชี Google ของมหาวิทยาลัย (@kkumail.com) เข้าใช้งานครั้งแรกระบบจะสร้างบัญชีให้อัตโนมัติ ไม่ต้องสมัครสมาชิก' : 'Use your university Google account (@kkumail.com). Your account is created automatically on first sign-in, no registration needed.' }}</p>
       <button type="button" :disabled="loading" class="mt-5 w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl bg-white hover:bg-brand-cream border border-brand-sand disabled:opacity-60 text-brand-espresso text-sm font-bold" @click="signInWithGoogle">
         <svg class="w-4 h-4" viewBox="0 0 48 48" aria-hidden="true">

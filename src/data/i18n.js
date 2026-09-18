@@ -2,10 +2,19 @@
 
 export const translations = {
   th: {
-    appTitle: 'LostStuff2',
+    appTitle: 'Foundit-KKU',
     appSubtitle: 'ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย',
+    staffOnlyTitle: 'หน้านี้สำหรับเจ้าหน้าที่',
+    staffOnlySignIn: 'เข้าสู่ระบบด้วยบัญชีเจ้าหน้าที่เพื่อใช้งานแผงเจ้าหน้าที่',
+    staffOnlyNoRole: 'บัญชีนี้ยังไม่มีสิทธิ์เจ้าหน้าที่',
+    staffCheckFailed: 'ตรวจสอบสิทธิ์เจ้าหน้าที่ไม่สำเร็จ โปรดรีเฟรชหน้าอีกครั้ง',
+    adminPortalLoading: 'กำลังโหลดแผงเจ้าหน้าที่...',
+    adminPortalLoadFailed: 'โหลดแผงเจ้าหน้าที่ไม่สำเร็จ อาจมีการอัปเดตเว็บไซต์ใหม่',
+    reloadPage: 'โหลดหน้าใหม่',
     navHome: 'หน้าหลัก',
     navSearch: 'คลังค้นหา & รายการ',
+    // Still used by the report modal title and My Reports, though the navbar button is gone.
+    navReportLost: 'แจ้งทำของหาย',
     navReportFound: 'แจ้งเก็บของได้',
     navMyReports: 'รายการของฉัน',
     navLocations: 'จุดรับ-ส่งของ',
@@ -69,6 +78,7 @@ export const translations = {
     // Item Card & Badges
     badgeLost: 'ของหาย',
     badgeFound: 'เก็บได้',
+    badgeReturned: 'ส่งคืนแล้ว',
     badgeColor: 'สี',
     badgeBrand: 'ยี่ห้อ',
     badgeMarks: 'จุดสังเกต',
@@ -200,15 +210,24 @@ export const translations = {
 
     // Footer
     footerDesc: 'ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย (University Lost-and-Found Notification and Tracking System)',
-    footerCopyright: '© 2026 LostStuff2 - พัฒนาเพื่อสนับสนุนความปลอดภัยและคอมมูนิตี้ในมหาวิทยาลัย',
+    footerCopyright: '© 2026 Foundit-KKU - พัฒนาเพื่อสนับสนุนความปลอดภัยและคอมมูนิตี้ในมหาวิทยาลัย',
+    footerDisclaimer: 'โปรเจกต์ของนักศึกษา ไม่ใช่ระบบทางการของมหาวิทยาลัยขอนแก่น',
     demoResetConfirm: 'ต้องการรีเซ็ตข้อมูล Mock Data กลับสู่ค่าเริ่มต้นใช่หรือไม่?'
   },
 
   en: {
-    appTitle: 'LostStuff2',
+    appTitle: 'Foundit-KKU',
     appSubtitle: 'University Lost-and-Found Notification & Tracking System',
+    staffOnlyTitle: 'Staff only',
+    staffOnlySignIn: 'Sign in with a staff account to use the staff portal.',
+    staffOnlyNoRole: 'This account does not have staff access yet.',
+    staffCheckFailed: 'Could not check staff access. Please reload the page.',
+    adminPortalLoading: 'Loading the staff portal...',
+    adminPortalLoadFailed: 'Could not load the staff portal. The site may have just been updated.',
+    reloadPage: 'Reload page',
     navHome: 'Home',
     navSearch: 'Discovery & Feed',
+    navReportLost: 'Report Lost',
     navReportFound: 'Report Found',
     navMyReports: 'My Reports',
     navLocations: 'Safe Drop-off Zones',
@@ -272,6 +291,7 @@ export const translations = {
     // Item Card & Badges
     badgeLost: 'Lost',
     badgeFound: 'Found',
+    badgeReturned: 'Returned',
     badgeColor: 'Color',
     badgeBrand: 'Brand',
     badgeMarks: 'Marks',
@@ -402,8 +422,9 @@ export const translations = {
     faq3A: 'Contact details remain shielded and are only revealed when a legitimate mutual claim is verified.',
 
     // Footer
-    footerDesc: 'University Lost-and-Found Notification and Tracking System (LostStuff2)',
-    footerCopyright: '© 2026 LostStuff2 - Supporting a safe and helpful campus community',
+    footerDesc: 'University Lost-and-Found Notification and Tracking System (Foundit-KKU)',
+    footerCopyright: '© 2026 Foundit-KKU - Supporting a safe and helpful campus community',
+    footerDisclaimer: 'A student project, not an official Khon Kaen University service.',
     demoResetConfirm: 'Are you sure you want to reset demo data to default settings?'
   }
 }

@@ -13,7 +13,7 @@ export const initialMockEmails = [
     toName: 'กิตติศักดิ์ (นิสิตวิศวะ)',
     from: 'lostfound-system@univ.ac.th',
     fromName: 'ระบบแจ้งเตือนของหาย มหาวิทยาลัยขอนแก่น',
-    subject: '[LostStuff] แจ้งเตือนด่วน: พบคู่ตรงของหายของคุณในระบบ (ความใกล้เคียง 92%)',
+    subject: '[Foundit-KKU] แจ้งเตือนด่วน: พบคู่ตรงของหายของคุณในระบบ (ความใกล้เคียง 92%)',
     previewText: 'ระบบตรวจพบหูฟังเคสสีดำ AirPods Pro 2 พบที่ห้อง SC-205 ตรงกับรายการที่คุณแจ้ง...',
     bodyHtmlTh: `
       <div style="font-family: sans-serif; color: #2D2016; line-height: 1.6;">
@@ -41,7 +41,7 @@ export const initialMockEmails = [
     toName: 'นางสาวธิดารัตน์ (นิสิตศึกษาศาสตร์)',
     from: 'library-helpdesk@univ.ac.th',
     fromName: 'สำนักหอสมุดกลาง มหาวิทยาลัยขอนแก่น',
-    subject: '[LostStuff] ยืนยันการส่งมอบคืนสิ่งของสำเร็จ (#item-006 ร่มพับ MUJI)',
+    subject: '[Foundit-KKU] ยืนยันการส่งมอบคืนสิ่งของสำเร็จ (#item-006 ร่มพับ MUJI)',
     previewText: 'เจ้าหน้าที่ได้บันทึกการส่งมอบคืนสิ่งของแก่ท่านเรียบร้อยแล้ว ณ เคาน์เตอร์ยืม-คืน...',
     bodyHtmlTh: `
       <div style="font-family: sans-serif; color: #2D2016; line-height: 1.6;">
