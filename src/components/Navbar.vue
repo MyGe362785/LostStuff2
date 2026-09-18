@@ -10,7 +10,7 @@
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <span class="font-bold text-base tracking-tight text-brand-espresso">LostStuff<span class="text-brand-caramel">2</span></span>
+              <span class="font-bold text-base tracking-tight text-brand-espresso whitespace-nowrap">Foundit<span class="text-brand-caramel">-KKU</span></span>
             </div>
             <span class="hidden sm:block text-[10px] text-brand-latte -mt-0.5 tracking-wider">
               University Lost & Found
@@ -59,8 +59,9 @@
         <!-- Right Action Cluster -->
         <div class="flex items-center gap-2 sm:gap-2.5">
           
-          <!-- Primary Notification: Email Mailbox Icon (Replaces Bell) -->
+          <!-- Simulated email inbox: demo mode only, it is not wired to real notifications -->
           <button
+            v-if="!backendConfigured"
             @click="$emit('open-emails')"
             class="w-10 h-10 rounded-xl hover:bg-brand-cream/80 text-brand-mocha transition-all flex items-center justify-center relative border border-transparent hover:border-brand-sand"
             :title="isTh ? 'การแจ้งเตือนทางอีเมล (Email Notifications)' : 'Email Notifications'"

@@ -13,7 +13,7 @@
             </div>
             <div>
               <div class="flex items-center gap-1.5">
-                <span class="font-bold text-base tracking-tight text-white">LostStuff<span class="text-brand-caramel">2</span></span>
+                <span class="font-bold text-base tracking-tight text-white">Foundit<span class="text-brand-caramel">-KKU</span></span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-caramel/25 text-amber-200 border border-brand-caramel/40 font-mono tracking-wider">
                   /admin
                 </span>

@@ -18,7 +18,7 @@
     </div>
 
     <!-- STUDENT PUBLIC VIEW: RENDERED FOR ALL PUBLIC ROUTES -->
-    <div v-else class="flex-1 flex flex-col">
+    <div v-else class="flex-1 flex flex-col pb-[calc(4rem_+_env(safe-area-inset-bottom))] md:pb-0">
       
       <!-- Public Navbar (No Bell, No Staff/Eval buttons, Email Mailbox as primary) -->
       <Navbar 
@@ -275,24 +275,27 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="font-bold text-sm text-brand-espresso">LostStuff<span class="text-brand-caramel">2</span></span>
+              <span class="font-bold text-sm text-brand-espresso">Foundit<span class="text-brand-caramel">-KKU</span></span>
               <span class="px-2 py-0.5 rounded-full text-[10px] bg-brand-sand font-bold text-brand-chestnut">v2.0</span>
             </div>
             <p class="text-brand-latte">{{ t('footerDesc') }}</p>
+            <p class="text-brand-latte mt-1">{{ t('footerDisclaimer') }}</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
-            <!-- Discrete link to /admin -->
+            <!-- With a backend, only staff see the portal entry; the route itself is also role-gated -->
             <button
+              v-if="!isBackendConfigured || isStaff"
               @click="navigateTo('/admin')"
               class="px-3 py-1.5 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold text-xs transition-colors flex items-center gap-1.5"
             >
               <ShieldCheck class="w-3.5 h-3.5 text-stone-700" />
-              <span>{{ isTh ? 'เข้าสู่ระบบเจ้าหน้าที่ (/admin)' : 'Staff Portal (/admin)' }}</span>
+              <span>{{ t('navStaffPortal') }}</span>
             </button>
 
-            <!-- Reset Demo Data -->
-            <button 
+            <!-- Reset Demo Data: only meaningful for the localStorage demo -->
+            <button
+              v-if="!isBackendConfigured"
               @click="resetDemoData"
               class="px-3 py-1.5 rounded-lg bg-brand-sand/70 hover:bg-brand-sand text-brand-chestnut font-bold text-xs border border-brand-tan/50 transition-colors flex items-center gap-1.5"
               :title="t('navResetData')"
@@ -307,6 +310,18 @@
           {{ t('footerCopyright') }}
         </div>
       </footer>
+
+      <MobileNav
+        :activeTab="activeTab"
+        :currentLang="currentLang"
+        :myReportsCount="myItems.length"
+        :user="currentUser"
+        :backendConfigured="isBackendConfigured"
+        :t="t"
+        @nav-change="handleNavChange"
+        @sign-in="isAuthModalOpen = true"
+        @sign-out="signOut"
+      />
 
     </div>
 
@@ -379,7 +394,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent, h } from 'vue'
 import { 
   FileText, Cpu, ShieldCheck, ArrowRight, RotateCcw 
 } from 'lucide-vue-next'
@@ -395,9 +410,28 @@ import CampusHandoverSection from './components/CampusHandoverSection.vue'
 import FaqSection from './components/FaqSection.vue'
 import MyItemsTracker from './components/MyItemsTracker.vue'
 import ToastNotification from './components/ToastNotification.vue'
+import MobileNav from './components/MobileNav.vue'
 
 // Admin & Claim & Email components
-import AdminPortal from './components/AdminPortal.vue'
+// Only staff ever render the portal, so keep it out of the main bundle.
+// A deploy renames the chunk, so an old tab can fail to fetch it; offer a reload.
+const AdminPortal = defineAsyncComponent({
+  loader: () => import('./components/AdminPortal.vue'),
+  delay: 200,
+  loadingComponent: {
+    render: () => h('p', { class: 'py-24 text-center text-sm text-brand-mocha' }, t('adminPortalLoading')),
+  },
+  errorComponent: {
+    render: () => h('div', { class: 'py-24 flex flex-col items-center gap-3 text-sm text-brand-mocha' }, [
+      h('p', t('adminPortalLoadFailed')),
+      h('button', {
+        type: 'button',
+        class: 'px-4 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white',
+        onClick: () => window.location.reload(),
+      }, t('reloadPage')),
+    ]),
+  },
+})
 import ClaimModal from './components/ClaimModal.vue'
 import EmailInboxModal from './components/EmailInboxModal.vue'
 import AuthModal from './components/AuthModal.vue'
@@ -412,9 +446,12 @@ import { createClaim, createItem, getCurrentProfile, getCurrentUser, listVisible
 
 // Routing State
 const currentPath = ref(window.location.pathname || '/')
+const isStaff = computed(() => ['staff', 'admin'].includes(currentProfile.value?.role))
 const isAdminRoute = computed(() => {
-  if (isBackendConfigured) return ['staff', 'admin'].includes(currentProfile.value?.role)
-  return currentPath.value === '/admin' || 
+  // With a backend, the portal needs both the /admin path and a staff role; RLS
+  // still enforces staff-only data access server-side.
+  if (isBackendConfigured) return isStaff.value && currentPath.value.startsWith('/admin')
+  return currentPath.value === '/admin' ||
          currentPath.value.startsWith('/admin') || 
          window.location.hash === '#/admin' ||
          window.location.search.includes('admin')
@@ -434,6 +471,7 @@ const auditLogs = ref([])
 const emails = ref([])
 const currentUser = ref(null)
 const currentProfile = ref(null)
+const profileLoadFailed = ref(false)
 
 // Filters
 const searchQuery = ref('')
@@ -511,6 +549,7 @@ function showAuthRedirectError() {
 // Global Keyboard & Navigation Listeners
 function handlePopState() {
   currentPath.value = window.location.pathname
+  explainStaffOnlyRoute()
 }
 
 function handleKeydown(e) {
@@ -543,9 +582,27 @@ function handleKeydown(e) {
   }
 }
 
+// Someone opening /admin without a staff role sees the public page, so say why.
+function explainStaffOnlyRoute() {
+  if (!isBackendConfigured || !currentPath.value.startsWith('/admin') || isStaff.value) return
+  // A failed profile fetch says nothing about the role, so do not claim "no access".
+  if (profileLoadFailed.value) {
+    showToast({ title: t('staffOnlyTitle'), message: t('staffCheckFailed'), type: 'info', duration: 8000 })
+    return
+  }
+  showToast({
+    title: t('staffOnlyTitle'),
+    message: currentUser.value ? t('staffOnlyNoRole') : t('staffOnlySignIn'),
+    type: 'info',
+    duration: 8000,
+  })
+  if (!currentUser.value) isAuthModalOpen.value = true
+}
+
 onMounted(async () => {
   showAuthRedirectError()
   await loadData()
+  explainStaffOnlyRoute()
   if (isBackendConfigured) {
     supabase.auth.onAuthStateChange((_event, session) => {
       currentUser.value = session?.user || null
@@ -574,7 +631,7 @@ async function loadData() {
   if (isBackendConfigured) {
     try {
       currentUser.value = await getCurrentUser()
-      currentProfile.value = await getCurrentProfile()
+      await refreshCurrentProfile()
       await loadBackendItems()
       auditLogs.value = []
       emails.value = []
@@ -617,7 +674,13 @@ async function loadBackendItems() {
 }
 
 async function refreshCurrentProfile() {
-  currentProfile.value = currentUser.value ? await getCurrentProfile() : null
+  try {
+    currentProfile.value = currentUser.value ? await getCurrentProfile() : null
+    profileLoadFailed.value = false
+  } catch (error) {
+    profileLoadFailed.value = true
+    throw error
+  }
 }
 
 async function signOut() {
@@ -841,7 +904,7 @@ async function handleApproveItem(itemId) {
     const newEmail = dispatchEmail({
       to: `${target.reporterName}@univ.ac.th`,
       toName: target.reporterName,
-      subject: `[LostStuff] รายการของคุณได้รับการอนุมัติแล้ว (#${target.id} ${target.titleTh})`,
+      subject: `[Foundit-KKU] รายการของคุณได้รับการอนุมัติแล้ว (#${target.id} ${target.titleTh})`,
       previewText: `เจ้าหน้าที่ได้ตรวจสอบและอนุมัติรายการของท่านขึ้นสู่ระบบค้นหาของมหาวิทยาลัยแล้ว...`,
       bodyHtmlTh: `
         <div style="font-family: sans-serif; color: #2D2016;">
@@ -935,7 +998,7 @@ async function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) 
     const newEmail = dispatchEmail({
       to: `${claimant}@univ.ac.th`,
       toName: claimant,
-      subject: `[LostStuff] ยืนยันการส่งมอบคืนสิ่งของสำเร็จ (#${target.id})`,
+      subject: `[Foundit-KKU] ยืนยันการส่งมอบคืนสิ่งของสำเร็จ (#${target.id})`,
       previewText: `เจ้าหน้าที่ได้บันทึกการส่งมอบคืน ${target.titleTh} แก่ท่านเรียบร้อยแล้ว...`,
       bodyHtmlTh: `
         <div style="font-family: sans-serif; color: #2D2016;">
@@ -1004,7 +1067,7 @@ async function handleSubmitClaim(claimData) {
     const newEmail = dispatchEmail({
       to: `${claimData.claimantId}@univ.ac.th`,
       toName: claimData.claimantName,
-      subject: `[LostStuff] ได้รับคำขอยื่นยืนยันความเป็นเจ้าของแล้ว (#${target.id})`,
+      subject: `[Foundit-KKU] ได้รับคำขอยื่นยืนยันความเป็นเจ้าของแล้ว (#${target.id})`,
       previewText: `ระบบได้รับข้อมูลหลักฐานยืนยันสิ่งของ "${target.titleTh}" ของท่านเรียบร้อยแล้ว...`,
       bodyHtmlTh: `
         <div style="font-family: sans-serif; color: #2D2016;">
@@ -1072,7 +1135,7 @@ async function handleReportSubmitted(newItem) {
     const matchEmail = dispatchEmail({
       to: `${newItem.reporterName}@univ.ac.th`,
       toName: newItem.reporterName,
-      subject: `[LostStuff] แจ้งเตือนด่วน: พบคู่ตรงของหายในระบบ (${bestMatch.totalScore}% Match)`,
+      subject: `[Foundit-KKU] แจ้งเตือนด่วน: พบคู่ตรงของหายในระบบ (${bestMatch.totalScore}% Match)`,
       previewText: `ระบบตรวจพบ "${bestMatch.candidate.titleTh}" ซึ่งตรงกับสิ่งของที่คุณแจ้ง...`,
       bodyHtmlTh: `
         <div style="font-family: sans-serif; color: #2D2016;">
