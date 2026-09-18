@@ -52,6 +52,9 @@ export default {
         '2xs': ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.02em' }],   // 10px micro badges
         'xs-plus': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.01em' }], // 11px category chips
       },
+      spacing: {
+        18: '4.5rem', // Keeps the original 72px item thumbnail size available.
+      },
       boxShadow: {
         'warm-sm': '0 1px 2px rgba(45, 32, 22, 0.05)',
         'warm-md': '0 4px 12px -2px rgba(45, 32, 22, 0.07), 0 2px 4px -1px rgba(45, 32, 22, 0.03)',
