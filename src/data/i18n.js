@@ -4,7 +4,6 @@ export const translations = {
   th: {
     appTitle: 'Foundit-KKU',
     appSubtitle: 'ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย',
-    popularTagsLabel: 'ค้นหายอดนิยม:',
     staffOnlyTitle: 'หน้านี้สำหรับเจ้าหน้าที่',
     staffOnlySignIn: 'เข้าสู่ระบบด้วยบัญชีเจ้าหน้าที่เพื่อใช้งานแผงเจ้าหน้าที่',
     staffOnlyNoRole: 'บัญชีนี้ยังไม่มีสิทธิ์เจ้าหน้าที่',
@@ -14,6 +13,8 @@ export const translations = {
     reloadPage: 'โหลดหน้าใหม่',
     navHome: 'หน้าหลัก',
     navSearch: 'คลังค้นหา & รายการ',
+    // Still used by the report modal title and My Reports, though the navbar button is gone.
+    navReportLost: 'แจ้งทำของหาย',
     navReportFound: 'แจ้งเก็บของได้',
     navMyReports: 'รายการของฉัน',
     navLocations: 'จุดรับ-ส่งของ',
@@ -217,7 +218,6 @@ export const translations = {
   en: {
     appTitle: 'Foundit-KKU',
     appSubtitle: 'University Lost-and-Found Notification & Tracking System',
-    popularTagsLabel: 'Popular:',
     staffOnlyTitle: 'Staff only',
     staffOnlySignIn: 'Sign in with a staff account to use the staff portal.',
     staffOnlyNoRole: 'This account does not have staff access yet.',
@@ -227,6 +227,7 @@ export const translations = {
     reloadPage: 'Reload page',
     navHome: 'Home',
     navSearch: 'Discovery & Feed',
+    navReportLost: 'Report Lost',
     navReportFound: 'Report Found',
     navMyReports: 'My Reports',
     navLocations: 'Safe Drop-off Zones',
