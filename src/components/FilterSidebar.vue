@@ -1,197 +1,224 @@
 <template>
-  <div class="space-y-3 mb-6">
-    
-    <!-- Top Row: Primary Type Switcher + View/Sort Controls -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-      
-      <!-- Primary Segmented Pill (Type: All / Lost / Found / Returned) -->
-      <div class="p-1 rounded-2xl bg-brand-cream/80 border border-brand-sand flex items-center gap-1 overflow-x-auto scrollbar-none shadow-2xs">
-        <button 
-          @click="$emit('update:selectedStatus', 'all')"
-          class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer"
-          :class="selectedStatus === 'all' 
-            ? 'bg-brand-paper text-brand-espresso shadow-warm-xs border border-brand-sand/80' 
-            : 'text-brand-mocha/70 hover:text-brand-espresso'"
-        >
-          {{ t('filterAll') }}
-        </button>
-
-        <button 
-          @click="$emit('update:selectedStatus', 'lost')"
-          class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-          :class="selectedStatus === 'lost' 
-            ? 'bg-lost-light text-lost-dark shadow-warm-xs border border-lost-border' 
-            : 'text-brand-mocha/70 hover:text-lost-dark'"
-        >
-          <span class="w-2 h-2 rounded-full bg-lost"></span>
-          <span>{{ t('badgeLost') }}</span>
-        </button>
-
-        <button 
-          @click="$emit('update:selectedStatus', 'found')"
-          class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-          :class="selectedStatus === 'found' 
-            ? 'bg-found-light text-found-dark shadow-warm-xs border border-found-border' 
-            : 'text-brand-mocha/70 hover:text-found-dark'"
-        >
-          <span class="w-2 h-2 rounded-full bg-found"></span>
-          <span>{{ t('badgeFound') }}</span>
-        </button>
-
-        <button 
-          @click="$emit('update:selectedStatus', 'returned')"
-          class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
-          :class="selectedStatus === 'returned' 
-            ? 'bg-returned-light text-returned-dark shadow-warm-xs border border-returned-border' 
-            : 'text-brand-mocha/70 hover:text-brand-espresso'"
-        >
-          <span class="w-2 h-2 rounded-full bg-returned"></span>
-          <span>{{ t('statusReturned') }}</span>
-        </button>
-      </div>
-
-      <!-- Right Side: Minimal Sort Dropdown & Grid/List View Mode -->
-      <div class="flex items-center gap-2 self-end sm:self-center">
-        
-        <!-- Sort Select with subtle minimal pill styling -->
-        <div class="relative">
-          <select 
-            :value="selectedSort"
-            @change="$emit('update:selectedSort', $event.target.value)"
-            class="appearance-none bg-brand-paper hover:bg-brand-cream border border-brand-sand rounded-xl pl-8 pr-7 py-1.5 text-xs font-bold text-brand-espresso focus:outline-hidden focus:ring-2 focus:ring-brand-caramel/40 cursor-pointer shadow-2xs transition-all"
-            :title="isTh ? 'เรียงลำดับ' : 'Sort order'"
+  <section
+    class="mb-6 rounded-2xl border border-brand-sand bg-brand-cream/35 p-3 sm:p-4"
+    :aria-label="t('filterPanelLabel')"
+  >
+    <!-- Primary controls: status on the left, result presentation on the right -->
+    <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <fieldset class="min-w-0">
+        <legend class="mb-2 text-[11px] font-bold text-brand-mocha/70">
+          {{ t('filterStatusLabel') }}
+        </legend>
+        <div class="grid w-full grid-cols-4 gap-1 rounded-xl bg-brand-paper p-1 sm:flex sm:w-fit">
+          <button
+            @click="$emit('update:selectedStatus', 'all')"
+            class="min-h-9 min-w-0 rounded-lg px-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel sm:px-3.5"
+            :class="selectedStatus === 'all'
+              ? 'bg-brand-chestnut text-white'
+              : 'text-brand-mocha/70 hover:bg-brand-cream hover:text-brand-espresso'"
+            :aria-pressed="selectedStatus === 'all'"
           >
-            <option value="newest">{{ t('sortNewest') }}</option>
-            <option value="highest_match">{{ t('sortHighestMatch') }}</option>
-          </select>
-          <ArrowUpDown class="w-3.5 h-3.5 text-brand-latte absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <ChevronDown class="w-3 h-3 text-brand-latte absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
+            {{ t('filterAll') }}
+          </button>
 
-        <!-- View Mode Switcher -->
-        <div class="flex items-center p-0.5 rounded-xl bg-brand-cream/80 border border-brand-sand shadow-2xs">
-          <button 
+          <button
+            @click="$emit('update:selectedStatus', 'lost')"
+            class="flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lost/40 sm:px-3.5"
+            :class="selectedStatus === 'lost'
+              ? 'bg-lost-light text-lost-dark'
+              : 'text-brand-mocha/70 hover:bg-lost-light/70 hover:text-lost-dark'"
+            :aria-pressed="selectedStatus === 'lost'"
+          >
+            <span class="hidden h-2 w-2 rounded-full bg-lost sm:block" aria-hidden="true"></span>
+            <span>{{ t('badgeLost') }}</span>
+          </button>
+
+          <button
+            @click="$emit('update:selectedStatus', 'found')"
+            class="flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-found/40 sm:px-3.5"
+            :class="selectedStatus === 'found'
+              ? 'bg-found-light text-found-dark'
+              : 'text-brand-mocha/70 hover:bg-found-light/70 hover:text-found-dark'"
+            :aria-pressed="selectedStatus === 'found'"
+          >
+            <span class="hidden h-2 w-2 rounded-full bg-found sm:block" aria-hidden="true"></span>
+            <span>{{ t('badgeFound') }}</span>
+          </button>
+
+          <button
+            @click="$emit('update:selectedStatus', 'returned')"
+            class="flex min-h-9 min-w-0 items-center justify-center gap-1.5 rounded-lg px-2 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel sm:px-3.5"
+            :class="selectedStatus === 'returned'
+              ? 'bg-returned-light text-returned-dark'
+              : 'text-brand-mocha/70 hover:bg-returned-light hover:text-brand-espresso'"
+            :aria-pressed="selectedStatus === 'returned'"
+          >
+            <span class="hidden h-2 w-2 rounded-full bg-returned sm:block" aria-hidden="true"></span>
+            <span>{{ t('statusReturned') }}</span>
+          </button>
+        </div>
+      </fieldset>
+
+      <div class="flex items-end gap-2">
+        <label class="min-w-0 flex-1 lg:flex-none">
+          <span class="mb-2 block text-[11px] font-bold text-brand-mocha/70">
+            {{ t('sortLabel') }}
+          </span>
+          <span class="relative block">
+            <select
+              :value="selectedSort"
+              @change="$emit('update:selectedSort', $event.target.value)"
+              class="h-10 w-full appearance-none rounded-xl border border-brand-sand bg-brand-paper pl-9 pr-8 text-xs font-bold text-brand-espresso transition-colors hover:bg-brand-cream focus:outline-none focus:ring-2 focus:ring-brand-caramel/40 lg:w-48"
+            >
+              <option value="newest">{{ t('sortNewest') }}</option>
+              <option value="highest_match">{{ t('sortHighestMatch') }}</option>
+            </select>
+            <ArrowUpDown class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-caramel" />
+            <ChevronDown class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-latte" />
+          </span>
+        </label>
+
+        <div class="flex h-10 items-center rounded-xl border border-brand-sand bg-brand-paper p-1" :aria-label="t('viewModeLabel')">
+          <button
             @click="$emit('update:viewMode', 'grid')"
-            class="p-1.5 rounded-lg transition-all cursor-pointer"
-            :class="viewMode === 'grid' ? 'bg-brand-paper text-brand-chestnut shadow-warm-xs border border-brand-sand/60' : 'text-brand-latte hover:text-brand-espresso'"
+            class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
+            :class="viewMode === 'grid' ? 'bg-brand-cream text-brand-chestnut' : 'text-brand-latte hover:text-brand-espresso'"
             :title="t('viewGrid')"
+            :aria-label="t('viewGrid')"
+            :aria-pressed="viewMode === 'grid'"
           >
-            <LayoutGrid class="w-3.5 h-3.5" />
+            <LayoutGrid class="h-4 w-4" />
           </button>
-          <button 
+          <button
             @click="$emit('update:viewMode', 'list')"
-            class="p-1.5 rounded-lg transition-all cursor-pointer"
-            :class="viewMode === 'list' ? 'bg-brand-paper text-brand-chestnut shadow-warm-xs border border-brand-sand/60' : 'text-brand-latte hover:text-brand-espresso'"
+            class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
+            :class="viewMode === 'list' ? 'bg-brand-cream text-brand-chestnut' : 'text-brand-latte hover:text-brand-espresso'"
             :title="t('viewList')"
+            :aria-label="t('viewList')"
+            :aria-pressed="viewMode === 'list'"
           >
-            <List class="w-3.5 h-3.5" />
+            <List class="h-4 w-4" />
           </button>
         </div>
-
       </div>
-
     </div>
 
-    <!-- Category Pills: Horizontal Scroll with Soft Icons -->
-    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 scrollbar-none">
-      <button 
-        @click="$emit('update:selectedCategory', '')"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border shrink-0 flex items-center gap-1.5 cursor-pointer"
-        :class="!selectedCategory 
-          ? 'bg-brand-chestnut text-white border-brand-chestnut shadow-warm-xs' 
-          : 'bg-brand-paper hover:bg-brand-cream text-brand-mocha border-brand-sand hover:border-brand-sand/80'"
-      >
-        <Layers class="w-3.5 h-3.5" />
-        <span>{{ t('filterCategory') }}</span>
-      </button>
+    <div class="my-4 h-px bg-brand-sand/80" aria-hidden="true"></div>
 
-      <button 
-        v-for="cat in itemCategories" 
-        :key="cat.id"
-        @click="$emit('update:selectedCategory', selectedCategory === cat.id ? '' : cat.id)"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all border shrink-0 flex items-center gap-1.5 cursor-pointer"
-        :class="selectedCategory === cat.id 
-          ? 'bg-brand-chestnut text-white border-brand-chestnut shadow-warm-xs' 
-          : 'bg-brand-paper hover:bg-brand-cream text-brand-mocha border-brand-sand hover:border-brand-sand/80'"
-      >
-        <component :is="getCategoryIcon(cat.icon)" class="w-3.5 h-3.5" />
-        <span>{{ isTh ? cat.nameTh : cat.nameEn }}</span>
-      </button>
-    </div>
-
-    <!-- Minimal Refinement Filter Pills (Location, Color, Reset) -->
-    <div class="flex flex-wrap items-center gap-2 pt-1">
-      
-      <!-- Campus Building Filter Pill -->
-      <div class="relative">
-        <select 
-          :value="selectedBuilding"
-          @change="$emit('update:selectedBuilding', $event.target.value)"
-          class="appearance-none rounded-xl pl-8 pr-7 py-1.5 text-xs font-bold transition-all cursor-pointer border shadow-2xs"
-          :class="selectedBuilding 
-            ? 'bg-brand-chestnut text-white border-brand-chestnut shadow-warm-xs' 
-            : 'bg-brand-paper hover:bg-brand-cream text-brand-mocha border-brand-sand hover:border-brand-sand/80'"
+    <!-- Category choices stay visible and wrap on larger screens -->
+    <fieldset>
+      <legend class="mb-2 text-[11px] font-bold text-brand-mocha/70">
+        {{ t('filterCategoryLabel') }}
+      </legend>
+      <div class="filter-scroll flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+        <button
+          @click="$emit('update:selectedCategory', '')"
+          class="flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
+          :class="!selectedCategory
+            ? 'border-brand-chestnut bg-brand-chestnut text-white'
+            : 'border-brand-sand bg-brand-paper text-brand-mocha hover:bg-brand-cream hover:text-brand-espresso'"
+          :aria-pressed="!selectedCategory"
         >
-          <option value="" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'ทุกอาคาร/สถานที่' : 'All Buildings' }}</option>
-          <option 
-            v-for="bld in campusBuildings" 
-            :key="bld.id" 
-            :value="bld.id"
-            class="bg-brand-paper text-brand-espresso"
-          >
-            {{ isTh ? bld.nameTh : bld.nameEn }}
-          </option>
-        </select>
-        <MapPin class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" :class="selectedBuilding ? 'text-white' : 'text-brand-caramel'" />
-        <ChevronDown class="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" :class="selectedBuilding ? 'text-white/80' : 'text-brand-latte'" />
-      </div>
+          <Layers class="h-4 w-4" />
+          <span>{{ t('filterCategory') }}</span>
+        </button>
 
-      <!-- Color Filter Pill -->
-      <div class="relative">
-        <select
-          :value="selectedColor"
-          @change="$emit('update:selectedColor', $event.target.value)"
-          class="appearance-none rounded-xl pl-8 pr-7 py-1.5 text-xs font-bold transition-all cursor-pointer border shadow-2xs"
-          :class="selectedColor 
-            ? 'bg-brand-chestnut text-white border-brand-chestnut shadow-warm-xs' 
-            : 'bg-brand-paper hover:bg-brand-cream text-brand-mocha border-brand-sand hover:border-brand-sand/80'"
+        <button
+          v-for="cat in itemCategories"
+          :key="cat.id"
+          @click="$emit('update:selectedCategory', selectedCategory === cat.id ? '' : cat.id)"
+          class="flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
+          :class="selectedCategory === cat.id
+            ? 'border-brand-chestnut bg-brand-chestnut text-white'
+            : 'border-brand-sand bg-brand-paper text-brand-mocha hover:bg-brand-cream hover:text-brand-espresso'"
+          :aria-pressed="selectedCategory === cat.id"
         >
-          <option value="" class="bg-brand-paper text-brand-espresso">{{ isTh ? 'ทุกสี' : 'All Colors' }}</option>
-          <option 
-            v-for="c in colorOptions" 
-            :key="c.id" 
-            :value="c.id" 
-            class="bg-brand-paper text-brand-espresso"
-          >
-            {{ isTh ? c.nameTh : c.nameEn }} ({{ isTh ? c.nameEn : c.nameTh }})
-          </option>
-        </select>
-        
-        <!-- Swatch preview circle or palette icon -->
-        <span 
-          v-if="selectedColor"
-          class="w-2.5 h-2.5 rounded-full border border-white/40 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
-          :style="{ backgroundColor: getColorHex(selectedColor) }"
-        ></span>
-        <Palette v-else class="w-3.5 h-3.5 text-brand-latte absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-        
-        <ChevronDown class="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" :class="selectedColor ? 'text-white/80' : 'text-brand-latte'" />
+          <component :is="getCategoryIcon(cat.icon)" class="h-4 w-4" />
+          <span>{{ isTh ? cat.nameTh : cat.nameEn }}</span>
+        </button>
       </div>
+    </fieldset>
 
-      <!-- Quick Reset Button when any filter is active -->
-      <button 
+    <div class="mt-4 flex flex-col gap-3 border-t border-brand-sand/80 pt-4 lg:flex-row lg:items-end lg:justify-between">
+      <fieldset class="min-w-0 flex-1">
+        <legend class="mb-2 flex items-center gap-2 text-[11px] font-bold text-brand-mocha/70">
+          <span>{{ t('filterMoreLabel') }}</span>
+          <span
+            v-if="activeFilterCount > 0"
+            class="rounded-full bg-brand-chestnut px-2 py-0.5 text-[10px] font-bold text-white"
+          >
+            {{ activeFilterCount }}
+          </span>
+        </legend>
+
+        <div class="grid gap-2 sm:grid-cols-2 lg:max-w-2xl">
+          <label class="relative block min-w-0">
+            <span class="sr-only">{{ t('filterBuilding') }}</span>
+            <select
+              :value="selectedBuilding"
+              @change="$emit('update:selectedBuilding', $event.target.value)"
+              class="h-10 w-full appearance-none rounded-xl border pl-9 pr-8 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-caramel/40"
+              :class="selectedBuilding
+                ? 'border-brand-chestnut bg-brand-chestnut text-white'
+                : 'border-brand-sand bg-brand-paper text-brand-mocha hover:bg-brand-cream'"
+            >
+              <option value="" class="bg-brand-paper text-brand-espresso">{{ t('filterBuilding') }}</option>
+              <option
+                v-for="bld in campusBuildings"
+                :key="bld.id"
+                :value="bld.id"
+                class="bg-brand-paper text-brand-espresso"
+              >
+                {{ isTh ? bld.nameTh : bld.nameEn }}
+              </option>
+            </select>
+            <MapPin class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" :class="selectedBuilding ? 'text-white' : 'text-brand-caramel'" />
+            <ChevronDown class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2" :class="selectedBuilding ? 'text-white/80' : 'text-brand-latte'" />
+          </label>
+
+          <label class="relative block min-w-0">
+            <span class="sr-only">{{ t('filterColor') }}</span>
+            <select
+              :value="selectedColor"
+              @change="$emit('update:selectedColor', $event.target.value)"
+              class="h-10 w-full appearance-none rounded-xl border pl-9 pr-8 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-caramel/40"
+              :class="selectedColor
+                ? 'border-brand-chestnut bg-brand-chestnut text-white'
+                : 'border-brand-sand bg-brand-paper text-brand-mocha hover:bg-brand-cream'"
+            >
+              <option value="" class="bg-brand-paper text-brand-espresso">{{ t('filterColor') }}</option>
+              <option
+                v-for="c in colorOptions"
+                :key="c.id"
+                :value="c.id"
+                class="bg-brand-paper text-brand-espresso"
+              >
+                {{ isTh ? c.nameTh : c.nameEn }} ({{ isTh ? c.nameEn : c.nameTh }})
+              </option>
+            </select>
+
+            <span
+              v-if="selectedColor"
+              class="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border border-white/40"
+              :style="{ backgroundColor: getColorHex(selectedColor) }"
+            ></span>
+            <Palette v-else class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-caramel" />
+            <ChevronDown class="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2" :class="selectedColor ? 'text-white/80' : 'text-brand-latte'" />
+          </label>
+        </div>
+      </fieldset>
+
+      <button
         v-if="hasActiveFilters"
         @click="clearAllFilters"
-        class="px-3 py-1.5 rounded-xl bg-brand-cream hover:bg-brand-sand text-brand-chestnut hover:text-brand-espresso text-xs font-bold transition-all flex items-center gap-1.5 border border-brand-sand/80 shadow-2xs cursor-pointer"
+        class="inline-flex min-h-10 items-center justify-center gap-2 self-stretch rounded-xl border border-brand-sand bg-brand-paper px-4 text-xs font-bold text-brand-chestnut transition-colors hover:bg-brand-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel lg:self-end"
         :title="t('btnResetFilters')"
       >
-        <X class="w-3.5 h-3.5 text-brand-latte" />
-        <span>{{ isTh ? 'ล้างตัวกรอง' : 'Clear Filters' }}</span>
+        <X class="h-4 w-4" />
+        <span>{{ t('btnResetFilters') }}</span>
       </button>
-
     </div>
-
-  </div>
+  </section>
 </template>
 
 <script setup>
@@ -256,6 +283,15 @@ const hasActiveFilters = computed(() => {
          props.selectedStatus !== 'all'
 })
 
+const activeFilterCount = computed(() => {
+  return [
+    props.selectedStatus !== 'all',
+    props.selectedCategory !== '',
+    props.selectedColor !== '',
+    props.selectedBuilding !== ''
+  ].filter(Boolean).length
+})
+
 function clearAllFilters() {
   emit('update:selectedStatus', 'all')
   emit('update:selectedCategory', '')
@@ -277,3 +313,14 @@ function getCategoryIcon(iconName) {
   return iconMap[iconName] || HelpCircle
 }
 </script>
+
+<style scoped>
+.filter-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+</style>
