@@ -102,19 +102,32 @@
               </button>
             </div>
 
-            <div 
-              v-else 
-              :class="viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5' : 'space-y-3'"
-            >
-              <ItemCard 
-                v-for="item in filteredItems" 
-                :key="item.id"
-                :item="item"
-                :viewMode="viewMode"
-                :currentLang="currentLang"
-                :t="t"
-                @select-item="openItemDetail"
-              />
+            <div v-else>
+              <div :class="viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5' : 'space-y-3'">
+                <ItemCard
+                  v-for="item in homeVisibleItems"
+                  :key="item.id"
+                  :item="item"
+                  :viewMode="viewMode"
+                  :currentLang="currentLang"
+                  :t="t"
+                  @select-item="openItemDetail"
+                />
+              </div>
+
+              <div v-if="hasMoreHomeItems" class="mt-8 flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  class="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-brand-tan bg-brand-paper px-6 py-2.5 text-sm font-bold text-brand-chestnut shadow-warm-sm transition-colors hover:border-brand-caramel hover:bg-brand-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
+                  @click="showMoreHomeItems"
+                >
+                  <span>{{ t('btnLoadMore') }}</span>
+                  <ChevronDown class="h-4 w-4 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
+                </button>
+                <p class="text-xs font-medium text-brand-mocha/70" aria-live="polite">
+                  {{ isTh ? `แสดง ${homeVisibleItems.length} จาก ${filteredItems.length} รายการ` : `Showing ${homeVisibleItems.length} of ${filteredItems.length} items` }}
+                </p>
+              </div>
             </div>
           </section>
 
@@ -201,6 +214,9 @@
 
           <!-- FAQ Section -->
           <FaqSection :currentLang="currentLang" :t="t" />
+
+          <!-- Satisfaction Survey -->
+          <SatisfactionSurveySection :currentLang="currentLang" :t="t" />
         </div>
 
         <!-- TAB: SEARCH & DISCOVERY HUB -->
@@ -433,9 +449,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, defineAsyncComponent, h } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent, h } from 'vue'
 import { 
-  FileText, Cpu, ShieldCheck, ArrowRight, RotateCcw, LockKeyhole
+  FileText, Cpu, ShieldCheck, ArrowRight, ChevronDown, RotateCcw, LockKeyhole
 } from 'lucide-vue-next'
 
 import Navbar from './components/Navbar.vue'
@@ -448,6 +464,7 @@ import ReportModal from './components/ReportModal.vue'
 import MatchAlertModal from './components/MatchAlertModal.vue'
 import CampusHandoverSection from './components/CampusHandoverSection.vue'
 import FaqSection from './components/FaqSection.vue'
+import SatisfactionSurveySection from './components/SatisfactionSurveySection.vue'
 import MyItemsTracker from './components/MyItemsTracker.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import MobileNav from './components/MobileNav.vue'
@@ -532,6 +549,7 @@ const selectedColor = ref('')
 const selectedBuilding = ref('')
 const selectedSort = ref('newest')
 const viewMode = ref('grid')
+const homeVisibleCount = ref(6)
 
 // Modals State
 const isReportModalOpen = ref(false)
@@ -942,6 +960,20 @@ const filteredItems = computed(() => {
   return result
 })
 
+const homeVisibleItems = computed(() => filteredItems.value.slice(0, homeVisibleCount.value))
+const hasMoreHomeItems = computed(() => homeVisibleCount.value < filteredItems.value.length)
+
+function showMoreHomeItems() {
+  homeVisibleCount.value += 6
+}
+
+watch(
+  [searchQuery, selectedStatus, selectedCategory, selectedColor, selectedBuilding, selectedSort],
+  () => {
+    homeVisibleCount.value = 6
+  }
+)
+
 // Navigation Handlers
 function handleNavChange(tab) {
   if (isPrivacyRoute.value) navigateTo('/')
@@ -982,12 +1014,23 @@ function openPrivacyFromAuth() {
 }
 
 function openQuickFoundSearch() {
-  const matches = getQuickFoundMatches(searchQuery.value, items.value)
+  const itemName = searchQuery.value.trim()
+
+  if (!itemName) {
+    showToast({
+      title: t('quickFoundEmptyTitle'),
+      message: t('quickFoundEnterName'),
+      type: 'info',
+    })
+    return
+  }
+
+  const matches = getQuickFoundMatches(itemName, items.value)
 
   if (matches.length === 0) {
     showToast({
       title: t('quickFoundEmptyTitle'),
-      message: searchQuery.value.trim() ? t('quickFoundEmptyMessage') : t('quickFoundNoAvailableMessage'),
+      message: t('quickFoundEmptyMessage'),
       type: 'info',
     })
     return
@@ -995,7 +1038,7 @@ function openQuickFoundSearch() {
 
   quickFoundMatches.value = matches
   quickFoundIndex.value = 0
-  quickFoundQuery.value = searchQuery.value.trim()
+  quickFoundQuery.value = itemName
   isQuickFoundOpen.value = true
 }
 

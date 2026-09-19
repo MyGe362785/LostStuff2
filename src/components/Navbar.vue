@@ -77,7 +77,7 @@
 
           <!-- Satisfaction survey: shown on layouts with enough room for a hover tooltip -->
           <a
-            href="https://forms.gle/gzCT8Zyt4KoMg9yi7"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSddiVTqyNb43VTCXMhvNs1TPwov3W4_fo0FvGk9yWkW1YwR2Q/viewform"
             target="_blank"
             rel="noopener noreferrer"
             class="group relative hidden lg:inline-flex w-10 h-10 items-center justify-center rounded-xl border border-transparent text-brand-mocha transition-all hover:border-brand-sand hover:bg-brand-cream/80 hover:text-brand-chestnut focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"

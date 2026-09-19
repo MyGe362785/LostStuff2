@@ -53,8 +53,11 @@
             </button>
 
             <button
+              type="button"
+              :disabled="!searchQuery.trim()"
+              :title="!searchQuery.trim() ? t('quickFoundEnterName') : t('btnQuickFoundSearch')"
               @click="$emit('quick-find')"
-              class="px-3 sm:px-4 py-3 rounded-lg bg-found-light hover:bg-green-100 text-found-dark text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-2"
+              class="px-3 sm:px-4 py-3 rounded-lg bg-found-light hover:bg-green-100 text-found-dark text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:bg-brand-cream disabled:text-brand-latte disabled:opacity-75"
             >
               <SearchCheck class="w-4 h-4 shrink-0" aria-hidden="true" />
               <span class="leading-tight">{{ t('btnQuickFoundSearch') }}</span>

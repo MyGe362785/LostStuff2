@@ -194,8 +194,8 @@ const resultSummary = computed(() => {
     return isTh.value ? `พบของที่เก็บได้ ${count} รายการ` : `${count} found items available`
   }
   return isTh.value
-    ? `พบ ${count} รายการที่ใกล้เคียงกับ “${props.searchQuery.trim()}”`
-    : `${count} matches for “${props.searchQuery.trim()}”`
+    ? `พบ ${count} รายการที่มีชื่อใกล้เคียงกับ “${props.searchQuery.trim()}”`
+    : `${count} items with names matching “${props.searchQuery.trim()}”`
 })
 
 function formatDate(value) {

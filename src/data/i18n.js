@@ -79,8 +79,9 @@ export const translations = {
     quickFoundPrevious: 'รายการก่อนหน้า',
     quickFoundNext: 'รายการถัดไป',
     quickFoundEmptyTitle: 'ยังไม่พบของที่ใกล้เคียง',
-    quickFoundEmptyMessage: 'ลองใช้คำค้นที่สั้นลง เช่น ประเภท สี ยี่ห้อ หรือสถานที่ที่ทำหาย',
+    quickFoundEmptyMessage: 'ไม่พบของที่เก็บได้ซึ่งมีชื่อใกล้เคียง ลองพิมพ์ชื่อสิ่งของให้สั้นลง',
     quickFoundNoAvailableMessage: 'ขณะนี้ยังไม่มีรายการของที่เก็บได้และรอเจ้าของมารับคืน',
+    quickFoundEnterName: 'พิมพ์ชื่อสิ่งของที่ต้องการค้นหาก่อนใช้การค้นหาแบบรวดเร็ว',
     btnReportLostMain: 'แจ้งทำของหาย',
     btnReportFoundMain: 'แจ้งเก็บของได้',
 
@@ -124,6 +125,7 @@ export const translations = {
     viewList: 'มุมมองตาราง',
     noItemsFound: 'ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา',
     btnResetFilters: 'ล้างตัวกรองทั้งหมด',
+    btnLoadMore: 'ดูเพิ่มเติม',
 
     // 5-Stage Statuses (ตาม Proposal 3.2)
     statusPendingReview: 'รอตรวจสอบ',
@@ -266,6 +268,13 @@ export const translations = {
     faq3Q: 'ระบบปกป้องความเป็นส่วนตัวอย่างไร?',
     faq3A: 'ระบบจะไม่เปิดเผยข้อมูลติดต่อส่วนบุคคลสู่สาธารณะจนกว่าจะมีการกดยืนยันการติดต่อเพื่อขอรับคืน',
 
+    // Satisfaction survey
+    surveyTitle: 'ร่วมประเมินความพึงพอใจในการใช้งาน',
+    surveyDescription: 'ความคิดเห็นของคุณจะช่วยให้เราปรับปรุงการค้นหา การแจ้งรายการ และขั้นตอนขอรับคืนให้ใช้งานได้ดียิ่งขึ้น',
+    surveyButton: 'ทำแบบประเมินความพึงพอใจ',
+    surveyExternalNote: 'แบบประเมินจะเปิดใน Google Forms',
+    surveyImageAlt: 'ภาพประกอบแบบประเมินความพึงพอใจ Foundit-KKU',
+
     // Footer
     footerPrivacy: 'นโยบายความเป็นส่วนตัว',
     footerDesc: 'ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย (University Lost-and-Found Notification and Tracking System)',
@@ -351,8 +360,9 @@ export const translations = {
     quickFoundPrevious: 'Previous',
     quickFoundNext: 'Next',
     quickFoundEmptyTitle: 'No close matches yet',
-    quickFoundEmptyMessage: 'Try a shorter query such as the item type, color, brand, or where you lost it.',
+    quickFoundEmptyMessage: 'No found item has a similar name. Try entering a shorter item name.',
     quickFoundNoAvailableMessage: 'There are currently no active found-item reports awaiting an owner.',
+    quickFoundEnterName: 'Enter the item name before using quick search.',
     btnReportLostMain: 'Report Lost Item',
     btnReportFoundMain: 'Report Found Item',
 
@@ -396,6 +406,7 @@ export const translations = {
     viewList: 'List View',
     noItemsFound: 'No items match the current search filters.',
     btnResetFilters: 'Clear All Filters',
+    btnLoadMore: 'Load more',
 
     // 5-Stage Statuses (ตาม Proposal 3.2)
     statusPendingReview: 'Pending Review',
@@ -537,6 +548,13 @@ export const translations = {
     faq2A: 'Please deliver it directly to the Central Student Affairs Office or the nearest Campus Security Booth to obtain an official deposit receipt.',
     faq3Q: 'How is user privacy protected?',
     faq3A: 'Contact details remain shielded and are only revealed when a legitimate mutual claim is verified.',
+
+    // Satisfaction survey
+    surveyTitle: 'Share your Foundit-KKU experience',
+    surveyDescription: 'Your feedback helps us improve search, reporting, and the ownership claim experience for everyone on campus.',
+    surveyButton: 'Take the satisfaction survey',
+    surveyExternalNote: 'The survey opens in Google Forms',
+    surveyImageAlt: 'Foundit-KKU satisfaction survey illustration',
 
     // Footer
     footerPrivacy: 'Privacy Policy',
