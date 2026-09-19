@@ -63,7 +63,7 @@
           <button
             v-if="!backendConfigured"
             @click="$emit('open-emails')"
-            class="w-10 h-10 rounded-xl hover:bg-brand-cream/80 text-brand-mocha transition-all flex items-center justify-center relative border border-transparent hover:border-brand-sand"
+            class="hidden min-[360px]:flex w-10 h-10 rounded-xl hover:bg-brand-cream/80 text-brand-mocha transition-all items-center justify-center relative border border-transparent hover:border-brand-sand"
             :title="isTh ? 'การแจ้งเตือนทางอีเมล (Email Notifications)' : 'Email Notifications'"
           >
             <Mail class="w-5 h-5 text-brand-espresso" />
@@ -138,10 +138,12 @@
           <!-- Primary Post Trigger -->
           <button 
             @click="$emit('open-report', 'found')"
-            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 px-2.5 min-[360px]:px-4 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer"
+            :aria-label="t('navReportFound')"
+            :title="t('navReportFound')"
           >
             <PlusCircle class="w-3.5 h-3.5" />
-            <span>{{ t('navReportFound') }}</span>
+            <span class="hidden min-[360px]:inline">{{ t('navReportFound') }}</span>
           </button>
         </div>
 

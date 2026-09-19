@@ -26,7 +26,7 @@
       
       <!-- Public Navbar (No Bell, No Staff/Eval buttons, Email Mailbox as primary) -->
       <Navbar 
-        :activeTab="activeTab"
+        :activeTab="isPrivacyRoute ? '' : activeTab"
         :currentLang="currentLang"
         :myReportsCount="myItems.length"
         :emailsCount="unreadEmailsCount"
@@ -43,9 +43,15 @@
 
       <!-- Main Content Container -->
       <main class="flex-1">
+        <PrivacyPolicy
+          v-if="isPrivacyRoute"
+          :currentLang="currentLang"
+          :backendConfigured="isBackendConfigured"
+          @navigate-home="navigateTo('/')"
+        />
         
         <!-- TAB: HOME -->
-        <div v-if="activeTab === 'home'">
+        <div v-else-if="activeTab === 'home'">
           <!-- Hero Search & Action Centerpiece -->
           <HeroBanner 
             v-model:searchQuery="searchQuery"
@@ -288,6 +294,16 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-3">
+            <a
+              href="/privacy"
+              class="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 py-1.5 font-bold text-brand-chestnut transition-colors hover:bg-brand-sand/70 hover:text-brand-espresso"
+              :aria-current="isPrivacyRoute ? 'page' : undefined"
+              @click.prevent="navigateTo('/privacy')"
+            >
+              <LockKeyhole class="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{{ t('footerPrivacy') }}</span>
+            </a>
+
             <!-- With a backend, only staff see the portal entry; the route itself is also role-gated -->
             <button
               v-if="!isBackendConfigured || isStaff"
@@ -317,7 +333,7 @@
       </footer>
 
       <MobileNav
-        :activeTab="activeTab"
+        :activeTab="isPrivacyRoute ? '' : activeTab"
         :currentLang="currentLang"
         :myReportsCount="myItems.length"
         :user="currentUser"
@@ -403,7 +419,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, defineAsyncComponent, h } from 'vue'
 import { 
-  FileText, Cpu, ShieldCheck, ArrowRight, RotateCcw 
+  FileText, Cpu, ShieldCheck, ArrowRight, RotateCcw, LockKeyhole
 } from 'lucide-vue-next'
 
 import Navbar from './components/Navbar.vue'
@@ -418,6 +434,7 @@ import FaqSection from './components/FaqSection.vue'
 import MyItemsTracker from './components/MyItemsTracker.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import MobileNav from './components/MobileNav.vue'
+import PrivacyPolicy from './components/PrivacyPolicy.vue'
 
 // Admin & Claim & Email components
 // Only staff ever render the portal, so keep it out of the main bundle.
@@ -457,6 +474,7 @@ import {
 // Routing State
 const currentPath = ref(window.location.pathname || '/')
 const isStaff = computed(() => ['staff', 'admin'].includes(currentProfile.value?.role))
+const isPrivacyRoute = computed(() => currentPath.value === '/privacy' || currentPath.value.startsWith('/privacy/'))
 const isAdminRoute = computed(() => {
   // With a backend, the portal needs both the /admin path and a staff role; RLS
   // still enforces staff-only data access server-side.
@@ -868,6 +886,7 @@ const filteredItems = computed(() => {
 
 // Navigation Handlers
 function handleNavChange(tab) {
+  if (isPrivacyRoute.value) navigateTo('/')
   activeTab.value = tab
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }

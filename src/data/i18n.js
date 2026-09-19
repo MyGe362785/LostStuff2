@@ -256,6 +256,7 @@ export const translations = {
     faq3A: 'ระบบจะไม่เปิดเผยข้อมูลติดต่อส่วนบุคคลสู่สาธารณะจนกว่าจะมีการกดยืนยันการติดต่อเพื่อขอรับคืน',
 
     // Footer
+    footerPrivacy: 'นโยบายความเป็นส่วนตัว',
     footerDesc: 'ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย (University Lost-and-Found Notification and Tracking System)',
     footerCopyright: '© 2026 Foundit-KKU - พัฒนาเพื่อสนับสนุนความปลอดภัยและคอมมูนิตี้ในมหาวิทยาลัย',
     footerDisclaimer: 'โปรเจกต์ของนักศึกษา ไม่ใช่ระบบทางการของมหาวิทยาลัยขอนแก่น',
@@ -516,6 +517,7 @@ export const translations = {
     faq3A: 'Contact details remain shielded and are only revealed when a legitimate mutual claim is verified.',
 
     // Footer
+    footerPrivacy: 'Privacy Policy',
     footerDesc: 'University Lost-and-Found Notification and Tracking System (Foundit-KKU)',
     footerCopyright: '© 2026 Foundit-KKU - Supporting a safe and helpful campus community',
     footerDisclaimer: 'A student project, not an official Khon Kaen University service.',
