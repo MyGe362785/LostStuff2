@@ -8,7 +8,7 @@
         :auditLogs="auditLogs"
         :currentLang="currentLang"
         :t="t"
-        :claimsEnabled="isBackendConfigured"
+        :backendConfigured="isBackendConfigured"
         :claims="claims"
         :busyClaimId="reviewingClaimId"
         @navigate-home="navigateTo('/')"
@@ -129,14 +129,14 @@
                   <div class="p-4 flex flex-col items-center text-center">
                     <span class="text-[11px] text-brand-mocha/70 font-semibold mb-1 uppercase tracking-wider">{{ t('statReturnedRate') }}</span>
                     <div class="flex items-center gap-1.5">
-                      <span class="text-xl sm:text-2xl font-bold text-brand-espresso">{{ '94.2%' }}</span>
+                      <span class="text-xl sm:text-2xl font-bold text-brand-espresso">{{ homeStats.returnRate }}</span>
                       <span class="w-2 h-2 rounded-full bg-found"></span>
                     </div>
                   </div>
 
                   <div class="p-4 flex flex-col items-center text-center">
                     <span class="text-[11px] text-brand-mocha/70 font-semibold mb-1 uppercase tracking-wider">{{ t('statReturnedCount') }}</span>
-                    <span class="text-xl sm:text-2xl font-bold text-brand-espresso">1,280+</span>
+                    <span class="text-xl sm:text-2xl font-bold text-brand-espresso">{{ homeStats.returned }}</span>
                   </div>
 
                   <div class="p-4 flex flex-col items-center text-center">
@@ -148,8 +148,8 @@
                   </div>
 
                   <div class="p-4 flex flex-col items-center text-center">
-                    <span class="text-[11px] text-brand-mocha/70 font-semibold mb-1 uppercase tracking-wider">{{ t('statAvgMatchTime') }}</span>
-                    <span class="text-xl sm:text-2xl font-bold text-brand-espresso">15 <span class="text-xs font-normal text-brand-mocha/70">{{ t('statMinutes') }}</span></span>
+                    <span class="text-[11px] text-brand-mocha/70 font-semibold mb-1 uppercase tracking-wider">{{ homeStats.lastLabel }}</span>
+                    <span class="text-xl sm:text-2xl font-bold text-brand-espresso">{{ homeStats.lastValue }} <span class="text-xs font-normal text-brand-mocha/70">{{ homeStats.lastUnit }}</span></span>
                   </div>
 
                 </div>
@@ -468,8 +468,9 @@ import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emai
 import { isBackendConfigured, supabase } from './lib/supabase'
 import {
   createClaim, createItem, DUPLICATE_CLAIM, getCurrentProfile, getCurrentUser, ITEM_UNAVAILABLE,
-  listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, updateItemStatus,
+  listAuditEvents, listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, updateItemStatus,
 } from './services/lostFoundRepository'
+import { toAuditLogEntry } from './utils/auditLog'
 
 // Routing State
 const currentPath = ref(window.location.pathname || '/')
@@ -638,8 +639,8 @@ onMounted(async () => {
   if (isBackendConfigured) {
     supabase.auth.onAuthStateChange((_event, session) => {
       currentUser.value = session?.user || null
-      // Claims depend on the role, so load them once the profile is in.
-      void refreshCurrentProfile().then(loadClaimsSafely).catch((error) => {
+      // Claims and the audit log depend on the role, so load them once the profile is in.
+      void refreshCurrentProfile().then(() => Promise.all([loadClaimsSafely(), loadAuditLogsSafely()])).catch((error) => {
         console.error('Unable to refresh user profile', error)
       })
       if (session?.user) isAuthModalOpen.value = false
@@ -666,8 +667,7 @@ async function loadData() {
       currentUser.value = await getCurrentUser()
       await refreshCurrentProfile()
       await loadBackendItems()
-      await loadClaimsSafely()
-      auditLogs.value = []
+      await Promise.all([loadClaimsSafely(), loadAuditLogsSafely()])
       emails.value = []
       return
     } catch (error) {
@@ -742,6 +742,23 @@ async function loadClaimsSafely() {
   }
 }
 
+// Only staff can read audit events; everyone else keeps an empty log.
+async function loadAuditLogsSafely() {
+  if (!isBackendConfigured) return
+  if (!currentUser.value || !isStaff.value) {
+    auditLogs.value = []
+    return
+  }
+  try {
+    const entries = (await listAuditEvents()).map(toAuditLogEntry)
+    // A sign-out can land while the request is in flight.
+    auditLogs.value = isStaff.value ? entries : []
+  } catch (error) {
+    console.error('Unable to load audit events', error)
+    showToast({ title: t('auditLoadFailedTitle'), message: error.message, type: 'warning' })
+  }
+}
+
 const CLAIM_DECISION_MESSAGES = {
   approved: 'claimApprovedMessage',
   rejected: 'claimRejectedMessage',
@@ -761,7 +778,7 @@ async function handleReviewClaim({ claimId, decision, note }) {
     reviewingClaimId.value = null
   }
   // Refresh either way: a failure usually means someone changed the item first.
-  await Promise.all([loadBackendItems(), loadClaims()]).catch((error) => {
+  await Promise.all([loadBackendItems(), loadClaims(), loadAuditLogsSafely()]).catch((error) => {
     console.error('Unable to refresh after reviewing a claim', error)
   })
 }
@@ -772,6 +789,7 @@ async function signOut() {
   currentProfile.value = null
   claims.value = []
   myClaims.value = []
+  auditLogs.value = []
   await loadBackendItems()
   showToast({ title: isTh.value ? 'ออกจากระบบแล้ว' : 'Signed out', message: isTh.value ? 'คุณสามารถดูรายการสาธารณะได้ตามปกติ' : 'Public listings remain available.', type: 'success' })
 }
@@ -821,6 +839,23 @@ function resetDemoData() {
 
 // Counts & Computed Items
 const myItems = computed(() => items.value.filter(item => item.isMyPost))
+
+// Real figures once a backend is connected; the offline demo keeps its showcase numbers.
+const homeStats = computed(() => {
+  if (!isBackendConfigured) {
+    return { returnRate: '94.2%', returned: '1,280+', lastLabel: t('statAvgMatchTime'), lastValue: '15', lastUnit: t('statMinutes') }
+  }
+  const published = items.value.filter(item => ['searching', 'pending_confirm', 'returned'].includes(item.status)).length
+  const returned = items.value.filter(item => item.status === 'returned').length
+  return {
+    returnRate: published === 0 ? '-' : `${((returned / published) * 100).toFixed(1)}%`,
+    returned: String(returned),
+    // No match timings are recorded, so show how many listings are public instead.
+    lastLabel: t('statPublishedItems'),
+    lastValue: String(published),
+    lastUnit: t('statItems'),
+  }
+})
 const activeLostCount = computed(() => items.value.filter(item => item.type === 'lost' && (item.status === 'searching' || item.status === 'pending_review')).length)
 const unreadEmailsCount = computed(() => emails.value.filter(e => !e.isRead).length)
 
@@ -964,6 +999,7 @@ async function handleApproveItem(itemId) {
       await updateItemStatus(itemId, 'searching', 'item_approved')
       await loadBackendItems()
       showToast({ title: isTh.value ? 'อนุมัติรายการแล้ว' : 'Item approved', message: isTh.value ? 'รายการเผยแพร่แล้ว' : 'The item is now published.', type: 'success' })
+      void loadAuditLogsSafely()
     } catch (error) {
       showToast({ title: 'Could not approve item', message: error.message, type: 'info' })
     }
@@ -1021,8 +1057,10 @@ async function handleRejectItem(itemId) {
     try {
       await updateItemStatus(itemId, 'closed', 'item_closed')
       await loadBackendItems()
+      showToast({ title: isTh.value ? 'ปิดรายการแล้ว' : 'Case closed', message: isTh.value ? 'รายการนี้ไม่แสดงต่อสาธารณะแล้ว' : 'The item is no longer public.', type: 'info' })
+      void loadAuditLogsSafely()
     } catch (error) {
-      showToast({ title: 'Could not close item', message: error.message, type: 'info' })
+      showToast({ title: isTh.value ? 'ปิดรายการไม่สำเร็จ' : 'Could not close item', message: error.message, type: 'info' })
     }
     return
   }
@@ -1057,10 +1095,13 @@ async function handleRejectItem(itemId) {
 async function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) {
   if (isBackendConfigured) {
     try {
-      await updateItemStatus(itemId, 'returned', 'return_confirmed')
+      // Keep who collected the item and the staff notes in the audit log.
+      await updateItemStatus(itemId, 'returned', 'return_confirmed', { claimant, notes })
       await loadBackendItems()
+      showToast({ title: isTh.value ? 'บันทึกการส่งมอบสำเร็จ' : 'Return confirmed', message: isTh.value ? 'รายการเปลี่ยนเป็นส่งคืนแล้ว และบันทึกลงประวัติ Audit' : 'The item is marked returned and logged.', type: 'success' })
+      void loadAuditLogsSafely()
     } catch (error) {
-      showToast({ title: 'Could not confirm return', message: error.message, type: 'info' })
+      showToast({ title: isTh.value ? 'ยืนยันการส่งคืนไม่สำเร็จ' : 'Could not confirm return', message: error.message, type: 'info' })
     }
     return
   }
