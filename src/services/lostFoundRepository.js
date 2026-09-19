@@ -194,10 +194,26 @@ export async function reviewClaim({ claimId, decision, note }) {
   if (error) throw error
 }
 
-export async function updateItemStatus(itemId, status, action) {
+/**
+ * @param {object} [details] extra audit metadata, such as who collected a
+ *   returned item and the staff member's notes
+ */
+export async function updateItemStatus(itemId, status, action, details = {}) {
   requireBackend()
   const { error: updateError } = await supabase.from('items').update({ status }).eq('id', itemId)
   if (updateError) throw updateError
-  const { error: auditError } = await supabase.from('audit_events').insert({ item_id: itemId, action, metadata: { status } })
+  const { error: auditError } = await supabase.from('audit_events').insert({ item_id: itemId, action, metadata: { ...details, status } })
   if (auditError) throw auditError
+}
+
+/** Latest audit events with who acted and on which item. RLS returns rows only to staff. */
+export async function listAuditEvents(limit = 200) {
+  requireBackend()
+  const { data, error } = await supabase
+    .from('audit_events')
+    .select('id, action, metadata, created_at, item_id, actor:profiles!audit_events_actor_id_fkey(display_name), item:items!audit_events_item_id_fkey(title_th, title_en)')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data
 }

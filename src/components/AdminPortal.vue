@@ -13,8 +13,8 @@
             </div>
             <div>
               <div class="flex items-center gap-1.5">
-                <span class="font-bold text-base tracking-tight text-white">Foundit<span class="text-brand-caramel">-KKU</span></span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-caramel/25 text-amber-200 border border-brand-caramel/40 font-mono tracking-wider">
+                <span class="font-bold text-base tracking-tight text-white whitespace-nowrap">Foundit<span class="text-brand-caramel">-KKU</span></span>
+                <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-caramel/25 text-amber-200 border border-brand-caramel/40 font-mono tracking-wider">
                   /admin
                 </span>
               </div>
@@ -38,7 +38,7 @@
             </button>
 
             <button
-              v-if="claimsEnabled"
+              v-if="backendConfigured"
               @click="activeSection = 'claims'"
               class="transition-colors py-1 relative flex items-center gap-1.5 cursor-pointer"
               :class="activeSection === 'claims' ? 'text-white font-bold border-b-2 border-brand-caramel' : 'text-[#C4B3A5] hover:text-white'"
@@ -84,19 +84,6 @@
 
           <!-- Right Action Cluster: Inverted dark style -->
           <div class="flex items-center gap-2 sm:gap-2.5">
-            <!-- Mobile Section Selector -->
-            <select 
-              v-model="activeSection"
-              class="md:hidden px-2.5 py-1.5 rounded-xl bg-[#3A2A1E] border border-[#4D3828] text-xs font-bold text-amber-200 focus:outline-hidden cursor-pointer"
-            >
-              <option value="pending">{{ isTh ? 'คิวรอตรวจสอบ' : 'Pending' }}</option>
-              <option v-if="claimsEnabled" value="claims">{{ t('staffTabClaims') }}</option>
-              <option value="active">{{ isTh ? 'จัดการรายการ' : 'All Items' }}</option>
-              <option value="audit">{{ isTh ? 'ประวัติ Audit' : 'Audit Logs' }}</option>
-              <option value="benchmark">{{ isTh ? 'ทดสอบความแม่นยำ' : 'Benchmark' }}</option>
-              <option value="survey">{{ isTh ? 'แบบประเมินความพึงพอใจ' : 'Survey' }}</option>
-            </select>
-
             <!-- Language Switcher Toggle (TH / EN) -->
             <div class="flex items-center p-1 rounded-xl bg-[#3A2A1E] border border-[#4D3828] text-xs font-bold shadow-2xs">
               <button 
@@ -115,14 +102,15 @@
               </button>
             </div>
 
-            <!-- Reset Mock Data Button -->
-            <button 
+            <!-- Reset Mock Data Button: demo only, it would swap real listings for mock ones -->
+            <button
+              v-if="!backendConfigured"
               @click="handleReset"
               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-[#3A2A1E] hover:bg-[#4D3828] text-amber-200 hover:text-white border border-[#4D3828] transition-colors cursor-pointer shadow-warm-xs"
               :title="isTh ? 'รีเซ็ตข้อมูล Mock Data ทั้งหมด' : 'Reset All Mock Data'"
             >
               <RotateCcw class="w-3.5 h-3.5 text-amber-300" />
-              <span>{{ isTh ? 'รีเซ็ตข้อมูล' : 'Reset Data' }}</span>
+              <span class="hidden sm:inline">{{ isTh ? 'รีเซ็ตข้อมูล' : 'Reset Data' }}</span>
             </button>
 
             <!-- Return to Student View -->
@@ -135,6 +123,22 @@
             </button>
           </div>
 
+        </div>
+
+        <!-- Mobile Section Selector: its own row, so the top row fits a 375px screen -->
+        <div class="md:hidden pb-3">
+          <select
+            v-model="activeSection"
+            :aria-label="isTh ? 'เลือกส่วนของแผงเจ้าหน้าที่' : 'Choose a staff portal section'"
+            class="w-full px-3 py-2 rounded-xl bg-[#3A2A1E] border border-[#4D3828] text-xs font-bold text-amber-200 focus:outline-hidden cursor-pointer"
+          >
+            <option value="pending">{{ isTh ? 'คิวรอตรวจสอบ' : 'Pending' }}</option>
+            <option v-if="backendConfigured" value="claims">{{ t('staffTabClaims') }}</option>
+            <option value="active">{{ isTh ? 'จัดการรายการ' : 'All Items' }}</option>
+            <option value="audit">{{ isTh ? 'ประวัติ Audit' : 'Audit Logs' }}</option>
+            <option value="benchmark">{{ isTh ? 'ทดสอบความแม่นยำ' : 'Benchmark' }}</option>
+            <option value="survey">{{ isTh ? 'แบบประเมินความพึงพอใจ' : 'Survey' }}</option>
+          </select>
         </div>
       </div>
     </header>
@@ -158,13 +162,13 @@
         <div class="flex items-center gap-2.5">
           <span class="w-2.5 h-2.5 rounded-full bg-found"></span>
           <span class="text-brand-mocha/80 font-medium">{{ isTh ? 'ส่งมอบคืนสำเร็จ:' : 'Handed Over:' }}</span>
-          <strong class="text-brand-espresso font-bold">{{ returnedCount }} {{ isTh ? 'รายการ' : 'items' }} (94.2%)</strong>
+          <strong class="text-brand-espresso font-bold">{{ returnedCount }} {{ isTh ? 'รายการ' : 'items' }}<template v-if="returnRate !== null"> ({{ returnRate }}%)</template></strong>
         </div>
 
         <div class="flex items-center gap-2.5">
           <span class="w-2.5 h-2.5 rounded-full bg-match"></span>
           <span class="text-brand-mocha/80 font-medium">{{ isTh ? 'ความแม่นยำระบบจับคู่:' : 'Algorithm Accuracy:' }}</span>
-          <strong class="text-match-dark font-extrabold">100% (Benchmark)</strong>
+          <strong class="text-match-dark font-extrabold">{{ benchmarkResults ? `${benchmarkResults.accuracy}%` : '-' }} (Benchmark)</strong>
         </div>
 
       </div>
@@ -514,6 +518,9 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-brand-sand/60">
+                <tr v-if="auditLogs.length === 0">
+                  <td colspan="5" class="py-10 px-4 text-center text-brand-latte">{{ t('staffAuditEmpty') }}</td>
+                </tr>
                 <tr v-for="log in auditLogs" :key="log.id" class="hover:bg-brand-cream/40 transition-colors">
                   <td class="py-3 px-4 font-mono tabular-nums text-[11px] text-brand-latte whitespace-nowrap">
                     {{ formatLogTime(log.timestamp) }}
@@ -923,8 +930,9 @@ const props = defineProps({
     type: Function,
     required: true
   },
-  // Claims only exist with a backend; the demo tracks them on the item instead.
-  claimsEnabled: { type: Boolean, default: false },
+  // Claims only exist with a backend; the demo tracks them on the item instead,
+  // and the demo alone may reset its mock data.
+  backendConfigured: { type: Boolean, default: false },
   claims: { type: Array, default: () => [] },
   busyClaimId: { type: String, default: null }
 })
@@ -972,6 +980,12 @@ const searchingCount = computed(() => {
 
 const returnedCount = computed(() => {
   return props.items.filter(i => i.status === 'returned').length
+})
+
+// Share of published items that went home; null until something is published.
+const returnRate = computed(() => {
+  const published = props.items.filter(i => ['searching', 'pending_confirm', 'returned'].includes(i.status)).length
+  return published === 0 ? null : ((returnedCount.value / published) * 100).toFixed(1)
 })
 
 // Search & Filter in Active Items
