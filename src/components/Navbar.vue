@@ -75,6 +75,40 @@
             </span>
           </button>
 
+          <!-- Satisfaction survey: shown on layouts with enough room for a hover tooltip -->
+          <a
+            href="https://forms.gle/gzCT8Zyt4KoMg9yi7"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group relative hidden lg:inline-flex w-10 h-10 items-center justify-center rounded-xl border border-transparent text-brand-mocha transition-all hover:border-brand-sand hover:bg-brand-cream/80 hover:text-brand-chestnut focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
+            :aria-label="t('navSatisfactionSurvey')"
+            aria-describedby="navbar-survey-tooltip"
+            :title="t('navSatisfactionSurvey')"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path d="M8 4h8" />
+              <path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1Z" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <path d="m8 13 2.25 2.25L16 9.5" />
+            </svg>
+            <span
+              id="navbar-survey-tooltip"
+              role="tooltip"
+              class="pointer-events-none invisible absolute right-0 top-full z-50 mt-2 translate-y-1 whitespace-nowrap rounded-lg bg-brand-espresso px-3 py-2 text-[11px] font-semibold text-brand-paper opacity-0 shadow-warm-lg transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transform-none motion-reduce:transition-none"
+            >
+              {{ t('navSatisfactionSurvey') }}
+            </span>
+          </a>
+
           <!-- Language Switcher Toggle (TH / EN) -->
           <div class="flex items-center p-1 rounded-xl bg-brand-cream border border-brand-sand text-xs font-bold shadow-2xs">
             <button 
