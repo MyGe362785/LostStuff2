@@ -59,6 +59,7 @@
             :currentLang="currentLang"
             :t="t"
             @trigger-search="activeTab = 'search'"
+            @quick-find="openQuickFoundSearch"
             @open-report="openReportModal"
           />
 
@@ -384,7 +385,21 @@
       @claim-item="handleClaimItem"
     />
 
-    <!-- 4. Ownership Claim Modal (Proposal Use-Case) -->
+    <!-- 4. Quick Found-Item Search with previous / next browsing -->
+    <QuickFoundModal
+      v-if="isQuickFoundOpen && quickFoundMatches.length"
+      :items="quickFoundMatches"
+      :currentIndex="quickFoundIndex"
+      :searchQuery="quickFoundQuery"
+      :currentLang="currentLang"
+      :t="t"
+      @close="closeQuickFoundSearch"
+      @previous="showPreviousQuickFoundItem"
+      @next="showNextQuickFoundItem"
+      @claim-item="handleQuickFoundClaim"
+    />
+
+    <!-- 5. Ownership Claim Modal (Proposal Use-Case) -->
     <ClaimModal
       v-if="isClaimModalOpen && claimingTargetItem"
       :item="claimingTargetItem"
@@ -394,7 +409,7 @@
       @submit-claim="handleSubmitClaim"
     />
 
-    <!-- 5. Simulated Email Mailbox Drawer (Primary Notification Center) -->
+    <!-- 6. Simulated Email Mailbox Drawer (Primary Notification Center) -->
     <EmailInboxModal
       v-if="isEmailModalOpen"
       :emails="emails"
@@ -408,6 +423,7 @@
       v-if="isAuthModalOpen && isBackendConfigured"
       :currentLang="currentLang"
       @close="isAuthModalOpen = false"
+      @open-privacy="openPrivacyFromAuth"
     />
 
     <!-- Toast Notifications Container -->
@@ -427,6 +443,7 @@ import HeroBanner from './components/HeroBanner.vue'
 import FilterSidebar from './components/FilterSidebar.vue'
 import ItemCard from './components/ItemCard.vue'
 import ItemDetailModal from './components/ItemDetailModal.vue'
+import QuickFoundModal from './components/QuickFoundModal.vue'
 import ReportModal from './components/ReportModal.vue'
 import MatchAlertModal from './components/MatchAlertModal.vue'
 import CampusHandoverSection from './components/CampusHandoverSection.vue'
@@ -464,6 +481,7 @@ import { initialMockItems } from './data/mockItems'
 import { initialAuditLogs } from './data/auditLogs'
 import { translations } from './data/i18n'
 import { findMatches } from './utils/matchingEngine'
+import { getQuickFoundMatches } from './utils/quickFoundSearch'
 import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emailNotifier'
 import { isBackendConfigured, supabase } from './lib/supabase'
 import {
@@ -519,6 +537,11 @@ const viewMode = ref('grid')
 const isReportModalOpen = ref(false)
 const activeReportType = ref('lost')
 const selectedItem = ref(null)
+
+const isQuickFoundOpen = ref(false)
+const quickFoundMatches = ref([])
+const quickFoundIndex = ref(0)
+const quickFoundQuery = ref('')
 
 const isMatchAlertOpen = ref(false)
 const activeMatchSourceItem = ref(null)
@@ -951,6 +974,48 @@ function openReportModal(type = 'lost') {
 
 function openItemDetail(item) {
   selectedItem.value = item
+}
+
+function openPrivacyFromAuth() {
+  isAuthModalOpen.value = false
+  navigateTo('/privacy')
+}
+
+function openQuickFoundSearch() {
+  const matches = getQuickFoundMatches(searchQuery.value, items.value)
+
+  if (matches.length === 0) {
+    showToast({
+      title: t('quickFoundEmptyTitle'),
+      message: searchQuery.value.trim() ? t('quickFoundEmptyMessage') : t('quickFoundNoAvailableMessage'),
+      type: 'info',
+    })
+    return
+  }
+
+  quickFoundMatches.value = matches
+  quickFoundIndex.value = 0
+  quickFoundQuery.value = searchQuery.value.trim()
+  isQuickFoundOpen.value = true
+}
+
+function closeQuickFoundSearch() {
+  isQuickFoundOpen.value = false
+  quickFoundMatches.value = []
+  quickFoundIndex.value = 0
+}
+
+function showPreviousQuickFoundItem() {
+  quickFoundIndex.value = Math.max(0, quickFoundIndex.value - 1)
+}
+
+function showNextQuickFoundItem() {
+  quickFoundIndex.value = Math.min(quickFoundMatches.value.length - 1, quickFoundIndex.value + 1)
+}
+
+function handleQuickFoundClaim(item) {
+  closeQuickFoundSearch()
+  handleClaimItem(item)
 }
 
 // Staff & Status Actions

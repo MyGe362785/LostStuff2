@@ -1,6 +1,6 @@
 <template>
   <div class="privacy-page">
-    <header class="border-b border-brand-sand bg-brand-cream/55">
+    <header class="border-b border-brand-sand bg-brand-paper">
       <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <button
           type="button"
@@ -24,13 +24,19 @@
             </p>
           </div>
 
-          <div class="flex flex-col items-start gap-1.5 border-t border-brand-tan pt-4 text-xs text-brand-mocha lg:min-w-48 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
-            <span class="font-semibold text-brand-espresso">{{ copy.updatedLabel }}</span>
-            <time datetime="2026-09-19">{{ copy.updatedDate }}</time>
-          </div>
+          <dl class="grid gap-3 border-t border-brand-tan pt-4 text-xs lg:min-w-64 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+            <div>
+              <dt class="font-semibold text-brand-espresso">{{ copy.updatedLabel }}</dt>
+              <dd class="mt-1 text-brand-mocha"><time datetime="2026-09-20">{{ copy.updatedDate }}</time></dd>
+            </div>
+            <div>
+              <dt class="font-semibold text-brand-espresso">{{ copy.accountRequirementLabel }}</dt>
+              <dd class="mt-1 font-bold text-brand-chestnut">{{ copy.accountRequirement }}</dd>
+            </div>
+          </dl>
         </div>
 
-        <div class="mt-8 flex max-w-4xl items-start gap-3 rounded-xl bg-brand-paper px-4 py-4 shadow-warm-sm sm:px-5">
+        <div class="mt-8 flex max-w-4xl items-start gap-3 rounded-xl border border-brand-sand bg-brand-cream/55 px-4 py-4 sm:px-5" role="note">
           <CircleAlert class="mt-0.5 h-5 w-5 shrink-0 text-brand-caramel" aria-hidden="true" />
           <div>
             <p class="text-sm font-bold text-brand-espresso">{{ copy.projectNoteTitle }}</p>
@@ -92,14 +98,14 @@
           </div>
         </section>
 
-        <div class="mt-10 flex flex-col gap-4 rounded-xl bg-brand-mocha px-5 py-6 text-brand-paper shadow-warm-lg sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div class="mt-12 flex flex-col gap-4 border-t-2 border-brand-chestnut pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p class="text-base font-bold">{{ copy.endTitle }}</p>
-            <p class="mt-1 text-xs leading-5 text-brand-cream/80">{{ copy.endDescription }}</p>
+            <p class="text-base font-bold text-brand-espresso">{{ copy.endTitle }}</p>
+            <p class="mt-1 text-xs leading-5 text-brand-mocha">{{ copy.endDescription }}</p>
           </div>
           <button
             type="button"
-            class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand-paper px-4 py-2.5 text-xs font-bold text-brand-espresso transition-colors hover:bg-brand-cream"
+            class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand-chestnut px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-brand-mocha"
             @click="$emit('navigate-home')"
           >
             {{ copy.backHome }}
@@ -114,6 +120,7 @@
 <script setup>
 import { computed } from 'vue'
 import {
+  AtSign,
   ArrowLeft,
   ArrowRight,
   CircleAlert,
@@ -137,29 +144,40 @@ defineEmits(['navigate-home'])
 const copy = computed(() => {
   if (props.currentLang === 'en') {
     return {
-      title: 'Privacy Policy',
-      intro: 'This notice explains what information Foundit-KKU uses when you report, search for, or claim lost property, including how the demo and configured service modes differ.',
+      title: 'Privacy and Data Protection Policy',
+      intro: 'This policy sets out how Foundit-KKU collects, uses, stores, and protects information when you report, search for, or claim lost property through the service.',
       backHome: 'Back to home',
-      updatedLabel: 'Last updated',
-      updatedDate: '19 September 2026',
-      projectNoteTitle: 'About this service',
-      projectNote: 'Foundit-KKU is a student project and is not an official Khon Kaen University service. Before a production launch, the operator must publish its legal identity and a verified privacy contact.',
+      updatedLabel: 'Effective date',
+      updatedDate: '20 September 2026',
+      accountRequirementLabel: 'Permitted sign-in account',
+      accountRequirement: '@kkumail.com only',
+      projectNoteTitle: 'Service status and responsibility',
+      projectNote: 'Foundit-KKU is a student project and is not an official Khon Kaen University service. Before production use, the operator must publish its legal identity, verified privacy contact, and applicable data-retention schedule.',
       contentsLabel: 'On this page',
       currentModeLabel: 'Current environment',
       demoMode: 'Demo mode: report and claim data is stored in this browser.',
-      backendMode: 'Configured mode: authentication and service data are handled through Supabase.',
-      endTitle: 'Ready to continue?',
-      endDescription: 'Return to the search hub to browse or report an item.',
+      backendMode: 'Configured mode: only @kkumail.com accounts are admitted; authentication and service data are handled through Google and Supabase.',
+      endTitle: 'End of privacy notice',
+      endDescription: 'You may return to the service after reviewing this policy.',
       sections: [
         {
           id: 'scope', nav: 'Scope', title: 'What this notice covers', icon: FileText,
           lead: 'This notice covers the Foundit-KKU website and the information used to publish lost-and-found reports, match related reports, verify ownership claims, notify users, and let staff review cases.',
         },
         {
+          id: 'authentication', nav: 'Sign-in eligibility', title: 'Authentication and permitted accounts', icon: AtSign,
+          lead: 'Access to authenticated features is restricted to Khon Kaen University Google Workspace accounts whose email address ends in @kkumail.com.',
+          points: [
+            'Google OAuth is used to verify the university account; personal Gmail addresses and accounts from other domains are not permitted.',
+            'The service may receive the account email address, display name, and sign-in session data required to create and maintain the user profile.',
+            'Before Google sign-in begins, the sign-in screen requires the user to confirm that they have read and accepted this Privacy Policy.',
+          ],
+        },
+        {
           id: 'data', nav: 'Information used', title: 'Information the system may use', icon: Database,
           lead: 'The information depends on the action you choose to take.',
           points: [
-            'Account details, such as your Google account email, display name, role, and sign-in session when the backend is enabled.',
+            'Account details from the permitted @kkumail.com Google account, such as email address, display name, role, and sign-in session when the backend is enabled.',
             'Report details, such as item type, title, category, colour, brand, identifying marks, description, image, place, date, time, and handover point.',
             'Contact and claim details, such as reporter contact, claimant name, student or identity reference, private proof, preferred contact channel, and review status.',
             'Operational records, such as notifications, case status changes, staff notes, and audit timestamps.',
@@ -209,7 +227,7 @@ const copy = computed(() => {
         },
         {
           id: 'services', nav: 'External services', title: 'Services involved', icon: Network,
-          lead: 'The configured version may use Google for sign-in and Supabase for authentication, database, and file storage. Demo content can also display sample images hosted by Unsplash. Those services process information under their own terms and privacy practices.',
+          lead: 'The configured version uses Google OAuth for @kkumail.com sign-in and Supabase for authentication, database, and file storage. Demo content may also display sample images hosted by Unsplash. Those services process information under their own terms and privacy practices.',
         },
         {
           id: 'contact', nav: 'Contact and changes', title: 'Questions, requests, and policy changes', icon: LockKeyhole,
@@ -220,29 +238,40 @@ const copy = computed(() => {
   }
 
   return {
-    title: 'นโยบายความเป็นส่วนตัว',
-    intro: 'คำชี้แจงนี้อธิบายข้อมูลที่ Foundit-KKU ใช้เมื่อคุณแจ้ง ค้นหา หรือยื่นขอรับคืนสิ่งของ รวมถึงความแตกต่างระหว่างโหมดสาธิตและโหมดที่เชื่อมต่อระบบหลังบ้าน',
+    title: 'นโยบายความเป็นส่วนตัวและการคุ้มครองข้อมูล',
+    intro: 'นโยบายฉบับนี้กำหนดแนวทางที่ Foundit-KKU ใช้ในการเก็บรวบรวม ใช้ จัดเก็บ และคุ้มครองข้อมูล เมื่อคุณแจ้ง ค้นหา หรือยื่นขอรับคืนสิ่งของผ่านระบบ',
     backHome: 'กลับหน้าหลัก',
-    updatedLabel: 'ปรับปรุงล่าสุด',
-    updatedDate: '19 กันยายน 2569',
-    projectNoteTitle: 'เกี่ยวกับบริการนี้',
-    projectNote: 'Foundit-KKU เป็นโครงงานของนักศึกษา ไม่ใช่ระบบทางการของมหาวิทยาลัยขอนแก่น ก่อนนำไปใช้งานจริง ผู้ดำเนินการต้องระบุตัวตนทางกฎหมายและช่องทางติดต่อด้านข้อมูลส่วนบุคคลที่ตรวจสอบได้',
+    updatedLabel: 'วันที่มีผลบังคับใช้',
+    updatedDate: '20 กันยายน 2569',
+    accountRequirementLabel: 'บัญชีที่อนุญาตให้เข้าสู่ระบบ',
+    accountRequirement: 'เฉพาะ @kkumail.com',
+    projectNoteTitle: 'สถานะและความรับผิดชอบของบริการ',
+    projectNote: 'Foundit-KKU เป็นโครงงานของนักศึกษาและไม่ใช่ระบบทางการของมหาวิทยาลัยขอนแก่น ก่อนนำไปใช้งานจริง ผู้ดำเนินการต้องประกาศตัวตนทางกฎหมาย ช่องทางติดต่อด้านข้อมูลส่วนบุคคลที่ตรวจสอบได้ และระยะเวลาการเก็บรักษาข้อมูลอย่างชัดเจน',
     contentsLabel: 'หัวข้อในหน้านี้',
     currentModeLabel: 'สภาพแวดล้อมปัจจุบัน',
     demoMode: 'โหมดสาธิต: ข้อมูลรายการและคำขอรับคืนจัดเก็บอยู่ในเบราว์เซอร์นี้',
-    backendMode: 'โหมดเชื่อมต่อ: การเข้าสู่ระบบและข้อมูลบริการจัดการผ่าน Supabase',
-    endTitle: 'พร้อมใช้งานต่อแล้วหรือยัง?',
-    endDescription: 'กลับไปยังคลังค้นหาเพื่อดูรายการหรือแจ้งสิ่งของ',
+    backendMode: 'โหมดเชื่อมต่อ: อนุญาตเฉพาะบัญชี @kkumail.com และจัดการการยืนยันตัวตนกับข้อมูลบริการผ่าน Google และ Supabase',
+    endTitle: 'สิ้นสุดคำชี้แจงนโยบาย',
+    endDescription: 'เมื่ออ่านและทำความเข้าใจแล้ว คุณสามารถกลับไปใช้งานระบบต่อได้',
     sections: [
       {
         id: 'scope', nav: 'ขอบเขต', title: 'นโยบายนี้ครอบคลุมอะไร', icon: FileText,
         lead: 'นโยบายนี้ครอบคลุมเว็บไซต์ Foundit-KKU และข้อมูลที่ใช้เพื่อเผยแพร่รายการของหายและของที่พบ จับคู่รายการ ยืนยันความเป็นเจ้าของ แจ้งเตือนผู้ใช้ และให้เจ้าหน้าที่ตรวจสอบเคส',
       },
       {
+        id: 'authentication', nav: 'สิทธิ์เข้าสู่ระบบ', title: 'การยืนยันตัวตนและบัญชีที่อนุญาต', icon: AtSign,
+        lead: 'ฟังก์ชันที่ต้องยืนยันตัวตนเปิดให้ใช้เฉพาะบัญชี Google Workspace ของมหาวิทยาลัยขอนแก่นซึ่งมีอีเมลลงท้ายด้วย @kkumail.com เท่านั้น',
+        points: [
+          'ระบบใช้ Google OAuth เพื่อตรวจสอบบัญชีมหาวิทยาลัย โดยไม่อนุญาตบัญชี Gmail ส่วนบุคคลหรือบัญชีจากโดเมนอื่น',
+          'ระบบอาจได้รับอีเมล ชื่อที่แสดง และข้อมูลเซสชันที่จำเป็นต่อการสร้างและดูแลโปรไฟล์ผู้ใช้',
+          'ก่อนเริ่มเข้าสู่ระบบผ่าน Google ผู้ใช้ต้องยืนยันว่าได้อ่านและยอมรับนโยบายความเป็นส่วนตัวฉบับนี้',
+        ],
+      },
+      {
         id: 'data', nav: 'ข้อมูลที่ใช้', title: 'ข้อมูลที่ระบบอาจใช้', icon: Database,
         lead: 'ประเภทข้อมูลขึ้นอยู่กับกิจกรรมที่คุณเลือกใช้ในระบบ',
         points: [
-          'ข้อมูลบัญชี เช่น อีเมลบัญชี Google ชื่อที่แสดง บทบาท และเซสชันการเข้าสู่ระบบ เมื่อเปิดใช้ระบบหลังบ้าน',
+          'ข้อมูลบัญชีจาก Google ที่ได้รับอนุญาตภายใต้โดเมน @kkumail.com เช่น อีเมล ชื่อที่แสดง บทบาท และเซสชันการเข้าสู่ระบบ เมื่อเปิดใช้ระบบหลังบ้าน',
           'ข้อมูลรายการ เช่น ประเภท ชื่อ หมวดหมู่ สี ยี่ห้อ จุดสังเกต รายละเอียด รูปภาพ สถานที่ วันที่ เวลา และจุดส่งมอบ',
           'ข้อมูลติดต่อและคำขอรับคืน เช่น ช่องทางติดต่อผู้แจ้ง ชื่อผู้ยื่น รหัสนักศึกษาหรือข้อมูลอ้างอิง หลักฐานส่วนตัว ช่องทางติดต่อที่สะดวก และผลการตรวจสอบ',
           'ข้อมูลการดำเนินงาน เช่น การแจ้งเตือน การเปลี่ยนสถานะ หมายเหตุของเจ้าหน้าที่ และเวลาที่บันทึกกิจกรรม',
@@ -292,7 +321,7 @@ const copy = computed(() => {
       },
       {
         id: 'services', nav: 'บริการภายนอก', title: 'บริการภายนอกที่เกี่ยวข้อง', icon: Network,
-        lead: 'เวอร์ชันที่เชื่อมต่ออาจใช้ Google สำหรับการเข้าสู่ระบบ และ Supabase สำหรับการยืนยันตัวตน ฐานข้อมูล และพื้นที่เก็บไฟล์ ส่วนข้อมูลสาธิตอาจแสดงภาพตัวอย่างจาก Unsplash บริการเหล่านี้ประมวลผลข้อมูลตามข้อกำหนดและนโยบายของตนเอง',
+        lead: 'เวอร์ชันที่เชื่อมต่อใช้ Google OAuth สำหรับบัญชี @kkumail.com และใช้ Supabase สำหรับการยืนยันตัวตน ฐานข้อมูล และพื้นที่เก็บไฟล์ ส่วนข้อมูลสาธิตอาจแสดงภาพตัวอย่างจาก Unsplash โดยบริการภายนอกเหล่านี้ประมวลผลข้อมูลตามข้อกำหนดและนโยบายของตนเอง',
       },
       {
         id: 'contact', nav: 'ติดต่อและการเปลี่ยนแปลง', title: 'คำถาม คำขอ และการเปลี่ยนแปลงนโยบาย', icon: LockKeyhole,

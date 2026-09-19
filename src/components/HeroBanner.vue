@@ -18,9 +18,9 @@
       </div>
 
       <!-- Bold Search Centerpiece -->
-      <div class="max-w-2xl mx-auto mb-4">
-        <div class="p-2 rounded-xl bg-brand-paper shadow-warm-md border border-brand-sand flex flex-col sm:flex-row gap-2 transition-all focus-within:border-brand-caramel focus-within:shadow-glow-caramel">
-          <div class="flex-1 flex items-center px-3.5 gap-3">
+      <div class="max-w-4xl mx-auto mb-4">
+        <div class="p-2 rounded-xl bg-brand-paper shadow-warm-md border border-brand-sand flex flex-col lg:flex-row gap-2 transition-all focus-within:border-brand-caramel focus-within:shadow-glow-caramel">
+          <div class="flex-1 flex items-center px-3.5 gap-3 min-w-0">
             <Search class="w-4.5 h-4.5 text-brand-latte shrink-0" />
             <input 
               id="hero-search-input"
@@ -34,7 +34,7 @@
             <kbd class="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brand-cream text-brand-latte border border-brand-sand shrink-0">
               /
             </kbd>
-            <button 
+            <button
               v-if="searchQuery" 
               @click="$emit('update:searchQuery', '')"
               class="text-brand-latte hover:text-brand-chestnut p-1"
@@ -43,13 +43,23 @@
             </button>
           </div>
           
-          <button 
-            @click="$emit('trigger-search')"
-            class="px-6 py-3 rounded-lg bg-brand-chestnut hover:bg-brand-mocha text-white text-xs sm:text-sm font-bold transition-all shadow-warm-sm flex items-center justify-center gap-2 shrink-0"
-          >
-            <span>{{ t('btnSearch') }}</span>
-            <ArrowRight class="w-4 h-4" />
-          </button>
+          <div class="grid grid-cols-2 gap-2 lg:flex lg:shrink-0">
+            <button
+              @click="$emit('trigger-search')"
+              class="px-4 sm:px-6 py-3 rounded-lg bg-brand-chestnut hover:bg-brand-mocha text-white text-xs sm:text-sm font-bold transition-colors shadow-warm-sm flex items-center justify-center gap-2"
+            >
+              <span>{{ t('btnSearch') }}</span>
+              <ArrowRight class="w-4 h-4" aria-hidden="true" />
+            </button>
+
+            <button
+              @click="$emit('quick-find')"
+              class="px-3 sm:px-4 py-3 rounded-lg bg-found-light hover:bg-green-100 text-found-dark text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-2"
+            >
+              <SearchCheck class="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span class="leading-tight">{{ t('btnQuickFoundSearch') }}</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -95,7 +105,7 @@
 <script setup>
 import { computed } from 'vue'
 import { 
-  Sparkles, Search, X, ArrowRight, AlertTriangle, PlusCircle
+  Search, SearchCheck, X, ArrowRight, AlertTriangle, PlusCircle
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -117,7 +127,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:searchQuery', 'trigger-search', 'open-report'])
+const emit = defineEmits(['update:searchQuery', 'trigger-search', 'quick-find', 'open-report'])
 
 const isTh = computed(() => props.currentLang === 'th')
 
