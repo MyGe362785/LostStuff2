@@ -1,5 +1,35 @@
 // Campus buildings, zones, and official safe handover drop-off points
 
+export const handoverLocations = [
+  {
+    id: 'dorm_nine_cafeteria',
+    nameTh: 'โรงอาหารหอเก้าหลัง',
+    nameEn: 'Dormitory 9 Cafeteria',
+    code: 'D9',
+    zone: 'Dormitory Zone',
+    image: '/img/handover-dorm-cafeteria.png',
+    handoverPointTh: 'จุดฝากของโรงอาหารหอเก้าหลัง',
+    handoverPointEn: 'Dormitory 9 Cafeteria Drop-off Point',
+    operatingHoursTh: '09.00 – 17.00 น.',
+    operatingHoursEn: '09:00–17:00',
+    isAvailable: true,
+  },
+  {
+    id: 'kku_library_office',
+    nameTh: 'สำนักงานหอสมุด มหาวิทยาลัยขอนแก่น',
+    nameEn: 'Khon Kaen University Library Office',
+    code: 'LIB',
+    zone: 'Academic Zone',
+    image: '/img/handover-library-office.png',
+    handoverPointTh: 'เคาน์เตอร์แจ้งของหาย ชั้น 1',
+    handoverPointEn: 'Lost & Found Counter, 1st Floor',
+    operatingHoursTh: '09.00 – 17.00 น.',
+    operatingHoursEn: '09:00–17:00',
+    isAvailable: true,
+  },
+]
+
+// Full campus list remains available to the report form and discovery filters.
 export const campusBuildings = [
   {
     id: 'bld_library',
