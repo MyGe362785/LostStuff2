@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between h-14 sm:h-16">
         
         <!-- Brand Logo & Campus Tag -->
-        <div class="flex items-center gap-2.5 cursor-pointer" @click="$emit('nav-change', 'home')">
+        <div class="flex cursor-pointer items-center gap-2.5 transition-transform duration-150 active:scale-[0.98] motion-reduce:transition-none" @click="$emit('nav-change', 'home')">
           <div class="w-8 h-8 rounded-lg bg-brand-chestnut flex items-center justify-center text-white shadow-warm-sm">
             <Compass class="w-4.5 h-4.5 text-brand-paper" />
           </div>
@@ -22,37 +22,45 @@
         <nav class="hidden md:flex items-center gap-6 text-xs font-semibold">
           <button 
             @click="$emit('nav-change', 'home')"
-            class="transition-colors py-1 relative"
-            :class="activeTab === 'home' ? 'text-brand-chestnut font-bold border-b-2 border-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            class="relative py-1 transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
+            :class="activeTab === 'home' ? 'font-bold text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            :aria-current="activeTab === 'home' ? 'page' : undefined"
           >
             {{ t('navHome') }}
+            <span class="absolute -bottom-1 left-0 h-0.5 w-full origin-center rounded-full bg-brand-chestnut transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none" :class="activeTab === 'home' ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'" aria-hidden="true"></span>
           </button>
           
           <button 
             @click="$emit('nav-change', 'search')"
-            class="transition-colors py-1 relative"
-            :class="activeTab === 'search' ? 'text-brand-chestnut font-bold border-b-2 border-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            class="relative py-1 transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
+            :class="activeTab === 'search' ? 'font-bold text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            :aria-current="activeTab === 'search' ? 'page' : undefined"
           >
             {{ t('navSearch') }}
+            <span class="absolute -bottom-1 left-0 h-0.5 w-full origin-center rounded-full bg-brand-chestnut transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none" :class="activeTab === 'search' ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'" aria-hidden="true"></span>
           </button>
           
           <button 
             @click="$emit('nav-change', 'my-posts')"
-            class="transition-colors py-1 relative flex items-center gap-1.5"
-            :class="activeTab === 'my-posts' ? 'text-brand-chestnut font-bold border-b-2 border-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            class="relative flex items-center gap-1.5 py-1 transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
+            :class="activeTab === 'my-posts' ? 'font-bold text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            :aria-current="activeTab === 'my-posts' ? 'page' : undefined"
           >
             {{ t('navMyReports') }}
             <span v-if="myReportsCount > 0" class="px-1.5 py-0.2 rounded-full text-[10px] bg-brand-cream text-brand-chestnut font-bold border border-brand-sand">
               {{ myReportsCount }}
             </span>
+            <span class="absolute -bottom-1 left-0 h-0.5 w-full origin-center rounded-full bg-brand-chestnut transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none" :class="activeTab === 'my-posts' ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'" aria-hidden="true"></span>
           </button>
 
           <button 
             @click="$emit('nav-change', 'locations')"
-            class="transition-colors py-1 relative"
-            :class="activeTab === 'locations' ? 'text-brand-chestnut font-bold border-b-2 border-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            class="relative py-1 transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
+            :class="activeTab === 'locations' ? 'font-bold text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
+            :aria-current="activeTab === 'locations' ? 'page' : undefined"
           >
             {{ t('navLocations') }}
+            <span class="absolute -bottom-1 left-0 h-0.5 w-full origin-center rounded-full bg-brand-chestnut transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none" :class="activeTab === 'locations' ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'" aria-hidden="true"></span>
           </button>
         </nav>
 
@@ -110,18 +118,27 @@
           </a>
 
           <!-- Language Switcher Toggle (TH / EN) -->
-          <div class="flex items-center p-1 rounded-xl bg-brand-cream border border-brand-sand text-xs font-bold shadow-2xs">
+          <div class="relative grid grid-cols-2 items-center rounded-xl border border-brand-sand bg-brand-cream p-1 text-xs font-bold shadow-2xs">
+            <span
+              class="absolute bottom-1 left-1 top-1 w-[calc(50%-0.25rem)] rounded-lg bg-brand-chestnut shadow-warm-sm transition-transform duration-300 ease-out motion-reduce:transition-none"
+              :class="currentLang === 'en' ? 'translate-x-full' : 'translate-x-0'"
+              aria-hidden="true"
+            ></span>
             <button 
+              type="button"
               @click="$emit('lang-change', 'th')"
-              class="px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer"
-              :class="currentLang === 'th' ? 'bg-brand-chestnut text-white shadow-warm-xs' : 'text-brand-latte hover:text-brand-espresso'"
+              class="relative z-10 cursor-pointer rounded-lg px-2.5 py-1 text-xs transition-colors duration-200 motion-reduce:transition-none"
+              :class="currentLang === 'th' ? 'text-white' : 'text-brand-latte hover:text-brand-espresso'"
+              :aria-pressed="currentLang === 'th'"
             >
               TH
             </button>
             <button 
+              type="button"
               @click="$emit('lang-change', 'en')"
-              class="px-2.5 py-1 rounded-lg transition-all text-xs cursor-pointer"
-              :class="currentLang === 'en' ? 'bg-brand-chestnut text-white shadow-warm-xs' : 'text-brand-latte hover:text-brand-espresso'"
+              class="relative z-10 cursor-pointer rounded-lg px-2.5 py-1 text-xs transition-colors duration-200 motion-reduce:transition-none"
+              :class="currentLang === 'en' ? 'text-white' : 'text-brand-latte hover:text-brand-espresso'"
+              :aria-pressed="currentLang === 'en'"
             >
               EN
             </button>

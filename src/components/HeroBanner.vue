@@ -1,6 +1,19 @@
 <template>
-  <section class="relative pt-10 pb-16 border-b border-brand-sand/60 bg-gradient-to-b from-brand-cream/40 via-brand-cream/10 to-transparent">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <section class="relative overflow-hidden border-b border-brand-sand/60 bg-gradient-to-b from-brand-cream/40 via-brand-cream/10 to-transparent pb-16 pt-10">
+    <div class="pointer-events-none absolute inset-0 z-0 select-none" aria-hidden="true">
+      <img
+        v-for="item in heroItems"
+        :key="item.name"
+        :src="item.src"
+        alt=""
+        class="hero-pile-item"
+        :class="[item.className, { 'hero-pile-item--drop': shouldAnimateItems }]"
+        :style="item.style"
+        draggable="false"
+      />
+    </div>
+
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       
       <!-- Top Modern Badge -->
       <div class="flex justify-center mb-5">
@@ -106,10 +119,51 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { 
   Search, SearchCheck, X, ArrowRight, AlertTriangle, PlusCircle
 } from 'lucide-vue-next'
+import backpackImage from '../../img/article1.png'
+import pencilImage from '../../img/article2.png'
+import tabletImage from '../../img/article3.png'
+import airpodsImage from '../../img/article5.png'
+import carKeyImage from '../../img/article6.png'
+
+let hasPlayedHeroItemDrop = false
+
+const shouldAnimateItems = ref(false)
+const heroItems = [
+  {
+    name: 'backpack',
+    src: backpackImage,
+    className: 'bottom-[-5.5rem] left-[-4.5rem] w-36 sm:bottom-[-7rem] sm:left-[-4rem] sm:w-52 lg:left-[-2rem] lg:w-60 xl:left-[1%] xl:w-64',
+    style: { '--settle-rotation': '-7deg', '--start-rotation': '-24deg', '--drop-delay': '40ms' },
+  },
+  {
+    name: 'pencil',
+    src: pencilImage,
+    className: 'hero-pile-item--pencil left-[-6rem] top-12 w-60 mix-blend-multiply sm:left-[-5rem] sm:top-14 sm:w-72 lg:left-[-4rem] lg:top-12 lg:w-96',
+    style: { '--settle-rotation': '-16deg', '--start-rotation': '8deg', '--drop-delay': '120ms' },
+  },
+  {
+    name: 'tablet',
+    src: tabletImage,
+    className: 'right-[-5rem] top-24 w-40 mix-blend-multiply sm:right-[-6rem] sm:top-20 sm:w-56 lg:right-[-3rem] lg:top-24 lg:w-64 xl:right-[1%] xl:w-72',
+    style: { '--settle-rotation': '7deg', '--start-rotation': '28deg', '--drop-delay': '200ms' },
+  },
+  {
+    name: 'airpods',
+    src: airpodsImage,
+    className: 'bottom-20 right-[-1.5rem] w-20 sm:bottom-20 sm:right-[4%] sm:w-24 lg:bottom-16 lg:right-[8%] lg:w-28',
+    style: { '--settle-rotation': '11deg', '--start-rotation': '-12deg', '--drop-delay': '280ms' },
+  },
+  {
+    name: 'car-key',
+    src: carKeyImage,
+    className: 'bottom-[-1.5rem] left-[17%] w-20 sm:bottom-[-2rem] sm:left-[19%] sm:w-28 lg:left-[14%] lg:w-32',
+    style: { '--settle-rotation': '-13deg', '--start-rotation': '16deg', '--drop-delay': '360ms' },
+  },
+]
 
 const props = defineProps({
   searchQuery: {
@@ -134,6 +188,12 @@ const emit = defineEmits(['update:searchQuery', 'trigger-search', 'quick-find', 
 
 const isTh = computed(() => props.currentLang === 'th')
 
+onMounted(() => {
+  if (hasPlayedHeroItemDrop) return
+  shouldAnimateItems.value = true
+  hasPlayedHeroItemDrop = true
+})
+
 const popularTags = computed(() => {
   return isTh.value 
     ? ['AirPods', 'บัตรนักศึกษา', 'กุญแจรถ', 'กระเป๋าสตางค์', 'iPad'] 
@@ -145,3 +205,53 @@ function selectQuickTag(tag) {
   emit('trigger-search')
 }
 </script>
+
+<style scoped>
+.hero-pile-item {
+  position: absolute;
+  opacity: 0.86;
+  transform: rotate(var(--settle-rotation));
+  transform-origin: center;
+  filter: drop-shadow(0 14px 18px rgb(45 32 22 / 0.14));
+}
+
+.hero-pile-item--drop {
+  animation: hero-item-drop 820ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--drop-delay);
+}
+
+.hero-pile-item--pencil {
+  clip-path: inset(0 45% 0 45%);
+  filter: none;
+}
+
+@keyframes hero-item-drop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -72vh, 0) rotate(var(--start-rotation)) scale(0.92);
+  }
+  72% {
+    opacity: 0.9;
+    transform: translate3d(0, 10px, 0) rotate(var(--settle-rotation)) scale(1);
+  }
+  88% {
+    opacity: 0.86;
+    transform: translate3d(0, -3px, 0) rotate(var(--settle-rotation)) scale(1);
+  }
+  100% {
+    opacity: 0.86;
+    transform: translate3d(0, 0, 0) rotate(var(--settle-rotation)) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-pile-item--drop {
+    animation: hero-item-fade 180ms ease-out both;
+  }
+
+  @keyframes hero-item-fade {
+    from { opacity: 0; }
+    to { opacity: 0.86; }
+  }
+}
+</style>

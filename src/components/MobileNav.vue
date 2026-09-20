@@ -8,12 +8,12 @@
       <button
         v-for="tab in tabs"
         :key="tab.id"
-        class="relative flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors"
+        class="relative flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
         :class="activeTab === tab.id ? 'text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
         :aria-current="activeTab === tab.id ? 'page' : undefined"
         @click="$emit('nav-change', tab.id)"
       >
-        <component :is="tab.icon" class="w-5 h-5" />
+        <component :is="tab.icon" class="h-5 w-5 transition-transform duration-300 ease-out motion-reduce:transition-none" :class="activeTab === tab.id ? '-translate-y-0.5 scale-110' : ''" />
         <span class="leading-tight">{{ tab.label }}</span>
         <span
           v-if="tab.id === 'my-posts' && myReportsCount > 0"
@@ -21,6 +21,11 @@
         >
           {{ myReportsCount }}
         </span>
+        <span
+          class="absolute bottom-1.5 h-1 w-1 rounded-full bg-brand-chestnut transition-[transform,opacity] duration-300 ease-out motion-reduce:transition-none"
+          :class="activeTab === tab.id ? 'scale-100 opacity-100' : 'scale-0 opacity-0'"
+          aria-hidden="true"
+        ></span>
       </button>
 
       <button

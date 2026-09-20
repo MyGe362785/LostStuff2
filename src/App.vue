@@ -43,15 +43,17 @@
 
       <!-- Main Content Container -->
       <main class="flex-1">
+        <Transition name="page-switch" mode="out-in">
         <PrivacyPolicy
           v-if="isPrivacyRoute"
+          :key="`privacy-${currentLang}`"
           :currentLang="currentLang"
           :backendConfigured="isBackendConfigured"
           @navigate-home="navigateTo('/')"
         />
         
         <!-- TAB: HOME -->
-        <div v-else-if="activeTab === 'home'">
+        <div v-else-if="activeTab === 'home'" :key="`home-${currentLang}`">
           <!-- Hero Search & Action Centerpiece -->
           <HeroBanner 
             v-model:searchQuery="searchQuery"
@@ -64,7 +66,7 @@
           />
 
           <!-- Discovery Feed Preview on Home -->
-          <section class="border-t border-brand-sand/60 bg-brand-paper py-12">
+          <section v-reveal class="border-t border-brand-sand/60 bg-brand-paper py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-6">
               <div>
@@ -134,10 +136,10 @@
           </section>
 
           <!-- Campus Handover Points Directory -->
-          <CampusHandoverSection :currentLang="currentLang" :t="t" />
+          <CampusHandoverSection v-reveal :currentLang="currentLang" :t="t" />
 
           <!-- Recovery Statistics Section -->
-          <section class="border-t border-brand-sand/70 bg-brand-sand/35 py-12">
+          <section v-reveal class="border-t border-brand-sand/70 bg-brand-sand/35 py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="max-w-4xl mx-auto rounded-xl bg-brand-paper border border-brand-sand shadow-warm-sm overflow-hidden">
                 <div class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-brand-sand/80">
@@ -174,7 +176,7 @@
           </section>
 
           <!-- How It Works 3-Step Workflow Section -->
-          <section class="border-t border-brand-sand/70 bg-brand-paper py-12">
+          <section v-reveal class="border-t border-brand-sand/70 bg-brand-paper py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="text-center max-w-xl mx-auto mb-8">
                 <h2 class="text-xl sm:text-2xl font-bold text-brand-espresso">
@@ -214,14 +216,14 @@
           </section>
 
           <!-- FAQ Section -->
-          <FaqSection :currentLang="currentLang" :t="t" />
+          <FaqSection v-reveal :currentLang="currentLang" :t="t" />
 
           <!-- Satisfaction Survey -->
-          <SatisfactionSurveySection :currentLang="currentLang" :t="t" />
+          <SatisfactionSurveySection v-reveal :currentLang="currentLang" :t="t" />
         </div>
 
         <!-- TAB: SEARCH & DISCOVERY HUB -->
-        <div v-else-if="activeTab === 'search'" class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div v-else-if="activeTab === 'search'" :key="`search-${currentLang}`" class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="mb-6">
             <h1 class="text-2xl sm:text-3xl font-extrabold text-brand-espresso mb-1">
               {{ t('hubTitle') }}
@@ -279,7 +281,7 @@
         </div>
 
         <!-- TAB: MY REPORTS TRACKER -->
-        <div v-else-if="activeTab === 'my-posts'" class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div v-else-if="activeTab === 'my-posts'" :key="`my-posts-${currentLang}`" class="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <MyItemsTracker
             :myItems="myItems"
             :myClaims="myClaims"
@@ -293,9 +295,11 @@
         </div>
 
         <!-- TAB: LOCATIONS DIRECTORY -->
-        <div v-else-if="activeTab === 'locations'">
-          <CampusHandoverSection :currentLang="currentLang" :t="t" />
+        <div v-else-if="activeTab === 'locations'" :key="`locations-${currentLang}`">
+          <CampusHandoverSection v-reveal :currentLang="currentLang" :t="t" />
         </div>
+
+        </Transition>
 
       </main>
 
@@ -507,6 +511,38 @@ import {
   listAuditEvents, listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, updateItemStatus,
 } from './services/lostFoundRepository'
 import { toAuditLogEntry } from './utils/auditLog'
+
+const revealObservers = new WeakMap()
+const vReveal = {
+  mounted(element) {
+    element.classList.add('section-reveal')
+
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      element.classList.add('is-revealed')
+      return
+    }
+
+    element.classList.add('is-waiting')
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      window.requestAnimationFrame(() => {
+        element.classList.remove('is-waiting')
+        element.classList.add('is-revealed')
+      })
+      observer.unobserve(element)
+    }, {
+      threshold: 0.06,
+      rootMargin: '0px',
+    })
+
+    revealObservers.set(element, observer)
+    observer.observe(element)
+  },
+  unmounted(element) {
+    revealObservers.get(element)?.disconnect()
+    revealObservers.delete(element)
+  },
+}
 
 // Routing State
 const currentPath = ref(window.location.pathname || '/')
@@ -979,7 +1015,8 @@ watch(
 function handleNavChange(tab) {
   if (isPrivacyRoute.value) navigateTo('/')
   activeTab.value = tab
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
 }
 
 function handleLangChange(lang) {
@@ -1447,3 +1484,67 @@ function clearEmails() {
   })
 }
 </script>
+
+<style>
+.page-switch-enter-active {
+  transition:
+    opacity 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 260ms ease-out;
+}
+
+.page-switch-leave-active {
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in,
+    filter 150ms ease-in;
+}
+
+.page-switch-enter-from {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  filter: blur(4px);
+}
+
+.page-switch-leave-to {
+  opacity: 0;
+  transform: translate3d(0, -6px, 0);
+  filter: blur(2px);
+}
+
+.section-reveal {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  filter: blur(0);
+}
+
+.section-reveal.is-waiting {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  filter: blur(4px);
+}
+
+.section-reveal.is-revealed {
+  transition:
+    opacity 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 480ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-switch-enter-active,
+  .page-switch-leave-active,
+  .section-reveal,
+  .section-reveal.is-waiting,
+  .section-reveal.is-revealed {
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+
+  .section-reveal,
+  .section-reveal.is-waiting {
+    opacity: 1;
+  }
+}
+</style>
