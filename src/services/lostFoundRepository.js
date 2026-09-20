@@ -197,13 +197,72 @@ export async function reviewClaim({ claimId, decision, note }) {
 /**
  * @param {object} [details] extra audit metadata, such as who collected a
  *   returned item and the staff member's notes
+ * @param {object} [options]
+ * @param {string} [options.fromStatus] only move the item when it still has
+ *   this status, so a repeated click cannot write a second audit event
+ * @returns {Promise<boolean>} false when the item had already moved on
  */
-export async function updateItemStatus(itemId, status, action, details = {}) {
+export async function updateItemStatus(itemId, status, action, details = {}, { fromStatus } = {}) {
   requireBackend()
-  const { error: updateError } = await supabase.from('items').update({ status }).eq('id', itemId)
+  let update = supabase.from('items').update({ status }).eq('id', itemId)
+  if (fromStatus) update = update.eq('status', fromStatus)
+  const { data, error: updateError } = await update.select('id')
   if (updateError) throw updateError
+  if (data.length === 0) return false
   const { error: auditError } = await supabase.from('audit_events').insert({ item_id: itemId, action, metadata: { ...details, status } })
   if (auditError) throw auditError
+  return true
+}
+
+function mapNotification(record) {
+  return {
+    id: record.id,
+    kind: record.kind,
+    title: record.title,
+    body: record.body,
+    itemId: record.item_id,
+    readAt: record.read_at,
+    createdAt: record.created_at,
+  }
+}
+
+/** A user's latest notifications, newest first. RLS returns only their own rows. */
+export async function listMyNotifications(recipientId, limit = 50) {
+  requireBackend()
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('id, kind, title, body, item_id, read_at, created_at')
+    .eq('recipient_id', recipientId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data.map(mapNotification)
+}
+
+/** RLS lets a user update only notifications addressed to them. */
+export async function markNotificationsRead(ids) {
+  requireBackend()
+  if (ids.length === 0) return
+  const { error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).in('id', ids)
+  if (error) throw error
+}
+
+/**
+ * Writes notifications addressed to other users; RLS accepts them from staff only.
+ * @param {Array<{ recipientId: string, kind: string, itemId?: string, title: string, body: string }>} notifications
+ */
+export async function sendNotifications(notifications) {
+  requireBackend()
+  if (notifications.length === 0) return
+  const rows = notifications.map(notification => ({
+    recipient_id: notification.recipientId,
+    kind: notification.kind,
+    item_id: notification.itemId || null,
+    title: notification.title,
+    body: notification.body,
+  }))
+  const { error } = await supabase.from('notifications').insert(rows)
+  if (error) throw error
 }
 
 /** Latest audit events with who acted and on which item. RLS returns rows only to staff. */
