@@ -37,7 +37,7 @@
 
 <script setup>
 import { ExternalLink } from 'lucide-vue-next'
-import surveyImage from '../../img/googleform_image.png'
+import surveyImage from '../../img/googleform_image.webp'
 import { SATISFACTION_SURVEY_URL } from '../data/links'
 
 defineProps({
