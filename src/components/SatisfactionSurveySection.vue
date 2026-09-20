@@ -38,6 +38,7 @@
 <script setup>
 import { ExternalLink } from 'lucide-vue-next'
 import surveyImage from '../../img/googleform_image.png'
+import { SATISFACTION_SURVEY_URL } from '../data/links'
 
 defineProps({
   currentLang: {
@@ -50,6 +51,7 @@ defineProps({
   }
 })
 
-const surveyUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSddiVTqyNb43VTCXMhvNs1TPwov3W4_fo0FvGk9yWkW1YwR2Q/viewform'
+// One source for the link, shared with the navbar icon and the staff portal.
+const surveyUrl = SATISFACTION_SURVEY_URL
 const titleId = 'satisfaction-survey-title'
 </script>

@@ -105,7 +105,9 @@
 
     <div class="my-4 h-px bg-brand-sand/80" aria-hidden="true"></div>
 
-    <!-- Category choices stay visible and wrap on larger screens -->
+    <!-- Category choices stay visible and wrap on larger screens.
+         min-w-0: a fieldset defaults to min-content width, so the nowrap row would widen the page on phones. -->
+
     <fieldset class="min-w-0">
       <legend class="mb-2 text-[11px] font-bold text-brand-mocha/70">
         {{ t('filterCategoryLabel') }}

@@ -64,8 +64,8 @@
           </button>
         </nav>
 
-        <!-- Right Action Cluster -->
-        <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Right Action Cluster: tighter below 360px so the bell still fits on a 320px phone -->
+        <div class="flex items-center gap-1 min-[360px]:gap-2 sm:gap-2.5">
           
           <!-- Simulated email inbox: demo mode only, it is not wired to real notifications -->
           <button
@@ -83,9 +83,28 @@
             </span>
           </button>
 
+          <!-- In-app notifications: signed-in users on the real backend -->
+          <button
+            v-if="showsBell"
+            type="button"
+            @click="$emit('open-notifications')"
+            class="flex shrink-0 w-9 h-9 min-[360px]:w-10 min-[360px]:h-10 rounded-xl hover:bg-brand-cream/80 text-brand-mocha transition-all items-center justify-center relative border border-transparent hover:border-brand-sand cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
+            :title="t('notifTitle')"
+            :aria-label="notificationsCount > 0 ? `${t('notifTitle')} (${notificationsCount})` : t('notifTitle')"
+          >
+            <Bell class="w-5 h-5 text-brand-espresso" />
+            <span
+              v-if="notificationsCount > 0"
+              class="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 rounded-full bg-lost text-white text-[11px] font-extrabold flex items-center justify-center shadow-warm-md border-2 border-brand-paper leading-none"
+              aria-hidden="true"
+            >
+              {{ notificationsCount > 9 ? '9+' : notificationsCount }}
+            </span>
+          </button>
+
           <!-- Satisfaction survey: shown on layouts with enough room for a hover tooltip -->
           <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSddiVTqyNb43VTCXMhvNs1TPwov3W4_fo0FvGk9yWkW1YwR2Q/viewform"
+            :href="SATISFACTION_SURVEY_URL"
             target="_blank"
             rel="noopener noreferrer"
             class="group relative hidden lg:inline-flex w-10 h-10 items-center justify-center rounded-xl border border-transparent text-brand-mocha transition-all hover:border-brand-sand hover:bg-brand-cream/80 hover:text-brand-chestnut focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
@@ -155,12 +174,14 @@
           <!-- Primary Post Trigger -->
           <button 
             @click="$emit('open-report', 'found')"
-            class="inline-flex items-center gap-1.5 px-2.5 min-[360px]:px-4 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer"
+            class="inline-flex items-center gap-1.5 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer"
+            :class="showsBell ? 'px-2.5 sm:px-4' : 'px-2.5 min-[360px]:px-4'"
             :aria-label="t('navReportFound')"
             :title="t('navReportFound')"
           >
             <PlusCircle class="w-3.5 h-3.5" />
-            <span class="hidden min-[360px]:inline">{{ t('navReportFound') }}</span>
+            <!-- With the bell in the row, phones get the icon only; the home page has full-size report buttons -->
+            <span class="hidden" :class="showsBell ? 'sm:inline' : 'min-[360px]:inline'">{{ t('navReportFound') }}</span>
           </button>
         </div>
 
@@ -171,7 +192,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Compass, PlusCircle, Mail } from 'lucide-vue-next'
+import { Compass, PlusCircle, Mail, Bell } from 'lucide-vue-next'
+import { SATISFACTION_SURVEY_URL } from '../data/links'
 
 const props = defineProps({
   activeTab: {
@@ -190,6 +212,7 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  notificationsCount: { type: Number, default: 0 },
   user: { type: Object, default: null },
   backendConfigured: { type: Boolean, default: false },
   t: {
@@ -203,9 +226,11 @@ defineEmits([
   'lang-change', 
   'open-report', 
   'open-emails',
+  'open-notifications',
   'sign-in',
   'sign-out'
 ])
 
 const isTh = computed(() => props.currentLang === 'th')
+const showsBell = computed(() => props.backendConfigured && Boolean(props.user))
 </script>

@@ -11,6 +11,7 @@
         :backendConfigured="isBackendConfigured"
         :claims="claims"
         :busyClaimId="reviewingClaimId"
+        :busyItemId="approvingItemId"
         @navigate-home="navigateTo('/')"
         @lang-change="handleLangChange"
         @approve-item="handleApproveItem"
@@ -30,6 +31,7 @@
         :currentLang="currentLang"
         :myReportsCount="myItems.length"
         :emailsCount="unreadEmailsCount"
+        :notificationsCount="unreadNotificationsCount"
         :user="currentUser"
         :backendConfigured="isBackendConfigured"
         :t="t"
@@ -37,6 +39,7 @@
         @lang-change="handleLangChange"
         @open-report="openReportModal"
         @open-emails="isEmailModalOpen = true"
+        @open-notifications="isNotificationsOpen = true"
         @sign-in="isAuthModalOpen = true"
         @sign-out="signOut"
       />
@@ -440,6 +443,16 @@
       @clear-emails="clearEmails"
     />
 
+    <NotificationsModal
+      v-if="isNotificationsOpen"
+      :notifications="notifications"
+      :currentLang="currentLang"
+      :t="t"
+      @close="isNotificationsOpen = false"
+      @mark-all-read="markNotificationsReadSafely"
+      @open-notification="openNotification"
+    />
+
     <AuthModal
       v-if="isAuthModalOpen && isBackendConfigured"
       :currentLang="currentLang"
@@ -497,6 +510,7 @@ const AdminPortal = defineAsyncComponent({
 })
 import ClaimModal from './components/ClaimModal.vue'
 import EmailInboxModal from './components/EmailInboxModal.vue'
+import NotificationsModal from './components/NotificationsModal.vue'
 import AuthModal from './components/AuthModal.vue'
 
 import { initialMockItems } from './data/mockItems'
@@ -508,9 +522,14 @@ import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emai
 import { isBackendConfigured, supabase } from './lib/supabase'
 import {
   createClaim, createItem, DUPLICATE_CLAIM, getCurrentProfile, getCurrentUser, ITEM_UNAVAILABLE,
-  listAuditEvents, listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, updateItemStatus,
+  listAuditEvents, listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, sendNotifications, updateItemStatus,
 } from './services/lostFoundRepository'
 import { toAuditLogEntry } from './utils/auditLog'
+import { useNotifications } from './composables/useNotifications'
+import {
+  buildApprovalNotifications, buildClaimDecisionNotification, findBestOwnMatch, findInstantMatches,
+  MATCH_ALERT_SCORE, NOTIFICATION_KINDS,
+} from './utils/notifications'
 
 const revealObservers = new WeakMap()
 const vReveal = {
@@ -576,6 +595,7 @@ const profileLoadFailed = ref(false)
 const claims = ref([]) // staff: every claim
 const myClaims = ref([]) // the signed-in user's own claims
 const reviewingClaimId = ref(null)
+const approvingItemId = ref(null)
 const isSubmittingReport = ref(false)
 
 // Filters
@@ -606,6 +626,23 @@ const isClaimModalOpen = ref(false)
 const claimingTargetItem = ref(null)
 const isEmailModalOpen = ref(false)
 const isAuthModalOpen = ref(false)
+const isNotificationsOpen = ref(false)
+
+const {
+  notifications,
+  unreadCount: unreadNotificationsCount,
+  refresh: refreshNotifications,
+  markAllRead: markAllNotificationsRead,
+  clear: clearNotifications,
+} = useNotifications({
+  enabled: isBackendConfigured,
+  getUserId: () => currentUser.value?.id || null,
+  onNewUnread: (count) => showToast({
+    title: t('notifArrivedTitle'),
+    message: t('notifArrivedMessage').replace('{count}', count),
+    type: 'match',
+  }),
+})
 
 // i18n Translation Helper
 function t(key) {
@@ -690,7 +727,13 @@ function handleKeydown(e) {
     if (selectedItem.value) selectedItem.value = null
     if (isClaimModalOpen.value) isClaimModalOpen.value = false
     if (isEmailModalOpen.value) isEmailModalOpen.value = false
+    if (isNotificationsOpen.value) isNotificationsOpen.value = false
   }
+}
+
+// Notifications arrive while the tab sits in the background; check again on return.
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') void loadNotificationsSafely()
 }
 
 // Someone opening /admin without a staff role sees the public page, so say why.
@@ -721,6 +764,7 @@ onMounted(async () => {
       void refreshCurrentProfile().then(() => Promise.all([loadClaimsSafely(), loadAuditLogsSafely()])).catch((error) => {
         console.error('Unable to refresh user profile', error)
       })
+      void loadNotificationsSafely()
       if (session?.user) isAuthModalOpen.value = false
       void loadBackendItems().catch((error) => {
         console.error('Unable to refresh Supabase data', error)
@@ -731,12 +775,14 @@ onMounted(async () => {
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('popstate', handlePopState)
   window.addEventListener('hashchange', handlePopState)
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('popstate', handlePopState)
   window.removeEventListener('hashchange', handlePopState)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 async function loadData() {
@@ -745,7 +791,7 @@ async function loadData() {
       currentUser.value = await getCurrentUser()
       await refreshCurrentProfile()
       await loadBackendItems()
-      await Promise.all([loadClaimsSafely(), loadAuditLogsSafely()])
+      await Promise.all([loadClaimsSafely(), loadAuditLogsSafely(), loadNotificationsSafely()])
       emails.value = []
       return
     } catch (error) {
@@ -837,6 +883,74 @@ async function loadAuditLogsSafely() {
   }
 }
 
+// A missing notification list should not interrupt anything else, so only log.
+function loadNotificationsSafely() {
+  return refreshNotifications().catch((error) => {
+    console.error('Unable to load notifications', error)
+  })
+}
+
+function markNotificationsReadSafely() {
+  void markAllNotificationsRead().catch((error) => {
+    console.error('Unable to mark notifications read', error)
+  })
+}
+
+// Notifications are a courtesy: a failure is reported, but the staff action it follows stands.
+async function sendNotificationsSafely(list) {
+  try {
+    await sendNotifications(list)
+  } catch (error) {
+    console.error('Unable to send notifications', error)
+    showToast({ title: t('notifSendFailedTitle'), message: error.message, type: 'warning' })
+  }
+}
+
+const CLAIM_NOTIFICATION_KINDS = [NOTIFICATION_KINDS.CLAIM_APPROVED, NOTIFICATION_KINDS.CLAIM_REJECTED, NOTIFICATION_KINDS.CLAIM_COMPLETED]
+
+// A match opens the side-by-side alert, a claim update opens My Reports, anything else the item.
+function openNotification(notification) {
+  isNotificationsOpen.value = false
+  if (CLAIM_NOTIFICATION_KINDS.includes(notification.kind)) {
+    handleNavChange('my-posts')
+    void loadClaimsSafely()
+    return
+  }
+  const linked = items.value.find(item => item.id === notification.itemId)
+  if (!linked) {
+    showToast({ title: t('notifTitle'), message: t('notifItemUnavailable'), type: 'info' })
+    return
+  }
+  const best = notification.kind === NOTIFICATION_KINDS.MATCH ? findBestOwnMatch(linked, myItems.value) : null
+  if (best) {
+    activeMatchSourceItem.value = best.source
+    activeMatchData.value = best.match
+    isMatchAlertOpen.value = true
+    return
+  }
+  openItemDetail(linked)
+}
+
+// Right after a lost report, point the reporter at published found items that already look like it.
+function showInstantMatches(itemId) {
+  const reported = items.value.find(item => item.id === itemId)
+  if (!reported) return
+  const [best] = findInstantMatches(reported, items.value)
+  if (!best) return
+  if (best.totalScore >= MATCH_ALERT_SCORE) {
+    activeMatchSourceItem.value = reported
+    activeMatchData.value = best
+    isMatchAlertOpen.value = true
+    return
+  }
+  showToast({
+    title: t('instantMatchTitle'),
+    message: t('instantMatchMessage').replace('{score}', best.totalScore),
+    type: 'match',
+    duration: 8000,
+  })
+}
+
 const CLAIM_DECISION_MESSAGES = {
   approved: 'claimApprovedMessage',
   rejected: 'claimRejectedMessage',
@@ -846,9 +960,12 @@ const CLAIM_DECISION_MESSAGES = {
 async function handleReviewClaim({ claimId, decision, note }) {
   if (reviewingClaimId.value) return
   reviewingClaimId.value = claimId
+  const claim = claims.value.find(candidate => candidate.id === claimId)
   try {
     await reviewClaim({ claimId, decision, note })
     showToast({ title: t('claimReviewedTitle'), message: t(CLAIM_DECISION_MESSAGES[decision]), type: 'success' })
+    const notification = buildClaimDecisionNotification(claim, decision, note)
+    if (notification) void sendNotificationsSafely([notification])
   } catch (error) {
     const message = error.code === ITEM_UNAVAILABLE ? t('claimItemNoLongerAvailable') : error.message
     showToast({ title: t('claimReviewFailedTitle'), message, type: 'warning', duration: 8000 })
@@ -868,6 +985,8 @@ async function signOut() {
   claims.value = []
   myClaims.value = []
   auditLogs.value = []
+  clearNotifications()
+  isNotificationsOpen.value = false
   await loadBackendItems()
   showToast({ title: isTh.value ? 'ออกจากระบบแล้ว' : 'Signed out', message: isTh.value ? 'คุณสามารถดูรายการสาธารณะได้ตามปกติ' : 'Public listings remain available.', type: 'success' })
 }
@@ -1141,13 +1260,26 @@ async function markItemReturned(itemId) {
 
 async function handleApproveItem(itemId) {
   if (isBackendConfigured) {
+    // A second click, from the queue row or the inspect modal, must not send
+    // the same notifications twice.
+    if (approvingItemId.value) return
+    approvingItemId.value = itemId
     try {
-      await updateItemStatus(itemId, 'searching', 'item_approved')
+      const published = await updateItemStatus(itemId, 'searching', 'item_approved', {}, { fromStatus: 'pending_review' })
       await loadBackendItems()
+      if (!published) {
+        showToast({ title: t('itemAlreadyHandledTitle'), message: t('itemAlreadyHandledMessage'), type: 'info' })
+        return
+      }
       showToast({ title: isTh.value ? 'อนุมัติรายการแล้ว' : 'Item approved', message: isTh.value ? 'รายการเผยแพร่แล้ว' : 'The item is now published.', type: 'success' })
       void loadAuditLogsSafely()
+      // Tell the owner it is live, and whoever lost the item in each likely match.
+      const approved = items.value.find(item => item.id === itemId)
+      if (approved) void sendNotificationsSafely(buildApprovalNotifications(approved, items.value))
     } catch (error) {
       showToast({ title: 'Could not approve item', message: error.message, type: 'info' })
+    } finally {
+      approvingItemId.value = null
     }
     return
   }
@@ -1397,6 +1529,7 @@ async function handleReportSubmitted(newItem) {
     await loadBackendItems().catch((error) => {
       console.error('Unable to refresh items after a report', error)
     })
+    showInstantMatches(result.id)
     return
   }
   items.value.unshift(newItem)

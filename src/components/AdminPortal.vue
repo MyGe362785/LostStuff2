@@ -276,7 +276,8 @@
 
               <button
                 @click="handleApprove(item)"
-                class="px-4 py-2 rounded-xl bg-found hover:bg-found-dark text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-warm-xs cursor-pointer"
+                :disabled="busyItemId !== null"
+                class="px-4 py-2 rounded-xl bg-found hover:bg-found-dark text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-warm-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <CheckCircle2 class="w-4 h-4" />
                 <span>{{ t('staffBtnApprove') }}</span>
@@ -707,6 +708,27 @@
           </p>
         </div>
 
+        <!-- Real answers live in the team's Google Form; the ratings below are demo data -->
+        <div
+          v-if="backendConfigured"
+          class="p-6 rounded-3xl bg-brand-paper border border-brand-sand shadow-warm-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div class="space-y-1 max-w-xl">
+            <h3 class="font-bold text-sm text-brand-espresso">{{ t('surveyFormTitle') }}</h3>
+            <p class="text-xs text-brand-mocha/80 leading-relaxed">{{ t('surveyFormBody') }}</p>
+          </div>
+          <a
+            :href="SATISFACTION_SURVEY_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white text-xs font-bold shadow-warm-xs transition-colors self-start sm:self-center shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2"
+          >
+            <ExternalLink class="w-4 h-4" />
+            <span>{{ t('surveyFormOpen') }}</span>
+          </a>
+        </div>
+
+        <template v-else>
         <!-- 4 Question Cards with Lucide Star icons -->
         <div class="space-y-4">
           <div 
@@ -769,6 +791,7 @@
             {{ isTh ? 'บันทึกผลการประเมินลงรายงาน' : 'Record Evaluation' }}
           </button>
         </div>
+        </template>
       </div>
 
     </main>
@@ -829,9 +852,10 @@
           >
             {{ t('staffBtnReject') }}
           </button>
-          <button 
-            @click="handleApprove(inspectingItem); inspectingItem = null" 
-            class="px-5 py-2 rounded-xl bg-found hover:bg-found-dark text-white text-xs font-bold transition-colors shadow-warm-xs cursor-pointer flex items-center gap-1.5"
+          <button
+            @click="handleApprove(inspectingItem); inspectingItem = null"
+            :disabled="busyItemId !== null"
+            class="px-5 py-2 rounded-xl bg-found hover:bg-found-dark text-white text-xs font-bold transition-colors shadow-warm-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckCircle2 class="w-4 h-4" />
             <span>{{ t('staffBtnApprove') }}</span>
@@ -907,8 +931,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { 
   ShieldCheck, ArrowLeft, Inbox, CheckSquare, FileText, 
-  Zap, Smile, CheckCircle2, RotateCcw, Search, Star 
+  Zap, Smile, CheckCircle2, RotateCcw, Search, Star, ExternalLink
 } from 'lucide-vue-next'
+import { SATISFACTION_SURVEY_URL } from '../data/links'
 import { runMatchingBenchmark } from '../data/benchmarkDataset'
 import { calculatePairScore } from '../utils/matchingEngine'
 import { CLAIM_STATUS_CLASSES, CLAIM_STATUS_KEYS, formatDateTime } from '../utils/claimStatus'
@@ -934,7 +959,9 @@ const props = defineProps({
   // and the demo alone may reset its mock data.
   backendConfigured: { type: Boolean, default: false },
   claims: { type: Array, default: () => [] },
-  busyClaimId: { type: String, default: null }
+  busyClaimId: { type: String, default: null },
+  // The item being approved right now; its buttons wait for the answer.
+  busyItemId: { type: String, default: null }
 })
 
 const emit = defineEmits([
