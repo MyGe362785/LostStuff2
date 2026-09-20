@@ -46,9 +46,9 @@
         :key="item.id"
         class="p-4 rounded-xl bg-brand-paper border border-brand-sand shadow-warm-sm flex flex-col justify-between"
       >
-        <div class="flex gap-3.5">
-          <div class="w-18 h-18 rounded-lg overflow-hidden bg-brand-cream shrink-0 border border-brand-sand">
-            <img :src="item.imageUrl" alt="" class="w-full h-full object-cover" />
+        <div class="flex min-w-0 gap-3.5">
+          <div class="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-brand-sand bg-brand-cream">
+            <img :src="item.imageUrl" alt="" class="block h-full w-full object-cover" />
           </div>
 
           <div class="flex-1 min-w-0">
