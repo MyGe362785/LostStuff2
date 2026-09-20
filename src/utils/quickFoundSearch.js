@@ -1,4 +1,4 @@
-const CLOSED_STATUSES = new Set(['pending_review', 'returned', 'closed'])
+const CLOSED_STATUSES = new Set(['returned', 'closed'])
 
 function normalize(value) {
   return String(value || '')
@@ -26,7 +26,8 @@ function scoreItemName(item, normalizedQuery, terms) {
 }
 
 /**
- * Returns active found-item reports whose Thai or English item name matches the typed name.
+ * Returns open reports whose Thai or English item name matches the typed name.
+ * Pending-review reports stay searchable so quick search behaves like the main search.
  */
 export function getQuickFoundMatches(query, allItems) {
   const normalizedQuery = normalize(query)
@@ -36,7 +37,7 @@ export function getQuickFoundMatches(query, allItems) {
   const terms = parsedTerms.length ? parsedTerms : [normalizedQuery]
 
   return (allItems || [])
-    .filter(item => item.type === 'found' && !CLOSED_STATUSES.has(item.status))
+    .filter(item => !CLOSED_STATUSES.has(item.status))
     .map(item => {
       const match = scoreItemName(item, normalizedQuery, terms)
       return { item, ...match }

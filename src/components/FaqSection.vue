@@ -1,5 +1,5 @@
 <template>
-  <section class="py-12 border-t border-brand-sand/60">
+  <section class="py-12 border-t border-brand-sand/70 bg-brand-cream/55">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       
       <!-- Section Header -->

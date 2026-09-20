@@ -10,7 +10,7 @@
     <div class="relative z-10 my-4 w-full max-w-3xl">
       <button
         type="button"
-        class="absolute left-2 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white/90 bg-brand-chestnut text-white shadow-warm-xl transition-all hover:scale-105 hover:bg-brand-mocha disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:scale-100 sm:-left-16 sm:h-12 sm:w-12"
+        class="absolute left-2 top-56 z-20 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white/90 bg-brand-chestnut text-white shadow-warm-xl transition-all hover:scale-105 hover:bg-brand-mocha disabled:invisible disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:scale-100 sm:-left-16 sm:top-1/2 sm:h-12 sm:w-12 sm:disabled:visible"
         :aria-label="t('quickFoundPrevious')"
         :disabled="currentIndex === 0"
         @click="$emit('previous')"
@@ -55,9 +55,15 @@
 
       <div ref="scrollArea" class="overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
         <div class="mb-4 flex items-center justify-between gap-3">
-          <span class="inline-flex items-center gap-1.5 rounded-md border border-found-border bg-found-light px-2.5 py-1 text-[11px] font-bold text-found-dark">
-            <PackageCheck class="h-3.5 w-3.5" aria-hidden="true" />
-            {{ t('quickFoundOnlyBadge') }}
+          <span
+            class="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-bold"
+            :class="item.type === 'lost'
+              ? 'border-lost-border bg-lost-light text-lost-dark'
+              : 'border-found-border bg-found-light text-found-dark'"
+          >
+            <AlertTriangle v-if="item.type === 'lost'" class="h-3.5 w-3.5" aria-hidden="true" />
+            <PackageCheck v-else class="h-3.5 w-3.5" aria-hidden="true" />
+            {{ item.type === 'lost' ? t('badgeLost') : t('quickFoundOnlyBadge') }}
           </span>
           <span class="text-xs font-bold tabular-nums text-brand-mocha" aria-live="polite">
             {{ currentIndex + 1 }} / {{ items.length }}
@@ -122,7 +128,7 @@
 
           <p class="leading-relaxed text-brand-espresso/90">{{ isTh ? item.descriptionTh : item.descriptionEn }}</p>
 
-          <div class="rounded-xl bg-found-light/60 p-4 text-found-dark">
+          <div v-if="item.type === 'found'" class="rounded-xl bg-found-light/60 p-4 text-found-dark">
             <h4 class="mb-1 flex items-center gap-1.5 text-xs font-bold">
               <ShieldCheck class="h-4 w-4" aria-hidden="true" />
               {{ t('handoverLabel') }}
@@ -132,7 +138,7 @@
         </div>
       </div>
 
-      <footer class="shrink-0 border-t border-brand-sand bg-brand-cream/90 px-4 py-3.5 sm:px-6">
+      <footer v-if="item.type === 'found'" class="shrink-0 border-t border-brand-sand bg-brand-cream/90 px-4 py-3.5 sm:px-6">
         <div class="flex justify-end">
           <button
             type="button"
@@ -148,7 +154,7 @@
 
       <button
         type="button"
-        class="absolute right-2 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white/90 bg-brand-chestnut text-white shadow-warm-xl transition-all hover:scale-105 hover:bg-brand-mocha disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:scale-100 sm:-right-16 sm:h-12 sm:w-12"
+        class="absolute right-2 top-56 z-20 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white/90 bg-brand-chestnut text-white shadow-warm-xl transition-all hover:scale-105 hover:bg-brand-mocha disabled:invisible disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:scale-100 sm:-right-16 sm:top-1/2 sm:h-12 sm:w-12 sm:disabled:visible"
         :aria-label="t('quickFoundNext')"
         :disabled="currentIndex === items.length - 1"
         @click="$emit('next')"
@@ -162,7 +168,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import {
-  Calendar, ChevronLeft, ChevronRight, Clock, HandHeart, MapPin,
+  AlertTriangle, Calendar, ChevronLeft, ChevronRight, Clock, HandHeart, MapPin,
   PackageCheck, SearchCheck, ShieldCheck, X,
 } from 'lucide-vue-next'
 import { itemCategories } from '../data/campusLocations'
@@ -191,7 +197,7 @@ const categoryName = computed(() => {
 const resultSummary = computed(() => {
   const count = props.items.length
   if (!props.searchQuery.trim()) {
-    return isTh.value ? `พบของที่เก็บได้ ${count} รายการ` : `${count} found items available`
+    return isTh.value ? `พบรายการที่ยังเปิดอยู่ ${count} รายการ` : `${count} open items available`
   }
   return isTh.value
     ? `พบ ${count} รายการที่มีชื่อใกล้เคียงกับ “${props.searchQuery.trim()}”`

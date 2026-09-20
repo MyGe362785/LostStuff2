@@ -64,7 +64,8 @@
           />
 
           <!-- Discovery Feed Preview on Home -->
-          <section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <section class="border-t border-brand-sand/60 bg-brand-paper py-12">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h2 class="text-2xl font-extrabold text-brand-espresso">{{ t('hubTitle') }}</h2>
@@ -129,13 +130,14 @@
                 </p>
               </div>
             </div>
+            </div>
           </section>
 
           <!-- Campus Handover Points Directory -->
           <CampusHandoverSection :currentLang="currentLang" :t="t" />
 
           <!-- Recovery Statistics Section -->
-          <section class="py-12 border-t border-brand-sand/60 bg-gradient-to-b from-brand-cream/30 to-transparent">
+          <section class="border-t border-brand-sand/70 bg-brand-sand/35 py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="max-w-4xl mx-auto rounded-xl bg-brand-paper border border-brand-sand shadow-warm-sm overflow-hidden">
                 <div class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-brand-sand/80">
@@ -172,11 +174,10 @@
           </section>
 
           <!-- How It Works 3-Step Workflow Section -->
-          <section class="py-12 border-t border-brand-sand/50 bg-brand-cream/30">
+          <section class="border-t border-brand-sand/70 bg-brand-paper py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div class="text-center max-w-xl mx-auto mb-8">
-                <span class="text-[11px] font-semibold text-brand-caramel uppercase tracking-wider">Workflow</span>
-                <h2 class="text-xl sm:text-2xl font-bold text-brand-espresso mt-1">
+                <h2 class="text-xl sm:text-2xl font-bold text-brand-espresso">
                   {{ t('howItWorksTitle') }}
                 </h2>
               </div>

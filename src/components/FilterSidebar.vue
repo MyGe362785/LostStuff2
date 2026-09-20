@@ -106,11 +106,11 @@
     <div class="my-4 h-px bg-brand-sand/80" aria-hidden="true"></div>
 
     <!-- Category choices stay visible and wrap on larger screens -->
-    <fieldset>
+    <fieldset class="min-w-0">
       <legend class="mb-2 text-[11px] font-bold text-brand-mocha/70">
         {{ t('filterCategoryLabel') }}
       </legend>
-      <div class="filter-scroll flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+      <div class="filter-scroll flex w-full max-w-full flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
         <button
           @click="$emit('update:selectedCategory', '')"
           class="flex min-h-9 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border px-3 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
