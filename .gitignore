@@ -145,3 +145,6 @@ dist
 .impeccable/
 .vscode/
 
+
+# macOS folder metadata
+.DS_Store
