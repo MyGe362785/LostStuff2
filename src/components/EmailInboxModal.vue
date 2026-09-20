@@ -107,9 +107,9 @@
               </div>
             </div>
 
-            <!-- Email Body Content -->
-            <div class="text-xs text-brand-espresso leading-relaxed p-4 rounded-xl bg-brand-cream/20 border border-brand-sand/50" v-html="selectedEmail.bodyHtmlTh">
-            </div>
+            <!-- Render legacy simulated-email markup as text because these messages
+                 can contain user-supplied report fields. -->
+            <div class="text-xs text-brand-espresso leading-relaxed whitespace-pre-line p-4 rounded-xl bg-brand-cream/20 border border-brand-sand/50">{{ selectedEmailBodyText }}</div>
 
             <div class="p-3 rounded-xl bg-brand-sand/30 border border-brand-tan/50 text-[11px] text-brand-mocha flex items-center gap-2">
               <ShieldCheck class="w-4 h-4 text-found shrink-0" />
@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { X, Mail, ShieldCheck } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -155,6 +155,7 @@ defineEmits(['close', 'clear-emails'])
 
 const isTh = ref(props.currentLang === 'th')
 const selectedEmail = ref(null)
+const selectedEmailBodyText = computed(() => htmlToPlainText(selectedEmail.value?.bodyHtmlTh || ''))
 
 onMounted(() => {
   if (props.emails && props.emails.length > 0) {
@@ -166,5 +167,13 @@ function formatEmailTime(isoStr) {
   if (!isoStr) return ''
   const d = new Date(isoStr)
   return d.toLocaleDateString('th-TH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function htmlToPlainText(html) {
+  const document = new DOMParser().parseFromString(html, 'text/html')
+  document.querySelectorAll('script, style, template, noscript').forEach(node => node.remove())
+  document.querySelectorAll('br').forEach(node => node.replaceWith('\n'))
+  document.querySelectorAll('p, h1, h2, h3, h4, li, div, hr').forEach(node => node.append('\n'))
+  return (document.body.textContent || '').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 </script>

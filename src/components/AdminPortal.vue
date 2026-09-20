@@ -1180,7 +1180,11 @@ function submitSurveyFeedback() {
   // Clean in-UI notification instead of blocking alert
   const banner = document.createElement('div')
   banner.className = 'fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-[#261B13] text-white text-xs font-bold shadow-warm-lg flex items-center gap-2 border border-brand-caramel/40 animate-in fade-in slide-in-from-bottom-2 duration-200'
-  banner.innerHTML = `<span class="w-2 h-2 rounded-full bg-found"></span><span>บันทึกผลการประเมินความพึงพอใจเรียบร้อยแล้ว (${surveySummary})</span>`
+  const dot = document.createElement('span')
+  dot.className = 'w-2 h-2 rounded-full bg-found'
+  const message = document.createElement('span')
+  message.textContent = `บันทึกผลการประเมินความพึงพอใจเรียบร้อยแล้ว (${surveySummary})`
+  banner.append(dot, message)
   document.body.appendChild(banner)
   setTimeout(() => banner.remove(), 4000)
 }

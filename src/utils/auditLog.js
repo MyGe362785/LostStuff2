@@ -1,6 +1,8 @@
 // Turns `audit_events` rows into the shape the staff portal's audit table
 // already renders for the demo's mock logs.
 const ACTIONS = {
+  report_created: { th: 'สร้างรายการใหม่', en: 'Report created', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
+  claim_received: { th: 'รับคำขอรับคืน', en: 'Claim received', badge: 'bg-purple-100 text-purple-800 border-purple-200' },
   item_approved: { th: 'อนุมัติรายการขึ้นสู่ระบบ', en: 'Item approved', badge: 'bg-blue-100 text-blue-800 border-blue-200' },
   item_closed: { th: 'ไม่อนุมัติ / ปิดเคส', en: 'Rejected / closed', badge: 'bg-red-100 text-red-800 border-red-200' },
   return_confirmed: { th: 'ยืนยันการส่งมอบคืนสำเร็จ', en: 'Return confirmed', badge: 'bg-green-100 text-green-800 border-green-200' },

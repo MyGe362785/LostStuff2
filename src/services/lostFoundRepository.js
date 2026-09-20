@@ -124,11 +124,15 @@ export async function createClaim({ itemId, proof, preferredContact }) {
   requireBackend()
   const user = await getCurrentUser()
   if (!user) throw new Error('Sign in is required before submitting a claim.')
-  const { data, error } = await supabase.from('claims').insert({ item_id: itemId, claimant_id: user.id, proof, preferred_contact: preferredContact }).select().single()
+  const { data, error } = await supabase.rpc('create_claim', {
+    p_item_id: itemId,
+    p_proof: proof,
+    p_preferred_contact: preferredContact,
+  })
   // claims has unique (item_id, claimant_id); a second claim on the same item lands here.
   if (error?.code === '23505') throw Object.assign(new Error(DUPLICATE_CLAIM), { code: DUPLICATE_CLAIM })
   if (error) throw error
-  return data
+  return { id: data, item_id: itemId, claimant_id: user.id, proof, preferred_contact: preferredContact, status: 'pending' }
 }
 
 function mapClaim(record) {
@@ -204,14 +208,15 @@ export async function reviewClaim({ claimId, decision, note }) {
  */
 export async function updateItemStatus(itemId, status, action, details = {}, { fromStatus } = {}) {
   requireBackend()
-  let update = supabase.from('items').update({ status }).eq('id', itemId)
-  if (fromStatus) update = update.eq('status', fromStatus)
-  const { data, error: updateError } = await update.select('id')
-  if (updateError) throw updateError
-  if (data.length === 0) return false
-  const { error: auditError } = await supabase.from('audit_events').insert({ item_id: itemId, action, metadata: { ...details, status } })
-  if (auditError) throw auditError
-  return true
+  const { data, error } = await supabase.rpc('update_item_status', {
+    p_item_id: itemId,
+    p_status: status,
+    p_action: action,
+    p_metadata: details,
+    p_expected_status: fromStatus || null,
+  })
+  if (error) throw error
+  return data
 }
 
 function mapNotification(record) {
