@@ -123,11 +123,11 @@ import { computed, onMounted, ref } from 'vue'
 import { 
   Search, SearchCheck, X, ArrowRight, AlertTriangle, PlusCircle
 } from 'lucide-vue-next'
-import backpackImage from '../../img/article1.png'
-import pencilImage from '../../img/article2.png'
-import tabletImage from '../../img/article3.png'
-import airpodsImage from '../../img/article5.png'
-import carKeyImage from '../../img/article6.png'
+import backpackImage from '../../img/article1.webp'
+import pencilImage from '../../img/article2.webp'
+import tabletImage from '../../img/article3.webp'
+import airpodsImage from '../../img/article5.webp'
+import carKeyImage from '../../img/article6.webp'
 
 let hasPlayedHeroItemDrop = false
 

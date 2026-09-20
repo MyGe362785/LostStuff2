@@ -1,7 +1,7 @@
 // Campus buildings, zones, and official safe handover drop-off points
 
-import cafeteriaLocationImage from '../../img/location1.jpg'
-import libraryLocationImage from '../../img/location2.png'
+import cafeteriaLocationImage from '../../img/location1.webp'
+import libraryLocationImage from '../../img/location2.webp'
 
 export const handoverLocations = [
   {
