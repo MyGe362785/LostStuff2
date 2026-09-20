@@ -1,5 +1,8 @@
 // Campus buildings, zones, and official safe handover drop-off points
 
+import cafeteriaLocationImage from '../../img/location1.jpg'
+import libraryLocationImage from '../../img/location2.png'
+
 export const handoverLocations = [
   {
     id: 'dorm_nine_cafeteria',
@@ -7,7 +10,7 @@ export const handoverLocations = [
     nameEn: 'Dormitory 9 Cafeteria',
     code: 'D9',
     zone: 'Dormitory Zone',
-    image: '/img/location1.jpg',
+    image: cafeteriaLocationImage,
     handoverPointTh: 'จุดฝากของโรงอาหารหอเก้าหลัง',
     handoverPointEn: 'Dormitory 9 Cafeteria Drop-off Point',
     operatingHoursTh: '09.00 – 17.00 น.',
@@ -20,7 +23,7 @@ export const handoverLocations = [
     nameEn: 'Khon Kaen University Library Office',
     code: 'LIB',
     zone: 'Academic Zone',
-    image: '/img/location2.png',
+    image: libraryLocationImage,
     handoverPointTh: 'เคาน์เตอร์แจ้งของหาย ชั้น 1',
     handoverPointEn: 'Lost & Found Counter, 1st Floor',
     operatingHoursTh: '09.00 – 17.00 น.',
