@@ -106,8 +106,9 @@
 .site-navbar::after {
   content: '';
   position: absolute;
-  inset: auto 0 -1px;
+  inset: auto 14px 0;
   height: 3px;
+  border-radius: 9999px;
   opacity: 0;
   transform: scaleX(0.72);
   transform-origin: center;

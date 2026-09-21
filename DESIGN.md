@@ -156,7 +156,7 @@ The palette embraces organic, earthy warmth combined with functional university 
 
 - **Max Container Width**: `1280px` (`max-w-7xl`) centered with responsive gutter padding (`16px` on mobile, `24px` on tablet, `32px` on desktop).
 - **Rhythm & Grid**: 12-column responsive grid with `16px` to `24px` gap. Item cards display in a 3-column grid on desktop, 2-column on tablet, and 1-column on mobile.
-- **Sticky Glass Navigation**: Fixed top bar (`h-20`) with 92% opacity and 16px backdrop blur.
+- **Floating Sticky Navigation**: Inset sticky bar with `8px` mobile / `12px` desktop top spacing, `16px` corner radius, soft elevation, 95% paper surface, and backdrop blur. The content remains `h-14` mobile / `h-16` desktop within the `1280px` container.
 
 ---
 

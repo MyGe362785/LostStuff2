@@ -31,7 +31,7 @@
       </div>
 
       <!-- Bold Search Centerpiece -->
-      <div class="max-w-4xl mx-auto mb-4">
+      <div data-tour="search" class="max-w-4xl mx-auto mb-4">
         <div class="p-2 rounded-xl bg-brand-paper shadow-warm-md border border-brand-sand flex flex-col lg:flex-row gap-2 transition-all focus-within:border-brand-caramel focus-within:shadow-glow-caramel">
           <div class="flex-1 flex items-center px-3.5 gap-3 min-w-0">
             <Search class="w-4.5 h-4.5 text-brand-latte shrink-0" />
@@ -94,6 +94,7 @@
       <!-- Primary Report Actions -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
         <button 
+          data-tour="report-lost"
           @click="$emit('open-report', 'lost')"
           class="group min-h-14 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-lost-light hover:bg-amber-100 text-lost-dark border border-lost-border font-extrabold text-sm shadow-warm-md hover:shadow-warm-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lost focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
         >
@@ -104,6 +105,7 @@
         </button>
 
         <button 
+          data-tour="report-found"
           @click="$emit('open-report', 'found')"
           class="group min-h-14 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white font-extrabold text-sm shadow-warm-md hover:shadow-warm-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel focus-visible:ring-offset-2 focus-visible:ring-offset-brand-paper"
         >
