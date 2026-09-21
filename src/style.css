@@ -2,10 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --brand-paper: 250 250 248;
+  --brand-cream: 245 240 235;
+  --brand-sand: 236 229 222;
+  --brand-tan: 216 202 191;
+  --brand-latte: 140 123 112;
+  --brand-caramel: 162 106 74;
+  --brand-chestnut: 120 77 52;
+  --brand-mocha: 84 54 36;
+  --brand-espresso: 45 32 22;
+  --status-lost-light: 254 243 199;
+  --status-lost-border: 253 230 138;
+  --status-lost: 217 119 6;
+  --status-lost-dark: 180 83 9;
+  --status-found-light: 220 252 231;
+  --status-found-border: 187 247 208;
+  --status-found: 21 128 61;
+  --status-found-dark: 22 101 52;
+  --status-match-light: 224 242 254;
+  --status-match-border: 186 230 253;
+  --status-match: 2 132 199;
+  --status-match-dark: 3 105 161;
+  --status-returned-light: 243 244 246;
+  --status-returned-border: 229 231 235;
+  --status-returned: 107 114 128;
+  --status-returned-dark: 75 85 99;
+  --shadow-sm: 0 1px 2px rgb(45 32 22 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(45 32 22 / 0.07), 0 2px 4px -1px rgb(45 32 22 / 0.03);
+  --shadow-lg: 0 8px 20px -4px rgb(45 32 22 / 0.08), 0 3px 6px -2px rgb(45 32 22 / 0.04);
+  --shadow-xl: 0 16px 30px -5px rgb(45 32 22 / 0.1), 0 6px 12px -4px rgb(45 32 22 / 0.05);
+  --shadow-focus: 0 0 16px -2px rgb(162 106 74 / 0.2);
+  --rainbow-red: 239 68 68;
+  --rainbow-orange: 249 115 22;
+  --rainbow-yellow: 234 179 8;
+  --rainbow-green: 34 197 94;
+  --rainbow-cyan: 6 182 212;
+  --rainbow-blue: 59 130 246;
+  --rainbow-violet: 168 85 247;
+}
+
+:root[data-theme='mono-red'] {
+  --brand-paper: 255 255 255;
+  --brand-cream: 247 247 247;
+  --brand-sand: 229 229 229;
+  --brand-tan: 198 198 198;
+  --brand-latte: 92 92 92;
+  --brand-caramel: 220 38 38;
+  --brand-chestnut: 193 18 31;
+  --brand-mocha: 143 17 25;
+  --brand-espresso: 17 17 17;
+  --status-lost-light: 255 241 242;
+  --status-lost-border: 253 164 175;
+  --status-lost: 208 0 0;
+  --status-lost-dark: 159 0 0;
+  --status-found-light: 245 245 245;
+  --status-found-border: 163 163 163;
+  --status-found: 38 38 38;
+  --status-found-dark: 23 23 23;
+  --status-match-light: 254 242 242;
+  --status-match-border: 252 165 165;
+  --status-match: 225 29 72;
+  --status-match-dark: 159 18 57;
+  --status-returned-light: 245 245 245;
+  --status-returned-border: 212 212 212;
+  --status-returned: 82 82 82;
+  --status-returned-dark: 38 38 38;
+  --shadow-sm: 0 2px 5px rgb(17 17 17 / 0.08);
+  --shadow-md: 0 8px 20px -6px rgb(17 17 17 / 0.16), 0 3px 7px -4px rgb(193 18 31 / 0.12);
+  --shadow-lg: 0 16px 30px -10px rgb(17 17 17 / 0.2), 0 5px 12px -7px rgb(193 18 31 / 0.14);
+  --shadow-xl: 0 26px 45px -16px rgb(17 17 17 / 0.26), 0 10px 20px -12px rgb(193 18 31 / 0.16);
+  --shadow-focus: 0 0 0 4px rgb(220 38 38 / 0.14), 0 10px 24px -10px rgb(17 17 17 / 0.24);
+}
+
 @layer base {
   body {
-    background-color: #FAFAF8;
-    color: #2D2016;
+    background-color: rgb(var(--brand-paper));
+    color: rgb(var(--brand-espresso));
     font-family: 'Kanit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-synthesis: none;
   }
@@ -19,32 +93,79 @@
 
   /* Smooth Focus Rings */
   *:focus-visible {
-    outline: 2px solid #A26A4A;
+    outline: 2px solid rgb(var(--brand-caramel));
     outline-offset: 2px;
   }
+
+  ::selection {
+    background: rgb(var(--brand-caramel));
+    color: white;
+  }
+}
+
+.site-navbar::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 3px;
+  opacity: 0;
+  transform: scaleX(0.72);
+  transform-origin: center;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--rainbow-red)) 0%,
+    rgb(var(--rainbow-orange)) 16%,
+    rgb(var(--rainbow-yellow)) 32%,
+    rgb(var(--rainbow-green)) 48%,
+    rgb(var(--rainbow-cyan)) 64%,
+    rgb(var(--rainbow-blue)) 80%,
+    rgb(var(--rainbow-violet)) 100%
+  );
+  transition: opacity 260ms ease-out, transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-theme='mono-red'] .site-navbar::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.theme-toggle__spark {
+  background: rgb(var(--brand-caramel));
+  box-shadow: 0 0 0 2px rgb(var(--brand-paper));
+}
+
+:root[data-theme='mono-red'] .theme-toggle {
+  background: rgb(var(--brand-espresso));
+  border-color: rgb(var(--brand-espresso));
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+:root[data-theme='mono-red'] .theme-toggle__spark {
+  background: rgb(var(--brand-caramel));
 }
 
 @layer utilities {
   /* Warm Glassmorphism */
-  .glass-card {
-    background: rgba(255, 255, 255, 0.85);
+.glass-card {
+    background: rgb(var(--brand-paper) / 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(216, 202, 191, 0.4);
+    border: 1px solid rgb(var(--brand-tan) / 0.4);
   }
 
-  .glass-card-warm {
-    background: rgba(245, 240, 235, 0.9);
+.glass-card-warm {
+    background: rgb(var(--brand-cream) / 0.9);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(216, 202, 191, 0.6);
+    border: 1px solid rgb(var(--brand-tan) / 0.6);
   }
 
-  .glass-nav {
-    background: rgba(250, 250, 248, 0.92);
+.glass-nav {
+    background: rgb(var(--brand-paper) / 0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(216, 202, 191, 0.5);
+    border-bottom: 1px solid rgb(var(--brand-tan) / 0.5);
   }
 }
 
@@ -55,16 +176,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #F5F0EB;
+  background: rgb(var(--brand-cream));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D8CABF;
-  border-radius: 4px;
+  background: rgb(var(--brand-tan));
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B49A85;
+  background: rgb(var(--brand-latte));
 }
 
 /* Pulse animation for match notification */
@@ -94,7 +215,7 @@
 }
 
 .shimmer-bg {
-  background: linear-gradient(90deg, rgba(245, 240, 235, 0.5) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(245, 240, 235, 0.5) 100%);
+  background: linear-gradient(90deg, rgb(var(--brand-cream) / 0.5) 0%, rgb(var(--brand-paper) / 0.9) 50%, rgb(var(--brand-cream) / 0.5) 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }

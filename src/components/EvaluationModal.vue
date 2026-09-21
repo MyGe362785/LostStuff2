@@ -170,7 +170,7 @@
                       <div class="text-[10px] text-brand-latte mt-0.5 line-clamp-1">{{ res.expectedReasonTh }}</div>
                     </td>
                     <td class="py-2.5 px-3 whitespace-nowrap">
-                      <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="res.expectedMatch ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold" :class="res.expectedMatch ? 'bg-found-light text-found-dark' : 'bg-brand-cream text-brand-mocha'">
                         {{ res.expectedMatch ? 'ตรงกัน (Match)' : 'ไม่ตรง (Non-Match)' }}
                       </span>
                     </td>

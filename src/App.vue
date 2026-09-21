@@ -34,12 +34,14 @@
         :notificationsCount="unreadNotificationsCount"
         :user="currentUser"
         :backendConfigured="isBackendConfigured"
+        :theme="currentTheme"
         :t="t"
         @nav-change="handleNavChange"
         @lang-change="handleLangChange"
         @open-report="openReportModal"
         @open-emails="isEmailModalOpen = true"
         @open-notifications="isNotificationsOpen = true"
+        @theme-change="handleThemeChange"
         @sign-in="isAuthModalOpen = true"
         @sign-out="signOut"
       />
@@ -585,6 +587,7 @@ function navigateTo(path) {
 
 // App State
 const currentLang = ref('th')
+const currentTheme = ref(document.documentElement.dataset.theme === 'mono-red' ? 'mono-red' : 'warm')
 const activeTab = ref('home')
 const items = ref([])
 const auditLogs = ref([])
@@ -1140,6 +1143,16 @@ function handleNavChange(tab) {
 
 function handleLangChange(lang) {
   currentLang.value = lang
+}
+
+function handleThemeChange(theme) {
+  currentTheme.value = theme === 'mono-red' ? 'mono-red' : 'warm'
+  document.documentElement.dataset.theme = currentTheme.value
+  try {
+    localStorage.setItem('foundit-theme', currentTheme.value)
+  } catch (_) {
+    // Theme switching still works when storage is unavailable.
+  }
 }
 
 function resetFilters() {

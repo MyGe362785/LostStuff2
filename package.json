@@ -15,6 +15,7 @@
     "security:check": "npm run security:secrets && npm run security:dependencies && npm test"
   },
   "dependencies": {
+    "@fontsource/kanit": "^5.3.0",
     "@supabase/supabase-js": "^2.116.0",
     "lucide-vue-next": "^0.468.0",
     "vue": "^3.5.13"

@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-40 bg-brand-paper/95 backdrop-blur-md border-b border-brand-sand/70 transition-all">
+  <header class="site-navbar sticky top-0 z-40 bg-brand-paper/95 backdrop-blur-md border-b border-brand-sand/70 transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 sm:h-16">
         
@@ -136,6 +136,19 @@
             </span>
           </a>
 
+          <!-- Theme switcher: warm brand theme / light black-white-red theme -->
+          <button
+            type="button"
+            class="theme-toggle relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-sand bg-brand-cream text-brand-chestnut transition-[color,background-color,border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-brand-caramel hover:text-brand-caramel active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none min-[360px]:h-10 min-[360px]:w-10"
+            :aria-label="themeLabel"
+            :title="themeLabel"
+            :aria-pressed="theme === 'mono-red'"
+            @click="$emit('theme-change', theme === 'mono-red' ? 'warm' : 'mono-red')"
+          >
+            <Palette class="h-5 w-5" aria-hidden="true" />
+            <span class="theme-toggle__spark absolute right-1.5 top-1.5 h-2 w-2 rounded-full" aria-hidden="true"></span>
+          </button>
+
           <!-- Language Switcher Toggle (TH / EN) -->
           <div class="relative grid grid-cols-2 items-center rounded-xl border border-brand-sand bg-brand-cream p-1 text-xs font-bold shadow-2xs">
             <span
@@ -174,14 +187,13 @@
           <!-- Primary Post Trigger -->
           <button 
             @click="$emit('open-report', 'found')"
-            class="inline-flex items-center gap-1.5 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer"
-            :class="showsBell ? 'px-2.5 sm:px-4' : 'px-2.5 min-[360px]:px-4'"
+            class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-bold bg-brand-chestnut hover:bg-brand-mocha text-white shadow-warm-xs transition-colors cursor-pointer sm:px-4"
             :aria-label="t('navReportFound')"
             :title="t('navReportFound')"
           >
             <PlusCircle class="w-3.5 h-3.5" />
             <!-- With the bell in the row, phones get the icon only; the home page has full-size report buttons -->
-            <span class="hidden" :class="showsBell ? 'sm:inline' : 'min-[360px]:inline'">{{ t('navReportFound') }}</span>
+            <span class="hidden sm:inline">{{ t('navReportFound') }}</span>
           </button>
         </div>
 
@@ -192,7 +204,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Compass, PlusCircle, Mail, Bell } from 'lucide-vue-next'
+import { Compass, PlusCircle, Mail, Bell, Palette } from 'lucide-vue-next'
 import { SATISFACTION_SURVEY_URL } from '../data/links'
 
 const props = defineProps({
@@ -215,6 +227,7 @@ const props = defineProps({
   notificationsCount: { type: Number, default: 0 },
   user: { type: Object, default: null },
   backendConfigured: { type: Boolean, default: false },
+  theme: { type: String, default: 'warm' },
   t: {
     type: Function,
     required: true
@@ -227,10 +240,15 @@ defineEmits([
   'open-report', 
   'open-emails',
   'open-notifications',
+  'theme-change',
   'sign-in',
   'sign-out'
 ])
 
 const isTh = computed(() => props.currentLang === 'th')
 const showsBell = computed(() => props.backendConfigured && Boolean(props.user))
+const themeLabel = computed(() => {
+  if (props.theme === 'mono-red') return isTh.value ? 'เปลี่ยนเป็นธีมอบอุ่น' : 'Switch to warm theme'
+  return isTh.value ? 'เปลี่ยนเป็นธีมดำ ขาว แดง' : 'Switch to black, white and red theme'
+})
 </script>
