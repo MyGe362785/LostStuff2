@@ -8,39 +8,39 @@ export default {
     extend: {
       colors: {
         brand: {
-          paper: '#FAFAF8',       // Ultra clean warm white
-          cream: '#F5F0EB',       // Soft oatmeal / warm cream
-          sand: '#ECE5DE',        // Light warm beige border & panel
-          tan: '#D8CABF',         // Subtle divider
-          latte: '#B49A85',       // Secondary muted brown
-          caramel: '#A26A4A',     // Warm caramel accent
-          chestnut: '#784D34',    // Primary rich warm brown
-          mocha: '#543624',       // Deep rich brown
-          espresso: '#2D2016',    // Dark espresso text
+          paper: 'rgb(var(--brand-paper) / <alpha-value>)',
+          cream: 'rgb(var(--brand-cream) / <alpha-value>)',
+          sand: 'rgb(var(--brand-sand) / <alpha-value>)',
+          tan: 'rgb(var(--brand-tan) / <alpha-value>)',
+          latte: 'rgb(var(--brand-latte) / <alpha-value>)',
+          caramel: 'rgb(var(--brand-caramel) / <alpha-value>)',
+          chestnut: 'rgb(var(--brand-chestnut) / <alpha-value>)',
+          mocha: 'rgb(var(--brand-mocha) / <alpha-value>)',
+          espresso: 'rgb(var(--brand-espresso) / <alpha-value>)',
         },
         lost: {
-          light: '#FEF3C7',
-          border: '#FDE68A',
-          DEFAULT: '#D97706',
-          dark: '#B45309',
+          light: 'rgb(var(--status-lost-light) / <alpha-value>)',
+          border: 'rgb(var(--status-lost-border) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--status-lost) / <alpha-value>)',
+          dark: 'rgb(var(--status-lost-dark) / <alpha-value>)',
         },
         found: {
-          light: '#DCFCE7',
-          border: '#BBF7D0',
-          DEFAULT: '#15803D',
-          dark: '#166534',
+          light: 'rgb(var(--status-found-light) / <alpha-value>)',
+          border: 'rgb(var(--status-found-border) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--status-found) / <alpha-value>)',
+          dark: 'rgb(var(--status-found-dark) / <alpha-value>)',
         },
         match: {
-          light: '#E0F2FE',
-          border: '#BAE6FD',
-          DEFAULT: '#0284C7',
-          dark: '#0369A1',
+          light: 'rgb(var(--status-match-light) / <alpha-value>)',
+          border: 'rgb(var(--status-match-border) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--status-match) / <alpha-value>)',
+          dark: 'rgb(var(--status-match-dark) / <alpha-value>)',
         },
         returned: {
-          light: '#F3F4F6',
-          border: '#E5E7EB',
-          DEFAULT: '#6B7280',
-          dark: '#4B5563',
+          light: 'rgb(var(--status-returned-light) / <alpha-value>)',
+          border: 'rgb(var(--status-returned-border) / <alpha-value>)',
+          DEFAULT: 'rgb(var(--status-returned) / <alpha-value>)',
+          dark: 'rgb(var(--status-returned-dark) / <alpha-value>)',
         }
       },
       fontFamily: {
@@ -53,11 +53,11 @@ export default {
         'xs-plus': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.01em' }], // 11px category chips
       },
       boxShadow: {
-        'warm-sm': '0 1px 2px rgba(45, 32, 22, 0.05)',
-        'warm-md': '0 4px 12px -2px rgba(45, 32, 22, 0.07), 0 2px 4px -1px rgba(45, 32, 22, 0.03)',
-        'warm-lg': '0 8px 20px -4px rgba(45, 32, 22, 0.08), 0 3px 6px -2px rgba(45, 32, 22, 0.04)',
-        'warm-xl': '0 16px 30px -5px rgba(45, 32, 22, 0.1), 0 6px 12px -4px rgba(45, 32, 22, 0.05)',
-        'glow-caramel': '0 0 16px -2px rgba(162, 106, 74, 0.2)',
+        'warm-sm': 'var(--shadow-sm)',
+        'warm-md': 'var(--shadow-md)',
+        'warm-lg': 'var(--shadow-lg)',
+        'warm-xl': 'var(--shadow-xl)',
+        'glow-caramel': 'var(--shadow-focus)',
       },
       borderRadius: {
         'lg': '0.75rem',    // 12px (crisp buttons & inputs)

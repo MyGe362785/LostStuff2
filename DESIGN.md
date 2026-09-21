@@ -128,11 +128,17 @@ The palette embraces organic, earthy warmth combined with functional university 
 ### Named Rules
 **The Warm Contrast Rule.** Pure cold blacks (`#000000`) and pure cold grays are forbidden. All dark neutrals must contain a hint of rich roasted coffee/espresso tone (`#2D2016`).
 
+### Optional Theme: Mono Red
+- Users may switch from the default warm theme to the light **Mono Red** theme from the public navbar.
+- Mono Red uses white and soft neutral surfaces, near-black typography, and strong red actions. Purple is not part of this theme.
+- A thin full-spectrum rainbow line sits beneath the navbar as the theme's only multicolor accent.
+- Theme choice persists locally. Status labels, component hierarchy, Kanit typography, and WCAG AA contrast remain unchanged.
+
 ---
 
 ## Typography
 
-**Display, Body & Numerals:** Google Fonts **Kanit** (Thai and English headers, body text, button labels, metrics, and badges)
+**Display, Body & Numerals:** Self-hosted **Kanit** bundled with the application (Thai and English headers, body text, button labels, metrics, and badges)
 
 **Character:** Warm, friendly, approachable, yet highly legible across mobile and desktop displays.
 

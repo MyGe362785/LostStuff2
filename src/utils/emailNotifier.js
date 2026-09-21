@@ -27,8 +27,8 @@ export const initialMockEmails = [
           <p style="margin: 0;"><strong>จุดรับมอบ:</strong> ห้องธุรการประจำอาคาร SC ชั้น 1 สำนักวิชาการ</p>
         </div>
         <p>กรุณาเตรียมบัตรนักศึกษาและติดต่อขอรับคืน หรือกดยืนยันความเป็นเจ้าของผ่านระบบเว็บแอปพลิเคชัน</p>
-        <hr style="border: 0; border-top: 1px solid #E5DFD7; margin: 20px 0;" />
-        <small style="color: #8C7B70;">อีเมลนี้ส่งโดยระบบอัตโนมัติของศูนย์ประสานงานของหายมหาวิทยาลัย</small>
+        <hr style="border: 0; border-top: 1px solid #ECE5DE; margin: 20px 0;" />
+        <small style="color: #784D34;">อีเมลนี้ส่งโดยระบบอัตโนมัติของศูนย์ประสานงานของหายมหาวิทยาลัย</small>
       </div>
     `,
     isRead: false,
