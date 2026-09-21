@@ -20,37 +20,37 @@ colors:
   status-returned-bg: "#F3F4F6"
 typography:
   display:
-    fontFamily: "Prompt, Inter, sans-serif"
+    fontFamily: "Kanit, system-ui, sans-serif"
     fontSize: "clamp(2rem, 5vw, 3rem)"
     fontWeight: 800
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Prompt, Inter, sans-serif"
+    fontFamily: "Kanit, system-ui, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 700
     lineHeight: 1.25
     letterSpacing: "-0.01em"
   body:
-    fontFamily: "Prompt, Inter, sans-serif"
+    fontFamily: "Kanit, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: "normal"
   label:
-    fontFamily: "Prompt, Inter, sans-serif"
+    fontFamily: "Kanit, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "0.02em"
   caption:
-    fontFamily: "Prompt, Inter, sans-serif"
+    fontFamily: "Kanit, system-ui, sans-serif"
     fontSize: "0.6875rem"
     fontWeight: 600
     lineHeight: 1.25
     letterSpacing: "0.01em"
   micro:
-    fontFamily: "Prompt, Inter, sans-serif"
+    fontFamily: "Kanit, system-ui, sans-serif"
     fontSize: "0.625rem"
     fontWeight: 700
     lineHeight: 1.2
@@ -132,8 +132,7 @@ The palette embraces organic, earthy warmth combined with functional university 
 
 ## Typography
 
-**Display & Body Font:** Google Fonts **Prompt** (Thai headers, body text, and button labels)  
-**Secondary & Numerals:** Google Fonts **Inter** (English metrics, numbers, and badges)
+**Display, Body & Numerals:** Google Fonts **Kanit** (Thai and English headers, body text, button labels, metrics, and badges)
 
 **Character:** Warm, friendly, approachable, yet highly legible across mobile and desktop displays.
 
@@ -203,7 +202,7 @@ Surfaces rely on tonal warmth and ambient diffusion rather than harsh drop shado
 - **Do** maintain the Warm White & Brown palette across all new screens and modals.
 - **Do** provide bilingual Thai/English string equivalents in `src/data/i18n.js` for every new UI label.
 - **Do** highlight matching scores with the cyan match badge whenever score $\ge 60\%$.
-- **Do** use `Prompt` for Thai typography and `Inter` for numbers and metric labels.
+- **Do** use `Kanit` consistently for Thai, English, numbers, and metric labels.
 
 ### Don't:
 - **Don't** introduce harsh saturated neon colors or stark cold grays (`#666666`, `#000000`).

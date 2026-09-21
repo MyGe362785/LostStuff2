@@ -16,7 +16,7 @@ export const initialMockEmails = [
     subject: '[Foundit-KKU] แจ้งเตือนด่วน: พบคู่ตรงของหายของคุณในระบบ (ความใกล้เคียง 92%)',
     previewText: 'ระบบตรวจพบหูฟังเคสสีดำ AirPods Pro 2 พบที่ห้อง SC-205 ตรงกับรายการที่คุณแจ้ง...',
     bodyHtmlTh: `
-      <div style="font-family: sans-serif; color: #2D2016; line-height: 1.6;">
+      <div style="font-family: 'Kanit', 'Segoe UI', sans-serif; color: #2D2016; line-height: 1.6;">
         <h2 style="color: #784D34;">แจ้งเตือนผลการจับคู่อัตโนมัติ (Automated Match)</h2>
         <p>เรียน คุณกิตติศักดิ์,</p>
         <p>ระบบแจ้งเตือนและติดตามของหายในมหาวิทยาลัย ได้ตรวจพบสิ่งของที่มีคุณลักษณะใกล้เคียงกับ <strong>หูฟังไร้สาย AirPods Pro 2</strong> ที่คุณได้แจ้งไว้:</p>
@@ -44,7 +44,7 @@ export const initialMockEmails = [
     subject: '[Foundit-KKU] ยืนยันการส่งมอบคืนสิ่งของสำเร็จ (#item-006 ร่มพับ MUJI)',
     previewText: 'เจ้าหน้าที่ได้บันทึกการส่งมอบคืนสิ่งของแก่ท่านเรียบร้อยแล้ว ณ เคาน์เตอร์ยืม-คืน...',
     bodyHtmlTh: `
-      <div style="font-family: sans-serif; color: #2D2016; line-height: 1.6;">
+      <div style="font-family: 'Kanit', 'Segoe UI', sans-serif; color: #2D2016; line-height: 1.6;">
         <h2 style="color: #15803D;">ยืนยันการส่งมอบคืนสิ่งของสำเร็จ</h2>
         <p>เรียน คุณธิดารัตน์,</p>
         <p>เจ้าหน้าที่ประจำเคาน์เตอร์บริการยืม-คืน สำนักหอสมุดกลาง ได้ส่งมอบ <strong>ร่มพับอัตโนมัติ MUJI สีน้ำเงินเข้ม ด้ามไม้ (#item-006)</strong> คืนให้แก่ท่านเรียบร้อยแล้ว</p>
@@ -99,4 +99,3 @@ export function dispatchEmail({ to, toName, subject, previewText, bodyHtmlTh, ba
   saveEmails(updated)
   return newEmail
 }
-

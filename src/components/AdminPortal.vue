@@ -574,7 +574,7 @@
           </button>
         </div>
 
-        <!-- Metric Cards with Inter Numbers -->
+        <!-- Metric cards use the shared Kanit type system -->
         <div v-if="benchmarkResults" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div class="p-5 rounded-3xl bg-brand-paper border border-brand-sand text-center shadow-warm-xs">
             <span class="text-[11px] font-bold text-brand-latte block uppercase tracking-wider mb-1">

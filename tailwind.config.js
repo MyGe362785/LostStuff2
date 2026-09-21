@@ -44,9 +44,9 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Prompt', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Prompt', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Kanit', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['Kanit', 'system-ui', 'sans-serif'],
+        mono: ['Kanit', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.875rem', letterSpacing: '0.02em' }],   // 10px micro badges

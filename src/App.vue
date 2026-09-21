@@ -1311,7 +1311,7 @@ async function handleApproveItem(itemId) {
       subject: `[Foundit-KKU] รายการของคุณได้รับการอนุมัติแล้ว (#${target.id} ${target.titleTh})`,
       previewText: `เจ้าหน้าที่ได้ตรวจสอบและอนุมัติรายการของท่านขึ้นสู่ระบบค้นหาของมหาวิทยาลัยแล้ว...`,
       bodyHtmlTh: `
-        <div style="font-family: sans-serif; color: #2D2016;">
+        <div style="font-family: 'Kanit', 'Segoe UI', sans-serif; color: #2D2016;">
           <h3 style="color: #15803D;">รายการของคุณได้รับการอนุมัติแล้ว</h3>
           <p>เรียน คุณ${target.reporterName},</p>
           <p>เจ้าหน้าที่ได้ตรวจสอบข้อมูลรายการ <strong>"${target.titleTh}"</strong> เรียบร้อยแล้ว ขณะนี้รายการได้ถูกเผยแพร่ในคลังค้นหาของหายของมหาวิทยาลัย</p>
@@ -1410,7 +1410,7 @@ async function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) 
       subject: `[Foundit-KKU] ยืนยันการส่งมอบคืนสิ่งของสำเร็จ (#${target.id})`,
       previewText: `เจ้าหน้าที่ได้บันทึกการส่งมอบคืน ${target.titleTh} แก่ท่านเรียบร้อยแล้ว...`,
       bodyHtmlTh: `
-        <div style="font-family: sans-serif; color: #2D2016;">
+        <div style="font-family: 'Kanit', 'Segoe UI', sans-serif; color: #2D2016;">
           <h3 style="color: #15803D;">การส่งมอบคืนสิ่งของสำเร็จ</h3>
           <p>เรียน คุณ${claimant},</p>
           <p>เจ้าหน้าที่ประจำจุดบริการได้รับรองการส่งมอบคืน <strong>"${target.titleTh}"</strong> ให้แก่ท่านเรียบร้อยแล้ว</p>
@@ -1482,7 +1482,7 @@ async function handleSubmitClaim(claimData) {
       subject: `[Foundit-KKU] ได้รับคำขอยื่นยืนยันความเป็นเจ้าของแล้ว (#${target.id})`,
       previewText: `ระบบได้รับข้อมูลหลักฐานยืนยันสิ่งของ "${target.titleTh}" ของท่านเรียบร้อยแล้ว...`,
       bodyHtmlTh: `
-        <div style="font-family: sans-serif; color: #2D2016;">
+        <div style="font-family: 'Kanit', 'Segoe UI', sans-serif; color: #2D2016;">
           <h3 style="color: #784D34;">ได้รับคำขอยื่นยืนยันความเป็นเจ้าของแล้ว</h3>
           <p>เรียน คุณ${claimData.claimantName},</p>
           <p>ระบบได้รับคำร้องยืนยันความเป็นเจ้าของสำหรับ <strong>"${target.titleTh}"</strong> แล้ว</p>
@@ -1565,7 +1565,7 @@ async function handleReportSubmitted(newItem) {
       subject: `[Foundit-KKU] แจ้งเตือนด่วน: พบคู่ตรงของหายในระบบ (${bestMatch.totalScore}% Match)`,
       previewText: `ระบบตรวจพบ "${bestMatch.candidate.titleTh}" ซึ่งตรงกับสิ่งของที่คุณแจ้ง...`,
       bodyHtmlTh: `
-        <div style="font-family: sans-serif; color: #2D2016;">
+        <div style="font-family: 'Kanit', 'Segoe UI', sans-serif; color: #2D2016;">
           <h3 style="color: #784D34;">ระบบตรวจพบรายการที่มีความใกล้เคียงสูง (${bestMatch.totalScore}%)</h3>
           <p>เรียน คุณ${newItem.reporterName},</p>
           <p>ระบบ Matching Engine วิเคราะห์พบสิ่งของที่ตรงกับรายการของคุณ:</p>
