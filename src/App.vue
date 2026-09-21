@@ -371,6 +371,8 @@
         @sign-out="signOut"
       />
 
+      <FirstVisitTour v-if="!isPrivacyRoute" :t="t" :current-lang="currentLang" />
+
     </div>
 
     <!-- MODALS -->
@@ -489,6 +491,7 @@ import MyItemsTracker from './components/MyItemsTracker.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import MobileNav from './components/MobileNav.vue'
 import PrivacyPolicy from './components/PrivacyPolicy.vue'
+import FirstVisitTour from './components/FirstVisitTour.vue'
 
 // Admin & Claim & Email components
 // Only staff ever render the portal, so keep it out of the main bundle.

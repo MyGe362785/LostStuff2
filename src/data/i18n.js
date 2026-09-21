@@ -87,6 +87,23 @@ export const translations = {
     navFaq: 'วิธีใช้งาน & ความปลอดภัย',
     navResetData: 'รีเซ็ตข้อมูลตัวอย่าง',
 
+    // First-visit guided tour
+    tourDialogLabel: 'แนะนำการใช้งาน Foundit-KKU',
+    tourProgress: 'ขั้นตอน {current} จาก {total}',
+    tourProgressLabel: 'ความคืบหน้าการแนะนำ',
+    tourSkip: 'ข้าม',
+    tourBack: 'ย้อนกลับ',
+    tourNext: 'ถัดไป',
+    tourFinish: 'เริ่มใช้งาน',
+    tourSearchTitle: 'ค้นหาของได้ในไม่กี่วินาที',
+    tourSearchDescription: 'พิมพ์ชื่อสิ่งของ สี หรือสถานที่ แล้วกดค้นหาเพื่อดูรายการที่ใกล้เคียง',
+    tourLostTitle: 'ของหาย ให้แจ้งตรงนี้',
+    tourLostDescription: 'กรอกรายละเอียดและจุดสังเกตให้ครบ ระบบจะช่วยจับคู่กับของที่มีคนเก็บได้',
+    tourFoundTitle: 'เก็บของได้ ก็ช่วยแจ้งได้',
+    tourFoundDescription: 'สร้างรายการของที่พบพร้อมจุดฝากส่งมอบ เพื่อให้เจ้าของยืนยันและรับคืนอย่างปลอดภัย',
+    tourReportsTitle: 'ติดตามทุกความคืบหน้า',
+    tourReportsDescription: 'ดูรายการที่คุณแจ้ง สถานะการตรวจสอบ และผลการจับคู่ได้จากเมนูรายการของฉัน',
+
     // Hero
     heroBadge: 'ระบบจับคู่อัจฉริยะ (Automated Matching Engine)',
     heroHeading: 'ศูนย์รวมแจ้งเตือนและ\nค้นหาของหายในมหาวิทยาลัยขอนแก่น',
@@ -386,6 +403,23 @@ export const translations = {
     navEmails: 'Mailbox',
     navFaq: 'Safety & FAQs',
     navResetData: 'Reset Demo Data',
+
+    // First-visit guided tour
+    tourDialogLabel: 'Foundit-KKU quick tour',
+    tourProgress: 'Step {current} of {total}',
+    tourProgressLabel: 'Tour progress',
+    tourSkip: 'Skip',
+    tourBack: 'Back',
+    tourNext: 'Next',
+    tourFinish: 'Start exploring',
+    tourSearchTitle: 'Find an item in seconds',
+    tourSearchDescription: 'Enter an item, color, or location, then search for the closest matches.',
+    tourLostTitle: 'Report a lost item here',
+    tourLostDescription: 'Add clear details and identifying marks so the system can match it with found items.',
+    tourFoundTitle: 'Found something? Let others know',
+    tourFoundDescription: 'Post the item and a safe handover point so its owner can verify and collect it.',
+    tourReportsTitle: 'Track every update',
+    tourReportsDescription: 'Review your reports, approval status, and match results from My Reports.',
 
     // Hero
     heroBadge: '5-Factor Automated Matching Engine',

@@ -1,6 +1,6 @@
 <template>
-  <header class="site-navbar sticky top-0 z-40 bg-brand-paper/95 backdrop-blur-md border-b border-brand-sand/70 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <header class="sticky top-2 z-40 px-2 sm:top-3 sm:px-4">
+    <div class="site-navbar relative max-w-7xl mx-auto rounded-xl bg-brand-cream/95 px-3 shadow-warm-lg backdrop-blur-xl transition-[background-color,box-shadow] duration-300 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-14 sm:h-16">
         
         <!-- Brand Logo & Campus Tag -->
@@ -41,6 +41,7 @@
           </button>
           
           <button 
+            data-tour="my-posts"
             @click="$emit('nav-change', 'my-posts')"
             class="relative flex items-center gap-1.5 py-1 transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
             :class="activeTab === 'my-posts' ? 'font-bold text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"

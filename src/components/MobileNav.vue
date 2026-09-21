@@ -8,6 +8,7 @@
       <button
         v-for="tab in tabs"
         :key="tab.id"
+        :data-tour="tab.id === 'my-posts' ? 'my-posts' : undefined"
         class="relative flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none"
         :class="activeTab === tab.id ? 'text-brand-chestnut' : 'text-brand-mocha/70 hover:text-brand-espresso'"
         :aria-current="activeTab === tab.id ? 'page' : undefined"
