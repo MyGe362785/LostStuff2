@@ -31,6 +31,7 @@ describe('repository security contract', () => {
     const config = JSON.parse(readFileSync('vercel.json', 'utf8'))
     const headers = Object.fromEntries(config.headers[0].headers.map(({ key, value }) => [key, value]))
     expect(headers['Content-Security-Policy']).toContain("frame-ancestors 'none'")
+    expect(headers['Content-Security-Policy']).toContain('frame-src https://www.google.com https://maps.google.com')
     expect(headers['Strict-Transport-Security']).toContain('max-age=63072000')
     expect(headers['X-Content-Type-Options']).toBe('nosniff')
   })

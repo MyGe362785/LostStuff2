@@ -22,16 +22,18 @@
           <div class="relative min-h-[330px] overflow-hidden bg-brand-sand/50 sm:min-h-[430px] lg:min-h-[500px]">
             <iframe
               class="absolute inset-0 h-full w-full border-0 pointer-events-none sm:hidden"
-              src="https://maps.google.com/maps?ll=16.47757,102.81611&z=14&t=m&output=embed"
+              src="https://www.google.com/maps/embed?origin=mfe&pb=!1m11!1m8!1m3!1d30607.677990312717!2d102.81611!3d16.47757!3m2!1i1024!2i768!4f13.1!5e0!6i14"
               :title="t('campusMapFrameTitle')"
               loading="lazy"
+              allowfullscreen
               referrerpolicy="no-referrer-when-downgrade"
             ></iframe>
             <iframe
               class="absolute inset-0 hidden h-full w-full border-0 pointer-events-none sm:block"
-              src="https://maps.google.com/maps?ll=16.47757,102.81611&z=15&t=m&output=embed"
+              src="https://www.google.com/maps/embed?origin=mfe&pb=!1m11!1m8!1m3!1d15303.838995156359!2d102.81611!3d16.47757!3m2!1i1024!2i768!4f13.1!5e0!6i15"
               :title="t('campusMapFrameTitle')"
               loading="lazy"
+              allowfullscreen
               referrerpolicy="no-referrer-when-downgrade"
             ></iframe>
 
