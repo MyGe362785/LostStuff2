@@ -334,6 +334,27 @@
                 <dt class="text-brand-latte">{{ t('claimProofLabel') }}</dt>
                 <dd class="text-brand-mocha whitespace-pre-line break-words">{{ claim.proof }}</dd>
               </div>
+              <div v-if="claim.linkedLostItem" class="sm:col-span-2">
+                <dt class="text-brand-latte">{{ t('claimLinkedLostPostStaffLabel') }}</dt>
+                <dd class="mt-1 flex flex-wrap items-center gap-2">
+                  <span class="font-semibold text-brand-espresso">{{ isTh ? claim.linkedLostItem.titleTh : claim.linkedLostItem.titleEn }}</span>
+                  <button
+                    type="button"
+                    @click="$emit('view-item', claim.linkedLostItem)"
+                    class="rounded-lg border border-brand-sand bg-brand-cream px-2.5 py-1 text-[11px] font-bold text-brand-chestnut transition-colors hover:bg-brand-sand"
+                  >
+                    {{ t('claimLinkedLostPostOpen') }}
+                  </button>
+                </dd>
+              </div>
+              <div v-if="claim.evidenceImageUrls.length" class="sm:col-span-2">
+                <dt class="text-brand-latte">{{ t('claimEvidenceStaffLabel') }}</dt>
+                <dd class="mt-1 flex flex-wrap gap-2">
+                  <a v-for="(imageUrl, index) in claim.evidenceImageUrls" :key="imageUrl" :href="imageUrl" target="_blank" rel="noopener noreferrer" class="block overflow-hidden rounded-lg border border-brand-sand focus:outline-none focus:ring-2 focus:ring-brand-caramel">
+                    <img :src="imageUrl" :alt="`${t('claimEvidenceStaffLabel')} ${index + 1}`" class="h-16 w-16 object-cover" />
+                  </a>
+                </dd>
+              </div>
               <div v-if="claim.staffNote" class="sm:col-span-2">
                 <dt class="text-brand-latte">{{ t('claimStaffNoteLabel') }}</dt>
                 <dd class="text-brand-mocha">{{ claim.staffNote }}</dd>
@@ -971,7 +992,8 @@ const emit = defineEmits([
   'reject-item',
   'confirm-return',
   'reset-data',
-  'review-claim'
+  'review-claim',
+  'view-item'
 ])
 
 const isTh = computed(() => props.currentLang === 'th')

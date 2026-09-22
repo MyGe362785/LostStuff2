@@ -35,7 +35,7 @@
           </div>
         </div>
 
-        <button 
+        <button
           @click="$emit('close')"
           class="w-7 h-7 rounded-lg bg-brand-sand/60 hover:bg-brand-sand text-brand-mocha flex items-center justify-center transition-colors"
         >
@@ -135,7 +135,7 @@
 
       <!-- Modal Footer -->
       <div class="px-6 py-4 bg-brand-cream/90 border-t border-brand-sand flex items-center justify-between shrink-0">
-        <button 
+        <button
           @click="$emit('close')"
           class="px-4 py-2 rounded-xl text-xs font-semibold text-brand-mocha hover:bg-brand-sand/60 transition-colors"
         >
@@ -143,6 +143,7 @@
         </button>
 
         <button 
+          v-if="candidateItem.type === 'found'"
           @click="$emit('verify-claim', candidateItem)"
           class="px-6 py-2.5 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white text-xs font-bold shadow-warm-md transition-all flex items-center gap-2"
         >

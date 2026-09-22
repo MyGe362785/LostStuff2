@@ -1,6 +1,8 @@
 import { isBackendConfigured, supabase } from '../lib/supabase'
 
 const IMAGE_BUCKET = 'loststuff-images'
+const CLAIM_EVIDENCE_BUCKET = 'claim-evidence'
+const MAX_CLAIM_EVIDENCE_IMAGES = 5
 
 const FALLBACK_IMAGE_BY_CATEGORY = {
   electronics: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
@@ -120,22 +122,70 @@ export async function createItem({ item, imageFile }) {
 
 export const DUPLICATE_CLAIM = 'duplicate_claim'
 
-export async function createClaim({ itemId, proof, preferredContact }) {
+/** Active lost reports owned by the signed-in user that may support a claim. */
+export async function listMyClaimableLostItems() {
+  requireBackend()
+  const user = await getCurrentUser()
+  if (!user) return []
+  const { data, error } = await supabase
+    .from('items')
+    .select('*, item_images(storage_path)')
+    .eq('owner_id', user.id)
+    .eq('type', 'lost')
+    .in('status', ['pending_review', 'searching', 'matched'])
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return Promise.all(data.map((item) => mapItem(item, user.id)))
+}
+
+/**
+ * The edge function validates the actual image signature and assigns the MIME
+ * type itself. The private bucket has no browser INSERT policy, so a caller
+ * cannot bypass that check by calling Storage directly.
+ */
+export async function uploadClaimEvidence(file) {
+  requireBackend()
+  const formData = new FormData()
+  formData.append('file', file)
+  const { data, error } = await supabase.functions.invoke('upload-claim-evidence', { body: formData })
+  if (error) throw new Error(data?.error || error.message || 'Could not upload evidence image.')
+  if (!data?.path) throw new Error('The evidence upload did not return a file reference.')
+  return data.path
+}
+
+/** Remove unsubmitted private evidence when the claimant cancels the form. */
+export async function removeClaimEvidence(paths) {
+  requireBackend()
+  if (!paths?.length) return
+  const { error } = await supabase.storage.from(CLAIM_EVIDENCE_BUCKET).remove(paths)
+  if (error) throw error
+}
+
+export async function createClaim({ itemId, proof, preferredContact, evidencePaths = [], linkedLostItemId = null }) {
   requireBackend()
   const user = await getCurrentUser()
   if (!user) throw new Error('Sign in is required before submitting a claim.')
+  if (evidencePaths.length > MAX_CLAIM_EVIDENCE_IMAGES) throw new Error('Attach no more than five evidence images.')
   const { data, error } = await supabase.rpc('create_claim', {
     p_item_id: itemId,
     p_proof: proof,
     p_preferred_contact: preferredContact,
+    p_evidence_paths: evidencePaths,
+    p_linked_lost_item_id: linkedLostItemId,
   })
   // claims has unique (item_id, claimant_id); a second claim on the same item lands here.
   if (error?.code === '23505') throw Object.assign(new Error(DUPLICATE_CLAIM), { code: DUPLICATE_CLAIM })
   if (error) throw error
-  return { id: data, item_id: itemId, claimant_id: user.id, proof, preferred_contact: preferredContact, status: 'pending' }
+  return {
+    id: data, item_id: itemId, claimant_id: user.id, proof, preferred_contact: preferredContact,
+    evidence_paths: evidencePaths, linked_lost_item_id: linkedLostItemId, status: 'pending',
+  }
 }
 
-function mapClaim(record) {
+async function mapClaim(record) {
+  const evidenceImageUrls = await Promise.all(
+    (record.claim_evidence || []).map((evidence) => signedImageUrl(evidence.storage_path))
+  )
   return {
     id: record.id,
     itemId: record.item_id,
@@ -153,20 +203,25 @@ function mapClaim(record) {
     itemType: record.item?.type || null,
     handoverPointTh: record.item?.handover_point_th || null,
     handoverPointEn: record.item?.handover_point_en || record.item?.handover_point_th || null,
+    linkedLostItem: record.linked_lost_item ? await mapItem(record.linked_lost_item) : null,
+    evidenceImageUrls: evidenceImageUrls.filter(Boolean),
   }
 }
 
 const CLAIM_ITEM_COLUMNS = 'item:items(title_th, title_en, status, type, handover_point_th, handover_point_en)'
+const CLAIM_LINKED_LOST_ITEM_COLUMNS = 'linked_lost_item:items!claims_linked_lost_item_id_fkey(*, item_images(storage_path))'
+const CLAIM_EVIDENCE_COLUMNS = 'claim_evidence(storage_path)'
+const CLAIM_SELECT_COLUMNS = `id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, ${CLAIM_ITEM_COLUMNS}, ${CLAIM_LINKED_LOST_ITEM_COLUMNS}, ${CLAIM_EVIDENCE_COLUMNS}`
 
 /** Every claim, newest first. RLS returns rows only to staff. */
 export async function listClaimsForStaff() {
   requireBackend()
   const { data, error } = await supabase
     .from('claims')
-    .select(`id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, claimant:profiles!claims_claimant_id_fkey(display_name), ${CLAIM_ITEM_COLUMNS}`)
+    .select(`${CLAIM_SELECT_COLUMNS}, claimant:profiles!claims_claimant_id_fkey(display_name)`)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data.map(mapClaim)
+  return Promise.all(data.map(mapClaim))
 }
 
 /** The signed-in user's own claims, newest first. */
@@ -176,11 +231,11 @@ export async function listMyClaims() {
   if (!user) return []
   const { data, error } = await supabase
     .from('claims')
-    .select(`id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, ${CLAIM_ITEM_COLUMNS}`)
+    .select(CLAIM_SELECT_COLUMNS)
     .eq('claimant_id', user.id)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data.map(mapClaim)
+  return Promise.all(data.map(mapClaim))
 }
 
 /**

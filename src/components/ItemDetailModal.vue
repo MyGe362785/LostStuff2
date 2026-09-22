@@ -154,7 +154,7 @@
         </div>
 
         <!-- Claim Instruction Notice -->
-        <div v-if="item.status !== 'returned' && item.status !== 'closed'" class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 space-y-1">
+        <div v-if="item.type === 'found' && item.status !== 'returned' && item.status !== 'closed'" class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 space-y-1">
           <p class="font-bold flex items-center gap-1.5">
             <AlertCircle class="w-4 h-4 text-amber-600" />
             {{ isTh ? 'ขั้นตอนการยืนยันความเป็นเจ้าของ (Proposal Use-Case)' : 'Ownership Claim Instructions' }}
@@ -215,7 +215,7 @@
           
           <!-- Submit Claim Button -->
           <button 
-            v-if="item.status !== 'returned' && item.status !== 'closed'"
+            v-if="item.type === 'found' && item.status !== 'returned' && item.status !== 'closed'"
             @click="handleClaimClick"
             class="px-5 py-2.5 rounded-xl bg-brand-chestnut hover:bg-brand-mocha text-white text-xs font-bold shadow-warm-sm transition-all flex items-center gap-2"
           >
