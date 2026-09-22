@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 const migration = readFileSync('supabase/migrations/202609200013_owasp_workflow_hardening.sql', 'utf8')
+const rpcRepairMigration = readFileSync('supabase/migrations/202609220014_repair_update_item_status_rpc.sql', 'utf8')
 
 describe('repository security contract', () => {
   it('removes the raw HTML rendering sink', () => {
@@ -18,6 +19,12 @@ describe('repository security contract', () => {
     expect(migration).toContain('create or replace function public.create_claim')
     expect(migration).toContain('create or replace function public.update_item_status')
     expect(migration).toContain('not public.is_kkumail_user() or not public.is_staff()')
+  })
+
+  it('repairs and reloads the item status RPC schema contract', () => {
+    expect(rpcRepairMigration).toContain('create or replace function public.update_item_status')
+    expect(rpcRepairMigration).toContain('p_expected_status public.item_status default null')
+    expect(rpcRepairMigration).toContain("notify pgrst, 'reload schema'")
   })
 
   it('configures deployment hardening headers', () => {
