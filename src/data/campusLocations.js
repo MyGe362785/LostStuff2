@@ -2,6 +2,8 @@
 
 import cafeteriaLocationImage from '../../img/location1.webp'
 import libraryLocationImage from '../../img/location2.webp'
+import sc09LocationImage from '../../img/location3.jpeg'
+import securityDivisionLocationImage from '../../img/location4.jpg'
 
 export const handoverLocations = [
   {
@@ -15,6 +17,11 @@ export const handoverLocations = [
     handoverPointEn: 'Dormitory 9 Cafeteria Drop-off Point',
     operatingHoursTh: '09.00 – 17.00 น.',
     operatingHoursEn: '09:00–17:00',
+    latitude: 16.4794586,
+    longitude: 102.8070961,
+    mapOffsetX: -105,
+    mapOffsetY: -23,
+    mapUrl: 'https://maps.app.goo.gl/ehW3XmAwbmP2jNhk6',
     isAvailable: true,
   },
   {
@@ -28,6 +35,47 @@ export const handoverLocations = [
     handoverPointEn: 'Lost & Found Counter, 1st Floor',
     operatingHoursTh: '09.00 – 17.00 น.',
     operatingHoursEn: '09:00–17:00',
+    latitude: 16.4766301,
+    longitude: 102.8234279,
+    mapOffsetX: 85,
+    mapOffsetY: 11,
+    mapUrl: 'https://maps.app.goo.gl/qCB4dckd39pN1kxA6',
+    isAvailable: true,
+  },
+  {
+    id: 'sc09_wittayawiphas',
+    nameTh: 'SC09 อาคารวิทยวิภาส วิทยาลัยการคอมพิวเตอร์',
+    nameEn: 'SC09 Wittayawiphas Building, College of Computing',
+    code: 'SC09',
+    zone: 'Science & Tech Zone',
+    image: sc09LocationImage,
+    handoverPointTh: 'จุดฝากของชั้น 1',
+    handoverPointEn: 'Drop-off Point, 1st Floor',
+    operatingHoursTh: '08.00 – 18.00 น.',
+    operatingHoursEn: '08:00–18:00',
+    latitude: 16.4756894,
+    longitude: 102.8251242,
+    mapOffsetX: 105,
+    mapOffsetY: 23,
+    mapUrl: 'https://maps.app.goo.gl/H8EgtKFGSkXFvvSA6',
+    isAvailable: true,
+  },
+  {
+    id: 'kku_security_division',
+    nameTh: 'กองป้องกันและรักษาความปลอดภัย มหาวิทยาลัยขอนแก่น',
+    nameEn: 'Security and Safety Division, Khon Kaen University',
+    code: 'SEC',
+    zone: 'Security Zone',
+    image: securityDivisionLocationImage,
+    handoverPointTh: 'กองป้องกันและรักษาความปลอดภัย',
+    handoverPointEn: 'Security and Safety Division',
+    operatingHoursTh: '08.00 – 18.00 น.',
+    operatingHoursEn: '08:00–18:00',
+    latitude: 16.4779575,
+    longitude: 102.8191785,
+    mapOffsetX: 36,
+    mapOffsetY: -5,
+    mapUrl: 'https://maps.app.goo.gl/a9qichZxTPQVvqzy6',
     isAvailable: true,
   },
 ]

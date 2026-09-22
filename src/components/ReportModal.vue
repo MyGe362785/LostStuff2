@@ -9,6 +9,9 @@
     <!-- Modal Dialog Panel -->
     <div 
       class="relative w-full max-w-2xl rounded-2xl bg-brand-paper shadow-warm-xl border border-brand-sand overflow-hidden z-10 my-8 flex flex-col max-h-[90vh]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="report-modal-title"
     >
       <!-- Modal Header -->
       <div class="px-5 py-3.5 bg-brand-cream/80 border-b border-brand-sand/80 flex items-center justify-between shrink-0">
@@ -21,7 +24,7 @@
             <Plus v-else class="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 class="font-bold text-sm sm:text-base text-brand-espresso">
+            <h3 id="report-modal-title" class="font-bold text-sm sm:text-base text-brand-espresso">
               {{ reportType === 'lost' ? t('navReportLost') : t('navReportFound') }}
             </h3>
             <p class="text-[11px] text-brand-mocha/70">
@@ -31,7 +34,9 @@
         </div>
 
         <button 
+          type="button"
           @click="$emit('close')"
+          :aria-label="isTh ? 'ปิดหน้าต่างแจ้งสิ่งของ' : 'Close report dialog'"
           class="w-7 h-7 rounded-lg bg-brand-sand/60 hover:bg-brand-sand text-brand-mocha flex items-center justify-center transition-colors"
         >
           <X class="w-3.5 h-3.5" />
@@ -77,9 +82,9 @@
           
           <!-- Category Selector -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <p class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldCategory') }} <span class="text-lost">*</span>
-            </label>
+            </p>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <button 
                 type="button"
@@ -97,10 +102,11 @@
 
           <!-- Item Name -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <label for="item-name" class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldName') }} <span class="text-lost">*</span>
             </label>
             <input 
+              id="item-name"
               v-model="formData.title"
               type="text" 
               required
@@ -275,33 +281,28 @@
         <!-- STEP 2: Location & Date -->
         <div v-if="currentStep === 2" class="space-y-4 animate-in fade-in duration-150">
           
-          <!-- Campus Building Selector -->
+          <!-- Free-form incident location -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <label for="incident-location" class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldBuilding') }} <span class="text-lost">*</span>
             </label>
-            <select 
-              v-model="formData.buildingId"
+            <input
+              id="incident-location"
+              v-model="formData.incidentLocation"
+              type="text"
               required
-              class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-semibold text-brand-espresso focus:outline-none focus:border-brand-caramel cursor-pointer"
-            >
-              <option value="">{{ isTh ? '-- เลือกอาคารในมหาวิทยาลัย --' : '-- Select Campus Building --' }}</option>
-              <option 
-                v-for="bld in campusBuildings" 
-                :key="bld.id" 
-                :value="bld.id"
-              >
-                {{ isTh ? bld.nameTh : bld.nameEn }} ({{ bld.zone }})
-              </option>
-            </select>
+              :placeholder="t('fieldBuildingPlaceholder')"
+              class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
+            />
           </div>
 
           <!-- Floor & Area Description -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <label for="location-detail" class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldFloor') }} <span class="text-lost">*</span>
             </label>
             <input 
+              id="location-detail"
               v-model="formData.locationDetail"
               type="text" 
               required
@@ -346,10 +347,11 @@
           
           <!-- Reporter Name -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <label for="reporter-name" class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldReporterName') }} <span class="text-lost">*</span>
             </label>
             <input 
+              id="reporter-name"
               v-model="formData.reporterName"
               type="text" 
               required
@@ -360,10 +362,11 @@
 
           <!-- Contact Channel -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <label for="reporter-contact" class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldContact') }} <span class="text-lost">*</span>
             </label>
             <input 
+              id="reporter-contact"
               v-model="formData.reporterContact"
               type="text" 
               required
@@ -374,17 +377,34 @@
 
           <!-- Safe Handover Drop-off Point Recommendation -->
           <div>
-            <label class="block text-xs font-bold text-brand-espresso mb-1.5">
+            <label for="handover-location" class="block text-xs font-bold text-brand-espresso mb-1.5">
               {{ t('fieldHandoverPoint') }}
             </label>
-            <input 
-              v-model="formData.handoverPoint"
-              type="text" 
-              :placeholder="isTh ? 'เช่น เคาน์เตอร์ยืม-คืน หอสมุดกลาง ชั้น 1' : 'e.g. Circulation Desk, Central Library 1st Floor'"
-              class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
+            <select
+              id="handover-location"
+              v-model="formData.handoverLocationId"
+              class="w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-semibold text-brand-espresso focus:outline-none focus:border-brand-caramel cursor-pointer"
+            >
+              <option
+                v-for="location in handoverLocations"
+                :key="location.id"
+                :value="location.id"
+              >
+                {{ handoverOptionLabel(location) }}
+              </option>
+              <option value="other">{{ t('fieldHandoverOther') }}</option>
+            </select>
+            <input
+              v-if="formData.handoverLocationId === 'other'"
+              v-model="formData.customHandoverPoint"
+              type="text"
+              required
+              :placeholder="t('fieldHandoverCustomPlaceholder')"
+              class="mt-2 w-full px-4 py-2.5 rounded-xl bg-brand-cream/60 border border-brand-sand text-xs font-medium text-brand-espresso focus:outline-none focus:border-brand-caramel"
             />
-            <p class="text-[11px] text-brand-latte mt-1">
-              {{ isTh ? '💡 แนะนำให้เลือกจุดฝากของทางการของมหาวิทยาลัยเพื่อความปลอดภัย' : '💡 Recommended to use official campus security/library desks' }}
+            <p class="mt-1.5 flex items-start gap-1.5 text-[11px] text-brand-latte">
+              <Lightbulb class="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>{{ isTh ? 'แนะนำให้เลือกจุดฝากของทางการของมหาวิทยาลัยเพื่อความปลอดภัย' : 'Choose an official university drop-off point whenever possible.' }}</span>
             </p>
           </div>
 
@@ -437,9 +457,9 @@
 import { ref, computed } from 'vue'
 import { 
   X, Plus, AlertCircle, Sparkles, Camera, ChevronDown,
-  Laptop, CreditCard, BookOpen, Watch, Key, HelpCircle 
+  Laptop, CreditCard, BookOpen, Watch, Key, HelpCircle, Lightbulb
 } from 'lucide-vue-next'
-import { itemCategories, campusBuildings } from '../data/campusLocations'
+import { itemCategories, handoverLocations } from '../data/campusLocations'
 import { colorOptions, getColorHex } from '../data/colors'
 import { ImageUploadError, prepareImageForUpload } from '../utils/imageUpload'
 
@@ -579,14 +599,21 @@ const formData = ref({
   description: '',
   // The demo shows a sample photo; the real backend only saves what the user uploads.
   imageUrl: props.backendConfigured ? '' : 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
-  buildingId: 'bld_library',
+  incidentLocation: '',
   locationDetail: '',
   date: today,
   timeRange: 'afternoon',
   reporterName: '',
   reporterContact: '',
-  handoverPoint: 'เคาน์เตอร์บริการยืม-คืน ชั้น 1 สำนักหอสมุดกลาง'
+  handoverLocationId: handoverLocations[0]?.id || 'other',
+  customHandoverPoint: ''
 })
+
+function handoverOptionLabel(location) {
+  const name = isTh.value ? location.nameTh : location.nameEn
+  const point = isTh.value ? location.handoverPointTh : location.handoverPointEn
+  return `${name} — ${point}`
+}
 
 function getCategoryIcon(iconName) {
   const iconMap = { Laptop, CreditCard, BookOpen, Watch, Key, HelpCircle }
@@ -600,7 +627,7 @@ function handleNextStep() {
       return
     }
   } else if (currentStep.value === 2) {
-    if (!formData.value.buildingId || !formData.value.locationDetail.trim()) {
+    if (!formData.value.incidentLocation.trim() || !formData.value.locationDetail.trim()) {
       alert(isTh.value ? 'กรุณาระบุสถานที่และบริเวณที่เกิดเหตุ' : 'Please specify location details')
       return
     }
@@ -615,8 +642,23 @@ function handleSubmit() {
     return
   }
 
-  const bld = campusBuildings.find(b => b.id === formData.value.buildingId)
-  const bldName = bld ? (isTh.value ? bld.nameTh : bld.nameEn) : ''
+  const incidentLocation = formData.value.incidentLocation.trim()
+  const selectedHandoverLocation = handoverLocations.find(
+    location => location.id === formData.value.handoverLocationId
+  )
+  const customHandoverPoint = formData.value.customHandoverPoint.trim()
+
+  if (formData.value.handoverLocationId === 'other' && !customHandoverPoint) {
+    alert(isTh.value ? 'กรุณาระบุจุดฝากส่งมอบของ' : 'Please enter a handover point')
+    return
+  }
+
+  const handoverPointTh = selectedHandoverLocation
+    ? `${selectedHandoverLocation.nameTh} — ${selectedHandoverLocation.handoverPointTh}`
+    : customHandoverPoint
+  const handoverPointEn = selectedHandoverLocation
+    ? `${selectedHandoverLocation.nameEn} — ${selectedHandoverLocation.handoverPointEn}`
+    : customHandoverPoint
 
   const chosenColor = colorOptions.find(c => c.id === formData.value.color)
   const defaultTh = chosenColor ? chosenColor.nameTh : formData.value.color
@@ -638,9 +680,9 @@ function handleSubmit() {
     colorNameEn: finalColorEn,
     brand: formData.value.brand || '',
     distinctiveMarks: formData.value.distinctiveMarks || '',
-    buildingId: formData.value.buildingId,
-    locationDetailTh: `${bldName} ${formData.value.locationDetail}`,
-    locationDetailEn: `${bldName} ${formData.value.locationDetail}`,
+    buildingId: incidentLocation,
+    locationDetailTh: `${incidentLocation} ${formData.value.locationDetail}`,
+    locationDetailEn: `${incidentLocation} ${formData.value.locationDetail}`,
     date: formData.value.date,
     timeRange: formData.value.timeRange,
     timeDetailTh: `แจ้งเมื่อ ${formData.value.date}`,
@@ -650,8 +692,8 @@ function handleSubmit() {
     imageUrl: formData.value.imageUrl || 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&auto=format&fit=crop&q=80',
     reporterName: formData.value.reporterName,
     reporterContact: formData.value.reporterContact,
-    handoverPointTh: formData.value.handoverPoint || (bld ? bld.handoverPointTh : 'ศูนย์ประสานงานของหายกลาง'),
-    handoverPointEn: formData.value.handoverPoint || (bld ? bld.handoverPointEn : 'Central Lost & Found Office'),
+    handoverPointTh,
+    handoverPointEn,
     createdAt: new Date().toISOString(),
     isMyPost: true,
     imageFile: selectedImageFile.value
