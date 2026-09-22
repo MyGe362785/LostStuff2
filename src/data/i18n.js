@@ -169,7 +169,7 @@ export const translations = {
     statusPendingConfirm: 'รอการยืนยัน',
     statusMatched: 'จับคู่แล้ว',
     statusReturned: 'ส่งคืนแล้ว',
-    statusClosed: 'ปิดรายการ',
+    statusClosed: 'ปิดรายการแล้ว',
 
     // Item Card & Badges
     badgeLost: 'ของหาย',

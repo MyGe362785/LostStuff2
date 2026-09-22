@@ -12,10 +12,12 @@
         :claims="claims"
         :busyClaimId="reviewingClaimId"
         :busyItemId="approvingItemId"
+        :busyCloseItemId="closingItemId"
         @navigate-home="navigateTo('/')"
         @lang-change="handleLangChange"
         @approve-item="handleApproveItem"
         @reject-item="handleRejectItem"
+        @close-item="handleCloseItem"
         @confirm-return="handleStaffConfirmReturn"
         @reset-data="resetDemoData"
         @review-claim="handleReviewClaim"
@@ -617,6 +619,7 @@ const claims = ref([]) // staff: every claim
 const myClaims = ref([]) // the signed-in user's own claims
 const reviewingClaimId = ref(null)
 const approvingItemId = ref(null)
+const closingItemId = ref(null)
 const isSubmittingReport = ref(false)
 
 // Filters
@@ -1080,7 +1083,9 @@ const activeLostCount = computed(() => items.value.filter(item => item.type === 
 const unreadEmailsCount = computed(() => emails.value.filter(e => !e.isRead).length)
 
 const filteredItems = computed(() => {
-  let result = [...items.value]
+  // Keep closed cases available to staff and in the reporter's history, but
+  // never expose them in the public catalogue through any filter.
+  let result = items.value.filter(item => item.status !== 'closed')
 
   // Status Filter
   if (selectedStatus.value === 'lost') {
@@ -1397,9 +1402,59 @@ async function handleRejectItem(itemId) {
 
     showToast({
       title: isTh.value ? 'ปิดรายการแล้ว' : 'Case Closed',
-      message: isTh.value ? `รายการ #${target.id} ถูกปรับสถานะเป็นปิดรายการ` : `Item #${target.id} marked as closed.`,
+      message: isTh.value ? `รายการ #${target.id} ถูกปรับสถานะเป็นปิดรายการแล้ว` : `Item #${target.id} marked as closed.`,
       type: 'info'
     })
+  }
+}
+
+async function handleCloseItem(itemId) {
+  if (closingItemId.value) return
+  closingItemId.value = itemId
+  try {
+    if (isBackendConfigured) {
+      await updateItemStatus(itemId, 'closed', 'item_closed', { reason: 'Closed by administrator' })
+      await loadBackendItems()
+      showToast({
+        title: isTh.value ? 'ปิดรายการแล้ว' : 'Item closed',
+        message: isTh.value ? 'รายการนี้จะไม่แสดงในหน้าหลักอีกต่อไป' : 'This item is no longer shown on the home page.',
+        type: 'info'
+      })
+      void loadAuditLogsSafely()
+      return
+    }
+
+    const target = items.value.find(item => item.id === itemId)
+    if (!target) return
+
+    target.status = 'closed'
+    auditLogs.value.unshift({
+      id: `log-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      staffName: 'เจ้าหน้าที่ศูนย์ประสานงาน (Staff)',
+      actionType: 'close_item',
+      actionLabelTh: 'ปิดรายการแล้ว',
+      actionLabelEn: 'Item Closed',
+      itemId: target.id,
+      itemTitle: target.titleTh,
+      claimantInfo: target.reporterName,
+      notes: 'เจ้าหน้าที่ปิดรายการและนำออกจากหน้าหลัก',
+      statusBadgeClass: 'bg-brand-sand text-brand-mocha border-brand-tan'
+    })
+    saveData()
+    showToast({
+      title: isTh.value ? 'ปิดรายการแล้ว' : 'Item closed',
+      message: isTh.value ? `รายการ #${target.id} จะไม่แสดงในหน้าหลักอีกต่อไป` : `Item #${target.id} is no longer shown on the home page.`,
+      type: 'info'
+    })
+  } catch (error) {
+    showToast({
+      title: isTh.value ? 'ปิดรายการไม่สำเร็จ' : 'Could not close item',
+      message: error.message,
+      type: 'info'
+    })
+  } finally {
+    closingItemId.value = null
   }
 }
 

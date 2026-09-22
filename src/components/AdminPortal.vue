@@ -447,7 +447,7 @@
               <option value="pending_confirm">{{ isTh ? 'รอยืนยันสิทธิ์ (Pending Confirm)' : 'Pending Confirm' }}</option>
               <option value="matched">{{ isTh ? 'จับคู่แล้ว (Matched)' : 'Matched' }}</option>
               <option value="returned">{{ isTh ? 'ส่งคืนแล้ว (Returned)' : 'Returned' }}</option>
-              <option value="closed">{{ isTh ? 'ปิดรายการ (Closed)' : 'Closed' }}</option>
+              <option value="closed">{{ isTh ? 'ปิดรายการแล้ว (Closed)' : 'Closed' }}</option>
             </select>
           </div>
         </div>
@@ -487,6 +487,17 @@
 
             <!-- Handover Confirmation Action -->
             <div class="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end pt-2 sm:pt-0">
+              <button
+                v-if="item.status !== 'returned' && item.status !== 'closed'"
+                type="button"
+                :disabled="busyCloseItemId !== null"
+                @click="openCloseConfirmModal(item)"
+                class="px-3.5 py-2 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
+              >
+                <CircleX class="w-4 h-4" />
+                <span>{{ isTh ? 'ปิดรายการ' : 'Close item' }}</span>
+              </button>
+
               <button
                 v-if="item.status !== 'returned' && item.status !== 'closed'"
                 @click="openConfirmReturnModal(item)"
@@ -885,6 +896,44 @@
       </div>
     </div>
 
+    <!-- Close Item Confirmation Modal -->
+    <div v-if="closeConfirmItem" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-espresso/70 backdrop-blur-md animate-in fade-in duration-150" @click.self="closeConfirmItem = null">
+      <div class="bg-brand-paper rounded-3xl p-6 border border-brand-sand max-w-md w-full shadow-warm-xl">
+        <div class="flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center justify-center shrink-0">
+            <CircleX class="w-5 h-5" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-lg font-extrabold text-brand-espresso">
+              {{ isTh ? 'ยืนยันการปิดรายการ' : 'Close this item?' }}
+            </h3>
+            <p class="mt-1 text-xs leading-relaxed text-brand-mocha/80">
+              {{ isTh ? `รายการ “${closeConfirmItem.titleTh}” จะเปลี่ยนเป็น “ปิดรายการแล้ว” และจะไม่แสดงในหน้าหลัก` : `“${closeConfirmItem.titleEn}” will be marked closed and removed from the home page.` }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 mt-6">
+          <button
+            type="button"
+            @click="closeConfirmItem = null"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-brand-mocha hover:bg-brand-cream transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel"
+          >
+            {{ isTh ? 'ยกเลิก' : 'Cancel' }}
+          </button>
+          <button
+            type="button"
+            :disabled="busyCloseItemId !== null"
+            @click="executeCloseItem"
+            class="px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300 focus-visible:ring-offset-2"
+          >
+            <CircleX class="w-4 h-4" />
+            <span>{{ isTh ? 'ยืนยันปิดรายการ' : 'Confirm close' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Return Handover Modal with Clean Warm Design -->
     <div v-if="returnConfirmItem" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-espresso/70 backdrop-blur-md animate-in fade-in duration-150">
       <div class="bg-brand-paper rounded-3xl p-6 border border-brand-sand max-w-md w-full shadow-warm-xl space-y-4">
@@ -952,7 +1001,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { 
   ShieldCheck, ArrowLeft, Inbox, CheckSquare, FileText, 
-  Zap, Smile, CheckCircle2, RotateCcw, Search, Star, ExternalLink
+  Zap, Smile, CheckCircle2, RotateCcw, Search, Star, ExternalLink, CircleX
 } from 'lucide-vue-next'
 import { SATISFACTION_SURVEY_URL } from '../data/links'
 import { runMatchingBenchmark } from '../data/benchmarkDataset'
@@ -982,7 +1031,8 @@ const props = defineProps({
   claims: { type: Array, default: () => [] },
   busyClaimId: { type: String, default: null },
   // The item being approved right now; its buttons wait for the answer.
-  busyItemId: { type: String, default: null }
+  busyItemId: { type: String, default: null },
+  busyCloseItemId: { type: String, default: null }
 })
 
 const emit = defineEmits([
@@ -990,6 +1040,7 @@ const emit = defineEmits([
   'lang-change',
   'approve-item',
   'reject-item',
+  'close-item',
   'confirm-return',
   'reset-data',
   'review-claim',
@@ -1065,6 +1116,7 @@ const filteredActiveItems = computed(() => {
 // Inspection & Return Modals
 const inspectingItem = ref(null)
 const returnConfirmItem = ref(null)
+const closeConfirmItem = ref(null)
 const returnClaimant = ref('')
 const returnNotes = ref('')
 
@@ -1076,6 +1128,16 @@ function openConfirmReturnModal(item) {
   returnConfirmItem.value = item
   returnClaimant.value = ''
   returnNotes.value = 'ตรวจสอบหลักฐานยืนยันตัวตนเรียบร้อย ณ จุดส่งมอบทางการ'
+}
+
+function openCloseConfirmModal(item) {
+  closeConfirmItem.value = item
+}
+
+function executeCloseItem() {
+  if (!closeConfirmItem.value || props.busyCloseItemId !== null) return
+  emit('close-item', closeConfirmItem.value.id)
+  closeConfirmItem.value = null
 }
 
 function executeReturnConfirm() {
@@ -1094,6 +1156,7 @@ function handleReset() {
   activeStatusFilter.value = 'all'
   inspectingItem.value = null
   returnConfirmItem.value = null
+  closeConfirmItem.value = null
   emit('reset-data')
 }
 
