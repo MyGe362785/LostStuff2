@@ -2,6 +2,8 @@
 
 import cafeteriaLocationImage from '../../img/location1.webp'
 import libraryLocationImage from '../../img/location2.webp'
+import sc09LocationImage from '../../img/location3.jpeg'
+import securityDivisionLocationImage from '../../img/location4.jpg'
 
 export const handoverLocations = [
   {
@@ -28,6 +30,32 @@ export const handoverLocations = [
     handoverPointEn: 'Lost & Found Counter, 1st Floor',
     operatingHoursTh: '09.00 – 17.00 น.',
     operatingHoursEn: '09:00–17:00',
+    isAvailable: true,
+  },
+  {
+    id: 'sc09_wittayawiphas',
+    nameTh: 'SC09 อาคารวิทยวิภาส วิทยาลัยการคอมพิวเตอร์',
+    nameEn: 'SC09 Wittayawiphas Building, College of Computing',
+    code: 'SC09',
+    zone: 'Science & Tech Zone',
+    image: sc09LocationImage,
+    handoverPointTh: 'จุดฝากของชั้น 1',
+    handoverPointEn: 'Drop-off Point, 1st Floor',
+    operatingHoursTh: '08.00 – 18.00 น.',
+    operatingHoursEn: '08:00–18:00',
+    isAvailable: true,
+  },
+  {
+    id: 'kku_security_division',
+    nameTh: 'กองป้องกันและรักษาความปลอดภัย มหาวิทยาลัยขอนแก่น',
+    nameEn: 'Security and Safety Division, Khon Kaen University',
+    code: 'SEC',
+    zone: 'Security Zone',
+    image: securityDivisionLocationImage,
+    handoverPointTh: 'กองป้องกันและรักษาความปลอดภัย',
+    handoverPointEn: 'Security and Safety Division',
+    operatingHoursTh: '08.00 – 18.00 น.',
+    operatingHoursEn: '08:00–18:00',
     isAvailable: true,
   },
 ]

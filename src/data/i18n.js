@@ -211,6 +211,7 @@ export const translations = {
     fieldImage: 'รูปภาพประกอบสิ่งของ',
     fieldImagePlaceholder: 'วาง URL รูปภาพ หรือเลือกภาพตัวอย่าง',
     fieldBuilding: 'อาคาร / สถานที่เกิดเหตุ',
+    fieldBuildingPlaceholder: 'เช่น SC09 อาคารวิทยวิภาส วิทยาลัยการคอมพิวเตอร์',
     fieldFloor: 'ชั้น / ห้อง / บริเวณที่พบหรือหาย',
     fieldFloorPlaceholder: 'เช่น ชั้น 3 โต๊ะอ่านหนังสือริมหน้าต่าง SC-205',
     fieldDate: 'วันที่เกิดเหตุ',
@@ -221,6 +222,8 @@ export const translations = {
     fieldReporterName: 'ชื่อผู้แจ้ง (ชื่อเล่น / ชื่อ-นามสกุล)',
     fieldContact: 'ช่องทางติดต่อ (LINE ID หรือ เบอร์โทร)',
     fieldHandoverPoint: 'จุดฝากส่งมอบของปลอดภัยที่สะดวก',
+    fieldHandoverOther: 'อื่นๆ (ระบุสถานที่เอง)',
+    fieldHandoverCustomPlaceholder: 'พิมพ์จุดนัดรับหรือจุดฝากส่งมอบที่สะดวก',
 
     // Match Alert Modal
     matchAlertTitle: '🎉 ตรวจพบรายการที่มีแนวโน้มตรงกัน!',
@@ -528,6 +531,7 @@ export const translations = {
     fieldImage: 'Item Image',
     fieldImagePlaceholder: 'Paste image URL or pick preset',
     fieldBuilding: 'Campus Building / Location',
+    fieldBuildingPlaceholder: 'e.g. SC09 Wittayawiphas Building, College of Computing',
     fieldFloor: 'Floor / Room / Specific Area',
     fieldFloorPlaceholder: 'e.g. 3rd Floor, window study desk area SC-205',
     fieldDate: 'Date of Incident',
@@ -538,6 +542,8 @@ export const translations = {
     fieldReporterName: 'Reporter Name (Nickname / Full Name)',
     fieldContact: 'Contact Info (LINE ID or Phone Number)',
     fieldHandoverPoint: 'Preferred Campus Safe Drop-off Point',
+    fieldHandoverOther: 'Other (enter a location)',
+    fieldHandoverCustomPlaceholder: 'Enter a convenient meeting or drop-off point',
 
     // Match Alert Modal
     matchAlertTitle: '🎉 Potential Match Detected!',
