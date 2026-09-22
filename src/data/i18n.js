@@ -297,6 +297,11 @@ export const translations = {
     // Campus Handover
     campusDirectoryTitle: 'จุดบริการรับ-ฝากของหายปลอดภัยในมหาวิทยาลัย',
     campusDirectorySubtitle: 'เพื่อความปลอดภัย แนะนำให้นัดหมายส่งมอบของหรือฝากไว้ ณ จุดบริการทางการของมหาวิทยาลัย',
+    campusMapTitle: 'แผนที่จุดรับ-ฝากของหาย',
+    campusMapHint: 'ชี้หรือกดที่หมุดเพื่อดูรายละเอียด',
+    campusMapOpen: 'เปิดใน Google Maps',
+    campusMapFrameTitle: 'แผนที่ Google Maps แสดงจุดรับ-ฝากของหายในมหาวิทยาลัยขอนแก่น',
+    campusLocationsListTitle: 'รายละเอียดจุดบริการทั้ง 4 จุด',
 
     // FAQ
     faqTitle: 'คำถามที่พบบ่อย & ข้อควรระวังด้านความปลอดภัย',
@@ -617,6 +622,11 @@ export const translations = {
     // Campus Handover
     campusDirectoryTitle: 'Campus Safe Handover & Drop-off Points',
     campusDirectorySubtitle: 'For student security, please arrange handovers or drop-offs at verified official university desks.',
+    campusMapTitle: 'Safe Drop-off Location Map',
+    campusMapHint: 'Hover, focus, or tap a pin to view details',
+    campusMapOpen: 'Open in Google Maps',
+    campusMapFrameTitle: 'Google Map of safe lost-and-found drop-off points at Khon Kaen University',
+    campusLocationsListTitle: 'Details for all 4 service points',
 
     // FAQ
     faqTitle: 'Frequently Asked Guidelines',

@@ -23,4 +23,12 @@ describe('official campus handover locations', () => {
       operatingHoursTh: '08.00 – 18.00 น.',
     })
   })
+
+  it('provides map coordinates and Google Maps links for every service point', () => {
+    for (const location of handoverLocations) {
+      expect(location.latitude).toBeTypeOf('number')
+      expect(location.longitude).toBeTypeOf('number')
+      expect(location.mapUrl).toMatch(/^https:\/\/maps\.app\.goo\.gl\//)
+    }
+  })
 })
