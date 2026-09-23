@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 sm:p-6 animate-in fade-in duration-200">
-    <div class="fixed inset-0 bg-brand-espresso/60 backdrop-blur-sm transition-opacity" @click="requestClose"></div>
+    <div data-modal-backdrop aria-hidden="true" class="fixed inset-0 bg-brand-espresso/60 backdrop-blur-sm transition-opacity"></div>
 
     <div class="relative z-10 my-8 flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-brand-sand bg-brand-paper shadow-warm-xl">
       <div class="flex shrink-0 items-center justify-between border-b border-brand-sand/80 bg-brand-cream/80 px-5 py-3.5">
@@ -25,7 +25,7 @@
           <div class="min-w-0 flex-1">
             <span class="block text-[10px] font-bold uppercase tracking-wider text-brand-latte">{{ t('claimItemSummary') }}</span>
             <h4 class="truncate text-xs font-bold text-brand-espresso sm:text-sm">{{ isTh ? item.titleTh : item.titleEn }}</h4>
-            <p class="truncate text-[11px] text-brand-mocha/70">ID: #{{ item.id }} • {{ isTh ? item.locationDetailTh : item.locationDetailEn }}</p>
+            <p class="truncate text-[11px] text-brand-mocha/70">{{ isTh ? item.locationDetailTh : item.locationDetailEn }}</p>
           </div>
         </div>
 
@@ -48,20 +48,6 @@
           <div>
             <label for="claimant-contact" class="mb-1 block text-xs font-bold text-brand-espresso">{{ t('fieldContact') }} <span class="text-lost">*</span></label>
             <input id="claimant-contact" v-model="claimantContact" type="text" required :disabled="isSubmitting" :placeholder="t('claimantContactPlaceholder')" class="w-full rounded-xl border border-brand-sand bg-brand-cream/60 px-4 py-2.5 text-xs font-medium text-brand-espresso focus:border-brand-caramel focus:outline-none focus:ring-2 focus:ring-brand-caramel/20 disabled:cursor-wait disabled:opacity-70" />
-          </div>
-        </div>
-
-        <div>
-          <label for="linked-lost-post" class="mb-1 block text-xs font-bold text-brand-espresso">{{ t('claimLinkedLostPostLabel') }}</label>
-          <select id="linked-lost-post" v-model="linkedLostPostId" :disabled="isSubmitting || loadingLostPosts" class="w-full rounded-xl border border-brand-sand bg-brand-cream/60 px-4 py-2.5 text-xs font-medium text-brand-espresso focus:border-brand-caramel focus:outline-none focus:ring-2 focus:ring-brand-caramel/20 disabled:cursor-wait disabled:opacity-70">
-            <option value="">{{ t('claimLinkedLostPostNone') }}</option>
-            <option v-for="post in lostPosts" :key="post.id" :value="post.id">{{ isTh ? post.titleTh : post.titleEn }} — {{ formatDate(post.date) }} · {{ isTh ? post.locationDetailTh : post.locationDetailEn }}</option>
-          </select>
-          <p v-if="loadingLostPosts" class="mt-1 text-[11px] text-brand-latte">{{ t('claimLinkedLostPostLoading') }}</p>
-          <p v-else-if="!lostPosts.length" class="mt-1 text-[11px] text-brand-latte">{{ t('claimLinkedLostPostEmpty') }}</p>
-          <div v-else-if="selectedLostPost" class="mt-2 flex items-center gap-2 rounded-xl border border-brand-sand/80 bg-brand-cream/40 p-2.5">
-            <img :src="selectedLostPost.imageUrl" alt="" class="h-10 w-10 rounded-lg border border-brand-sand object-cover" />
-            <p class="min-w-0 truncate text-[11px] font-semibold text-brand-mocha">{{ isTh ? selectedLostPost.titleTh : selectedLostPost.titleEn }}</p>
           </div>
         </div>
 
@@ -129,8 +115,6 @@ const IMAGE_SIGNATURES = {
 
 const props = defineProps({
   item: { type: Object, required: true },
-  lostPosts: { type: Array, default: () => [] },
-  loadingLostPosts: { type: Boolean, default: false },
   backendConfigured: { type: Boolean, default: false },
   submitClaim: { type: Function, required: true },
   currentLang: { type: String, default: 'th' },
@@ -143,7 +127,6 @@ const secretDetails = ref('')
 const claimantId = ref('')
 const claimantName = ref('')
 const claimantContact = ref('')
-const linkedLostPostId = ref('')
 const selectedEvidence = ref([])
 const evidenceError = ref('')
 const submitError = ref('')
@@ -151,14 +134,6 @@ const isDragging = ref(false)
 const isSubmitting = ref(false)
 const hasSubmittedClaim = ref(false)
 const isTh = computed(() => props.currentLang === 'th')
-const selectedLostPost = computed(() => props.lostPosts.find((post) => post.id === linkedLostPostId.value) || null)
-
-function formatDate(value) {
-  if (!value) return '-'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString(isTh.value ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })
-}
 
 function requestClose() {
   if (!isSubmitting.value) emit('close')
@@ -242,7 +217,6 @@ async function handleSubmit() {
       claimantName: claimantName.value.trim(),
       claimantContact: claimantContact.value.trim(),
       evidencePaths: selectedEvidence.value.map((evidence) => evidence.uploadedPath).filter(Boolean),
-      linkedLostItemId: linkedLostPostId.value || null,
     })
     hasSubmittedClaim.value = true
     emit('close')

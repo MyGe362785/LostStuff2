@@ -52,13 +52,13 @@ describe('claim submission', () => {
     mocks.rpc.mockResolvedValue({ data: 'claim-1', error: null })
     await expect(createClaim({
       itemId: 'item-1', proof: 'mark', preferredContact: 'email',
-      evidencePaths: ['user-1/image.jpg'], linkedLostItemId: 'lost-item-1',
+      evidencePaths: ['user-1/image.jpg'],
     })).resolves.toMatchObject({
       id: 'claim-1', claimant_id: 'user-1', status: 'pending',
     })
     expect(mocks.rpc).toHaveBeenCalledWith('create_claim', {
       p_item_id: 'item-1', p_proof: 'mark', p_preferred_contact: 'email',
-      p_evidence_paths: ['user-1/image.jpg'], p_linked_lost_item_id: 'lost-item-1',
+      p_evidence_paths: ['user-1/image.jpg'],
     })
   })
 

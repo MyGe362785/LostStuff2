@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 const migration = readFileSync('supabase/migrations/202609200013_owasp_workflow_hardening.sql', 'utf8')
 const rpcRepairMigration = readFileSync('supabase/migrations/202609220014_repair_update_item_status_rpc.sql', 'utf8')
 const claimEvidenceMigration = readFileSync('supabase/migrations/202609220015_claim_evidence_and_linked_lost_posts.sql', 'utf8')
+const removeLinkedPostMigration = readFileSync('supabase/migrations/202609220016_remove_linked_lost_claim_relation.sql', 'utf8')
 
 describe('repository security contract', () => {
   it('removes the raw HTML rendering sink', () => {
@@ -28,13 +29,14 @@ describe('repository security contract', () => {
     expect(rpcRepairMigration).toContain("notify pgrst, 'reload schema'")
   })
 
-  it('keeps claim evidence private and validates links to a claimant-owned lost post', () => {
+  it('keeps claim evidence private and restricts claims to found-item posts', () => {
     expect(claimEvidenceMigration).toContain("'claim-evidence'")
     expect(claimEvidenceMigration).toContain('claim_evidence_storage_path_shape')
     expect(claimEvidenceMigration).toContain('There is intentionally no authenticated INSERT policy')
-    expect(claimEvidenceMigration).toContain("v_linked_lost_item.type <> 'lost'")
-    expect(claimEvidenceMigration).toContain("v_item.type <> 'found'")
     expect(claimEvidenceMigration).toContain('p_evidence_paths text[]')
+    expect(removeLinkedPostMigration).toContain('drop column if exists linked_lost_item_id')
+    expect(removeLinkedPostMigration).toContain("v_item.type <> 'found'")
+    expect(removeLinkedPostMigration).not.toContain('p_linked_lost_item_id')
   })
 
   it('configures deployment hardening headers', () => {

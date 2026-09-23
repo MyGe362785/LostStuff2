@@ -21,18 +21,6 @@
         @confirm-return="handleStaffConfirmReturn"
         @reset-data="resetDemoData"
         @review-claim="handleReviewClaim"
-        @view-item="openItemDetail"
-      />
-      <ItemDetailModal
-        v-if="selectedItem"
-        :item="selectedItem"
-        :currentLang="currentLang"
-        :t="t"
-        :backendConfigured="isBackendConfigured"
-        @close="selectedItem = null"
-        @mark-returned="markItemReturned"
-        @approve-item="handleApproveItem"
-        @claim-item="handleClaimItem"
       />
     </div>
 
@@ -445,8 +433,6 @@
     <ClaimModal
       v-if="isClaimModalOpen && claimingTargetItem"
       :item="claimingTargetItem"
-      :lost-posts="claimableLostItems"
-      :loading-lost-posts="loadingClaimableLostItems"
       :backend-configured="isBackendConfigured"
       :submit-claim="handleSubmitClaim"
       :currentLang="currentLang"
@@ -544,7 +530,7 @@ import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emai
 import { isBackendConfigured, supabase } from './lib/supabase'
 import {
   createClaim, createItem, DUPLICATE_CLAIM, getCurrentProfile, getCurrentUser, ITEM_UNAVAILABLE,
-  listAuditEvents, listClaimsForStaff, listMyClaimableLostItems, listMyClaims, listVisibleItems, reviewClaim, sendNotifications, updateItemStatus,
+  listAuditEvents, listClaimsForStaff, listMyClaims, listVisibleItems, reviewClaim, sendNotifications, updateItemStatus,
 } from './services/lostFoundRepository'
 import { toAuditLogEntry } from './utils/auditLog'
 import { useNotifications } from './composables/useNotifications'
@@ -648,8 +634,6 @@ const activeMatchData = ref(null)
 
 const isClaimModalOpen = ref(false)
 const claimingTargetItem = ref(null)
-const claimableLostItems = ref([])
-const loadingClaimableLostItems = ref(false)
 const isEmailModalOpen = ref(false)
 const isAuthModalOpen = ref(false)
 const isNotificationsOpen = ref(false)
@@ -746,15 +730,6 @@ function handleKeydown(e) {
     }
   }
 
-  // Dismiss modals on Escape
-  if (e.key === 'Escape') {
-    if (isReportModalOpen.value) isReportModalOpen.value = false
-    if (isMatchAlertOpen.value) isMatchAlertOpen.value = false
-    if (selectedItem.value) selectedItem.value = null
-    if (isClaimModalOpen.value) isClaimModalOpen.value = false
-    if (isEmailModalOpen.value) isEmailModalOpen.value = false
-    if (isNotificationsOpen.value) isNotificationsOpen.value = false
-  }
 }
 
 // Notifications arrive while the tab sits in the background; check again on return.
@@ -1519,25 +1494,7 @@ async function handleStaffConfirmReturn({ itemId, itemTitle, claimant, notes }) 
 }
 
 // Ownership Claim Flow Handlers
-async function loadClaimableLostItems() {
-  if (!isBackendConfigured) {
-    claimableLostItems.value = myItems.value.filter((item) => (
-      item.type === 'lost' && ['pending_review', 'searching', 'matched'].includes(item.status)
-    ))
-    return
-  }
-  loadingClaimableLostItems.value = true
-  try {
-    claimableLostItems.value = await listMyClaimableLostItems()
-  } catch (error) {
-    claimableLostItems.value = []
-    showToast({ title: t('claimLinkedLostPostLoadFailedTitle'), message: error.message, type: 'warning' })
-  } finally {
-    loadingClaimableLostItems.value = false
-  }
-}
-
-async function handleClaimItem(item) {
+function handleClaimItem(item) {
   if (item.type !== 'found') {
     showToast({ title: t('claimUnavailableTitle'), message: t('claimOnlyFoundMessage'), type: 'info' })
     return
@@ -1547,9 +1504,7 @@ async function handleClaimItem(item) {
     return
   }
   claimingTargetItem.value = item
-  claimableLostItems.value = []
   isClaimModalOpen.value = true
-  await loadClaimableLostItems()
 }
 
 async function handleSubmitClaim(claimData) {
@@ -1560,7 +1515,6 @@ async function handleSubmitClaim(claimData) {
         proof: `${claimData.secretDetails}\nStudent ID: ${claimData.claimantId}\nName: ${claimData.claimantName}`,
         preferredContact: claimData.claimantContact,
         evidencePaths: claimData.evidencePaths,
-        linkedLostItemId: claimData.linkedLostItemId,
       })
       showToast({ title: isTh.value ? 'ยื่นคำขอสำเร็จ' : 'Claim submitted', message: isTh.value ? 'เจ้าหน้าที่จะตรวจสอบหลักฐานของคุณ ติดตามสถานะได้ที่รายการของฉัน' : 'Staff will review your proof. Track it under My Reports.', type: 'success' })
     } catch (error) {

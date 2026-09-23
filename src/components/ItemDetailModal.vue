@@ -2,8 +2,9 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
     <!-- Backdrop Overlay -->
     <div 
+      data-modal-backdrop
+      aria-hidden="true"
       class="fixed inset-0 bg-brand-espresso/60 backdrop-blur-sm transition-opacity" 
-      @click="$emit('close')"
     ></div>
 
     <!-- Modal Dialog Panel -->
@@ -20,7 +21,6 @@
             <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDotClass(item.status, item.type)"></span>
             {{ getStatusLabel(item.status, item.type) }}
           </span>
-          <span class="text-xs font-semibold text-brand-latte">ID: #{{ item.id }}</span>
         </div>
 
         <button 

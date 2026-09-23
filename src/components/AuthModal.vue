@@ -1,11 +1,10 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <button
-      type="button"
+    <div
+      data-modal-backdrop
+      aria-hidden="true"
       class="fixed inset-0 bg-brand-espresso/60 backdrop-blur-sm"
-      :aria-label="copy.close"
-      @click="emit('close')"
-    ></button>
+    ></div>
 
     <section
       class="relative w-full max-w-md rounded-2xl border border-brand-sand bg-brand-paper p-6 shadow-warm-xl sm:p-7"

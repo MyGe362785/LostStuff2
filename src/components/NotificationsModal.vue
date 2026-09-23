@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-    <div class="fixed inset-0 bg-brand-espresso/60 backdrop-blur-sm" @click="$emit('close')"></div>
+    <div data-modal-backdrop aria-hidden="true" class="fixed inset-0 bg-brand-espresso/60 backdrop-blur-sm"></div>
 
     <div
       class="relative w-full max-w-lg rounded-2xl bg-brand-paper shadow-warm-xl border border-brand-sand overflow-hidden z-10 my-6 flex flex-col max-h-[85vh]"

@@ -334,19 +334,6 @@
                 <dt class="text-brand-latte">{{ t('claimProofLabel') }}</dt>
                 <dd class="text-brand-mocha whitespace-pre-line break-words">{{ claim.proof }}</dd>
               </div>
-              <div v-if="claim.linkedLostItem" class="sm:col-span-2">
-                <dt class="text-brand-latte">{{ t('claimLinkedLostPostStaffLabel') }}</dt>
-                <dd class="mt-1 flex flex-wrap items-center gap-2">
-                  <span class="font-semibold text-brand-espresso">{{ isTh ? claim.linkedLostItem.titleTh : claim.linkedLostItem.titleEn }}</span>
-                  <button
-                    type="button"
-                    @click="$emit('view-item', claim.linkedLostItem)"
-                    class="rounded-lg border border-brand-sand bg-brand-cream px-2.5 py-1 text-[11px] font-bold text-brand-chestnut transition-colors hover:bg-brand-sand"
-                  >
-                    {{ t('claimLinkedLostPostOpen') }}
-                  </button>
-                </dd>
-              </div>
               <div v-if="claim.evidenceImageUrls.length" class="sm:col-span-2">
                 <dt class="text-brand-latte">{{ t('claimEvidenceStaffLabel') }}</dt>
                 <dd class="mt-1 flex flex-wrap gap-2">
@@ -897,7 +884,7 @@
     </div>
 
     <!-- Close Item Confirmation Modal -->
-    <div v-if="closeConfirmItem" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-espresso/70 backdrop-blur-md animate-in fade-in duration-150" @click.self="closeConfirmItem = null">
+    <div v-if="closeConfirmItem" data-modal-backdrop class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-espresso/70 backdrop-blur-md animate-in fade-in duration-150">
       <div class="bg-brand-paper rounded-3xl p-6 border border-brand-sand max-w-md w-full shadow-warm-xl">
         <div class="flex items-start gap-3.5">
           <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center justify-center shrink-0">
@@ -1043,8 +1030,7 @@ const emit = defineEmits([
   'close-item',
   'confirm-return',
   'reset-data',
-  'review-claim',
-  'view-item'
+  'review-claim'
 ])
 
 const isTh = computed(() => props.currentLang === 'th')

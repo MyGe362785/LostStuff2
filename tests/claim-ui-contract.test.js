@@ -14,7 +14,7 @@ describe('ownership claim UI contract', () => {
     expect(app).toContain("if (item.type !== 'found')")
   })
 
-  it('provides an accessible private-evidence upload and optional lost-post selector', () => {
+  it('provides an accessible private-evidence upload without a lost-post selector', () => {
     const modal = readFileSync('src/components/ClaimModal.vue', 'utf8')
 
     expect(modal).toContain('type="file"')
@@ -22,7 +22,20 @@ describe('ownership claim UI contract', () => {
     expect(modal).toContain('@drop.prevent="handleDrop"')
     expect(modal).toContain('URL.createObjectURL(file)')
     expect(modal).toContain('removeClaimEvidence')
-    expect(modal).toContain('id="linked-lost-post"')
-    expect(modal).toContain('linkedLostItemId: linkedLostPostId.value || null')
+    expect(modal).not.toContain('id="linked-lost-post"')
+    expect(modal).not.toContain('linkedLostItemId')
+  })
+
+  it('does not expose internal item IDs in public claim or detail views', () => {
+    const modal = readFileSync('src/components/ClaimModal.vue', 'utf8')
+    const itemDetail = readFileSync('src/components/ItemDetailModal.vue', 'utf8')
+
+    expect(modal).not.toContain('ID: #{{ item.id }}')
+    expect(itemDetail).not.toContain('ID: #{{ item.id }}')
+  })
+
+  it('uses the supplied character artwork in the homepage hero', () => {
+    const hero = readFileSync('src/components/HeroBanner.vue', 'utf8')
+    expect(hero).toContain("import guideCharacter from '../../img/ghibli4-hero.webp'")
   })
 })

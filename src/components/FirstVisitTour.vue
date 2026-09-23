@@ -250,7 +250,6 @@ function finish(status) {
 
 function handleKeydown(event) {
   if (!isVisible.value) return
-  if (event.key === 'Escape') finish('skipped')
   if (event.key === 'ArrowRight') nextStep()
   if (event.key === 'ArrowLeft') previousStep()
 }

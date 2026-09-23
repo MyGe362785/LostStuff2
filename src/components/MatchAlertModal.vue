@@ -2,8 +2,9 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in zoom-in-95 duration-200">
     <!-- Backdrop Overlay -->
     <div 
+      data-modal-backdrop
+      aria-hidden="true"
       class="fixed inset-0 bg-brand-espresso/70 backdrop-blur-md transition-opacity" 
-      @click="$emit('close')"
     ></div>
 
     <!-- Modal Dialog Panel -->

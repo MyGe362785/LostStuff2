@@ -1,11 +1,10 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-6">
-    <button
+    <div
+      data-modal-backdrop
+      aria-hidden="true"
       class="fixed inset-0 cursor-default bg-brand-espresso/65 backdrop-blur-sm"
-      type="button"
-      :aria-label="t('modalClose')"
-      @click="$emit('close')"
-    ></button>
+    ></div>
 
     <div class="relative z-10 my-4 w-full max-w-3xl">
       <button
@@ -214,7 +213,6 @@ function formatDate(value) {
 }
 
 function handleKeydown(event) {
-  if (event.key === 'Escape') emit('close')
   if (event.key === 'ArrowLeft' && props.currentIndex > 0) emit('previous')
   if (event.key === 'ArrowRight' && props.currentIndex < props.items.length - 1) emit('next')
 }
