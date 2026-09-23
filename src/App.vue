@@ -593,7 +593,7 @@ function navigateTo(path) {
 
 // App State
 const currentLang = ref('th')
-const currentTheme = ref(document.documentElement.dataset.theme === 'mono-red' ? 'mono-red' : 'warm')
+const currentTheme = ref(document.documentElement.dataset.theme === 'dark' ? 'dark' : 'warm')
 const activeTab = ref('home')
 const items = ref([])
 const auditLogs = ref([])
@@ -1146,7 +1146,7 @@ function handleLangChange(lang) {
 }
 
 function handleThemeChange(theme) {
-  currentTheme.value = theme === 'mono-red' ? 'mono-red' : 'warm'
+  currentTheme.value = theme === 'dark' ? 'dark' : 'warm'
   document.documentElement.dataset.theme = currentTheme.value
   try {
     localStorage.setItem('foundit-theme', currentTheme.value)

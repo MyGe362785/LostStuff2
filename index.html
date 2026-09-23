@@ -7,7 +7,7 @@
     <script>
       try {
         const savedTheme = localStorage.getItem('foundit-theme')
-        document.documentElement.dataset.theme = savedTheme === 'mono-red' || savedTheme === 'vivid' ? 'mono-red' : 'warm'
+        document.documentElement.dataset.theme = ['dark', 'mono-red', 'vivid'].includes(savedTheme) ? 'dark' : 'warm'
       } catch (_) {
         document.documentElement.dataset.theme = 'warm'
       }

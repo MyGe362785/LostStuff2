@@ -131,22 +131,23 @@
             <span
               id="navbar-survey-tooltip"
               role="tooltip"
-              class="pointer-events-none invisible absolute right-0 top-full z-50 mt-2 translate-y-1 whitespace-nowrap rounded-lg bg-brand-espresso px-3 py-2 text-[11px] font-semibold text-brand-paper opacity-0 shadow-warm-lg transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transform-none motion-reduce:transition-none"
+              class="theme-tooltip pointer-events-none invisible absolute right-0 top-full z-50 mt-2 translate-y-1 whitespace-nowrap rounded-lg bg-brand-espresso px-3 py-2 text-[11px] font-semibold text-brand-paper opacity-0 shadow-warm-lg transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:visible group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transform-none motion-reduce:transition-none"
             >
               {{ t('navSatisfactionSurvey') }}
             </span>
           </a>
 
-          <!-- Theme switcher: warm brand theme / light black-white-red theme -->
+          <!-- Theme switcher: warm brand theme / dark theme -->
           <button
             type="button"
             class="theme-toggle relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-sand bg-brand-cream text-brand-chestnut transition-[color,background-color,border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-brand-caramel hover:text-brand-caramel active:translate-y-0 motion-reduce:transform-none motion-reduce:transition-none min-[360px]:h-10 min-[360px]:w-10"
             :aria-label="themeLabel"
             :title="themeLabel"
-            :aria-pressed="theme === 'mono-red'"
-            @click="$emit('theme-change', theme === 'mono-red' ? 'warm' : 'mono-red')"
+            :aria-pressed="theme === 'dark'"
+            @click="$emit('theme-change', theme === 'dark' ? 'warm' : 'dark')"
           >
-            <Palette class="h-5 w-5" aria-hidden="true" />
+            <Sun v-if="theme === 'dark'" class="h-5 w-5" aria-hidden="true" />
+            <Moon v-else class="h-5 w-5" aria-hidden="true" />
             <span class="theme-toggle__spark absolute right-1.5 top-1.5 h-2 w-2 rounded-full" aria-hidden="true"></span>
           </button>
 
@@ -205,7 +206,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Compass, PlusCircle, Mail, Bell, Palette } from 'lucide-vue-next'
+import { Compass, PlusCircle, Mail, Bell, Moon, Sun } from 'lucide-vue-next'
 import { SATISFACTION_SURVEY_URL } from '../data/links'
 
 const props = defineProps({
@@ -249,7 +250,7 @@ defineEmits([
 const isTh = computed(() => props.currentLang === 'th')
 const showsBell = computed(() => props.backendConfigured && Boolean(props.user))
 const themeLabel = computed(() => {
-  if (props.theme === 'mono-red') return isTh.value ? 'เปลี่ยนเป็นธีมอบอุ่น' : 'Switch to warm theme'
-  return isTh.value ? 'เปลี่ยนเป็นธีมดำ ขาว แดง' : 'Switch to black, white and red theme'
+  if (props.theme === 'dark') return isTh.value ? 'เปลี่ยนเป็นธีมสว่าง' : 'Switch to light theme'
+  return isTh.value ? 'เปลี่ยนเป็นโหมดมืด' : 'Switch to dark mode'
 })
 </script>

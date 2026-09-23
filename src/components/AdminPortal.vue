@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#F7F4F0] text-brand-espresso flex flex-col font-sans selection:bg-brand-chestnut/15 selection:text-brand-espresso">
+  <div class="min-h-screen bg-brand-cream text-brand-espresso flex flex-col font-sans selection:bg-brand-chestnut/15 selection:text-brand-espresso">
     
     <!-- Admin Top Navbar: Same layout as Home Navbar, but with inverted Warm Espresso palette -->
     <header class="sticky top-0 z-40 bg-[#261B13] text-white border-b border-brand-espresso/40 backdrop-blur-md transition-all shadow-warm-md">
