@@ -1518,7 +1518,7 @@ async function handleCloseItem(itemId) {
   closingItemId.value = itemId
   try {
     if (isBackendConfigured) {
-      await updateItemStatus(itemId, 'closed', 'item_closed', { reason: 'Closed by administrator' })
+      await updateItemStatus(itemId, 'closed', 'item_closed')
       await loadBackendItems()
       showToast({
         title: isTh.value ? 'ปิดรายการแล้ว' : 'Item closed',
