@@ -5,6 +5,7 @@ const migration = readFileSync('supabase/migrations/202609200013_owasp_workflow_
 const rpcRepairMigration = readFileSync('supabase/migrations/202609220014_repair_update_item_status_rpc.sql', 'utf8')
 const claimEvidenceMigration = readFileSync('supabase/migrations/202609220015_claim_evidence_and_linked_lost_posts.sql', 'utf8')
 const removeLinkedPostMigration = readFileSync('supabase/migrations/202609220016_remove_linked_lost_claim_relation.sql', 'utf8')
+const claimEvidenceRepairMigration = readFileSync('supabase/migrations/202609240017_repair_claim_evidence_relationship.sql', 'utf8')
 
 describe('repository security contract', () => {
   it('removes the raw HTML rendering sink', () => {
@@ -37,6 +38,11 @@ describe('repository security contract', () => {
     expect(removeLinkedPostMigration).toContain('drop column if exists linked_lost_item_id')
     expect(removeLinkedPostMigration).toContain("v_item.type <> 'found'")
     expect(removeLinkedPostMigration).not.toContain('p_linked_lost_item_id')
+  })
+
+  it('repairs and reloads the claim evidence relationship', () => {
+    expect(claimEvidenceRepairMigration).toContain('foreign key (claim_id) references public.claims(id) on delete cascade')
+    expect(claimEvidenceRepairMigration).toContain("notify pgrst, 'reload schema'")
   })
 
   it('configures deployment hardening headers', () => {

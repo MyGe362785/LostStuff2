@@ -42,9 +42,9 @@ export async function getCurrentProfile() {
   return data
 }
 
-async function signedImageUrl(storagePath) {
+async function signedImageUrl(storagePath, bucket = IMAGE_BUCKET) {
   if (!storagePath) return null
-  const { data, error } = await supabase.storage.from(IMAGE_BUCKET).createSignedUrl(storagePath, 3600)
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(storagePath, 3600)
   return error ? null : data.signedUrl
 }
 
@@ -167,7 +167,7 @@ export async function createClaim({ itemId, proof, preferredContact, evidencePat
 
 async function mapClaim(record) {
   const evidenceImageUrls = await Promise.all(
-    (record.claim_evidence || []).map((evidence) => signedImageUrl(evidence.storage_path))
+    (record.claim_evidence || []).map((evidence) => signedImageUrl(evidence.storage_path, CLAIM_EVIDENCE_BUCKET))
   )
   return {
     id: record.id,
@@ -192,15 +192,42 @@ async function mapClaim(record) {
 
 const CLAIM_ITEM_COLUMNS = 'item:items(title_th, title_en, status, type, handover_point_th, handover_point_en)'
 const CLAIM_EVIDENCE_COLUMNS = 'claim_evidence(storage_path)'
-const CLAIM_SELECT_COLUMNS = `id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, ${CLAIM_ITEM_COLUMNS}, ${CLAIM_EVIDENCE_COLUMNS}`
+const CLAIM_BASE_COLUMNS = `id, item_id, claimant_id, proof, preferred_contact, status, staff_note, created_at, reviewed_at, ${CLAIM_ITEM_COLUMNS}`
+
+function isMissingClaimEvidenceRelationship(error) {
+  if (error?.code !== 'PGRST200') return false
+  const diagnostic = [error.message, error.details, error.hint].filter(Boolean).join(' ').toLowerCase()
+  return diagnostic.includes('claims') && diagnostic.includes('claim_evidence')
+}
+
+async function selectClaims({ claimantId = null, includeClaimant = false, includeEvidence = true } = {}) {
+  const evidenceColumns = includeEvidence ? `, ${CLAIM_EVIDENCE_COLUMNS}` : ''
+  const claimantColumns = includeClaimant ? ', claimant:profiles!claims_claimant_id_fkey(display_name)' : ''
+  let query = supabase
+    .from('claims')
+    .select(`${CLAIM_BASE_COLUMNS}${evidenceColumns}${claimantColumns}`)
+
+  if (claimantId) query = query.eq('claimant_id', claimantId)
+  return query.order('created_at', { ascending: false })
+}
+
+/**
+ * Deployments can briefly serve a newer frontend before PostgREST has reloaded
+ * the claim-evidence relationship. Claims remain usable without thumbnails, so
+ * retry the read without that optional embed instead of breaking the session.
+ */
+async function selectClaimsWithEvidenceFallback(options) {
+  let result = await selectClaims(options)
+  if (isMissingClaimEvidenceRelationship(result.error)) {
+    result = await selectClaims({ ...options, includeEvidence: false })
+  }
+  return result
+}
 
 /** Every claim, newest first. RLS returns rows only to staff. */
 export async function listClaimsForStaff() {
   requireBackend()
-  const { data, error } = await supabase
-    .from('claims')
-    .select(`${CLAIM_SELECT_COLUMNS}, claimant:profiles!claims_claimant_id_fkey(display_name)`)
-    .order('created_at', { ascending: false })
+  const { data, error } = await selectClaimsWithEvidenceFallback({ includeClaimant: true })
   if (error) throw error
   return Promise.all(data.map(mapClaim))
 }
@@ -210,11 +237,7 @@ export async function listMyClaims() {
   requireBackend()
   const user = await getCurrentUser()
   if (!user) return []
-  const { data, error } = await supabase
-    .from('claims')
-    .select(CLAIM_SELECT_COLUMNS)
-    .eq('claimant_id', user.id)
-    .order('created_at', { ascending: false })
+  const { data, error } = await selectClaimsWithEvidenceFallback({ claimantId: user.id })
   if (error) throw error
   return Promise.all(data.map(mapClaim))
 }

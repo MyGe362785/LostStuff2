@@ -863,7 +863,7 @@ async function loadClaimsSafely() {
     await loadClaims()
   } catch (error) {
     console.error('Unable to load claims', error)
-    showToast({ title: t('claimsLoadFailedTitle'), message: error.message, type: 'warning' })
+    showToast({ title: t('claimsLoadFailedTitle'), message: t('claimsLoadFailedMessage'), type: 'warning' })
   }
 }
 
