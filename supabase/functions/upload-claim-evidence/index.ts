@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 const CLAIM_EVIDENCE_BUCKET = 'claim-evidence'
 const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }

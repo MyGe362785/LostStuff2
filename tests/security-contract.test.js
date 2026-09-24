@@ -45,6 +45,12 @@ describe('repository security contract', () => {
     expect(claimEvidenceRepairMigration).toContain("notify pgrst, 'reload schema'")
   })
 
+  it('allows browser preflight requests to the claim evidence upload function', () => {
+    const uploadFunction = readFileSync('supabase/functions/upload-claim-evidence/index.ts', 'utf8')
+    expect(uploadFunction).toContain("'Access-Control-Allow-Origin': '*'")
+    expect(uploadFunction).toContain("if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })")
+  })
+
   it('configures deployment hardening headers', () => {
     const config = JSON.parse(readFileSync('vercel.json', 'utf8'))
     const headers = Object.fromEntries(config.headers[0].headers.map(({ key, value }) => [key, value]))
