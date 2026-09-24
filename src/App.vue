@@ -13,7 +13,7 @@
         :busyClaimId="reviewingClaimId"
         :busyItemId="approvingItemId"
         :busyCloseItemId="closingItemId"
-        @navigate-home="navigateTo('/')"
+        @navigate-home="returnHome"
         @lang-change="handleLangChange"
         @approve-item="handleApproveItem"
         @reject-item="handleRejectItem"
@@ -56,7 +56,7 @@
           :key="`privacy-${currentLang}`"
           :currentLang="currentLang"
           :backendConfigured="isBackendConfigured"
-          @navigate-home="navigateTo('/')"
+          @navigate-home="returnHome"
         />
         
         <!-- TAB: HOME -->
@@ -64,12 +64,16 @@
           <!-- Hero Search & Action Centerpiece -->
           <HeroBanner 
             v-model:searchQuery="searchQuery"
+            :searchHistory="searchHistory"
             :activeLostCount="activeLostCount"
             :currentLang="currentLang"
             :t="t"
-            @trigger-search="activeTab = 'search'"
+            @trigger-search="submitSearch"
             @quick-find="openQuickFoundSearch"
             @open-report="openReportModal"
+            @select-history="reuseSearchTerm"
+            @remove-history="removeSearchTerm"
+            @clear-history="clearSearchHistory"
           />
 
           <!-- Discovery Feed Preview on Home -->
@@ -81,7 +85,7 @@
                 <p class="text-xs text-brand-mocha/70 mt-0.5">{{ t('hubSubtitle') }}</p>
               </div>
               <button 
-                @click="activeTab = 'search'"
+                @click="handleNavChange('search')"
                 class="text-xs font-bold text-brand-chestnut hover:text-brand-mocha flex items-center gap-1"
               >
                 <span>{{ isTh ? 'ดูทั้งหมด' : 'View All' }}</span>
@@ -239,6 +243,39 @@
               {{ t('hubSubtitle') }}
             </p>
           </div>
+
+          <div
+            v-if="activeSearchTerm"
+            class="mb-4 flex flex-col gap-3 rounded-xl border border-brand-sand bg-brand-cream/55 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between"
+            role="status"
+            aria-live="polite"
+          >
+            <div class="flex min-w-0 items-center gap-3">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-chestnut text-white">
+                <Search class="h-4 w-4" aria-hidden="true" />
+              </span>
+              <p class="min-w-0 text-sm text-brand-mocha">
+                <span class="font-semibold">{{ t('searchingFor') }}</span>
+                <strong class="ml-1 break-words font-extrabold text-brand-espresso">“{{ activeSearchTerm }}”</strong>
+              </p>
+            </div>
+            <button
+              type="button"
+              class="self-start rounded-lg px-3 py-2 text-xs font-bold text-brand-chestnut transition-colors hover:bg-brand-sand/70 hover:text-brand-espresso focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-caramel sm:self-auto"
+              @click="clearCurrentSearch"
+            >
+              {{ t('clearCurrentSearch') }}
+            </button>
+          </div>
+
+          <SearchHistory
+            class="mb-5"
+            :items="searchHistory"
+            :t="t"
+            @select="reuseSearchTerm"
+            @remove="removeSearchTerm"
+            @clear="clearSearchHistory"
+          />
 
           <!-- Filter Controls -->
           <FilterSidebar 
@@ -475,8 +512,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, defineAsyncComponent, h } from 'vue'
-import { 
-  FileText, Cpu, ShieldCheck, ArrowRight, ChevronDown, RotateCcw, LockKeyhole
+import {
+  FileText, Cpu, ShieldCheck, ArrowRight, ChevronDown, RotateCcw, LockKeyhole, Search
 } from 'lucide-vue-next'
 
 import Navbar from './components/Navbar.vue'
@@ -495,6 +532,7 @@ import ToastNotification from './components/ToastNotification.vue'
 import MobileNav from './components/MobileNav.vue'
 import PrivacyPolicy from './components/PrivacyPolicy.vue'
 import FirstVisitTour from './components/FirstVisitTour.vue'
+import SearchHistory from './components/SearchHistory.vue'
 
 // Admin & Claim & Email components
 // Only staff ever render the portal, so keep it out of the main bundle.
@@ -526,6 +564,7 @@ import { initialAuditLogs } from './data/auditLogs'
 import { translations } from './data/i18n'
 import { findMatches } from './utils/matchingEngine'
 import { getQuickFoundMatches } from './utils/quickFoundSearch'
+import { addSearchHistoryTerm, parseSearchHistory, removeSearchHistoryTerm } from './utils/searchHistory'
 import { loadEmails, saveEmails, dispatchEmail, resetEmails } from './utils/emailNotifier'
 import { isBackendConfigured, supabase } from './lib/supabase'
 import {
@@ -572,6 +611,7 @@ const vReveal = {
 }
 
 // Routing State
+const PUBLIC_TABS = new Set(['home', 'search', 'my-posts', 'locations'])
 const currentPath = ref(window.location.pathname || '/')
 const isStaff = computed(() => ['staff', 'admin'].includes(currentProfile.value?.role))
 const isPrivacyRoute = computed(() => currentPath.value === '/privacy' || currentPath.value.startsWith('/privacy/'))
@@ -585,9 +625,21 @@ const isAdminRoute = computed(() => {
          window.location.search.includes('admin')
 })
 
-function navigateTo(path) {
+function navigateTo(path, { replace = false } = {}) {
+  // Secondary routes should always sit on top of Home, not on top of an
+  // in-app tab such as Search. This keeps the browser Back destination stable.
+  if (!replace && currentPath.value === '/' && path !== '/') {
+    window.history.replaceState({ founditTab: 'home' }, '', '/')
+  }
   currentPath.value = path
-  window.history.pushState(null, '', path)
+  window.history[replace ? 'replaceState' : 'pushState'](null, '', path)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function returnHome() {
+  currentPath.value = '/'
+  activeTab.value = 'home'
+  window.history.replaceState({ founditTab: 'home' }, '', '/')
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -617,6 +669,8 @@ const selectedBuilding = ref('')
 const selectedSort = ref('newest')
 const viewMode = ref('grid')
 const homeVisibleCount = ref(6)
+const SEARCH_HISTORY_KEY = 'foundit_search_history_v1'
+const searchHistory = ref(readSearchHistory())
 
 // Modals State
 const isReportModalOpen = ref(false)
@@ -661,6 +715,7 @@ function t(key) {
 }
 
 const isTh = computed(() => currentLang.value === 'th')
+const activeSearchTerm = computed(() => searchQuery.value.trim())
 
 // Storage Persistence Keys
 const STORAGE_KEY = 'loststuff2_items_v2'
@@ -705,8 +760,12 @@ function showAuthRedirectError() {
 }
 
 // Global Keyboard & Navigation Listeners
-function handlePopState() {
+function handlePopState(event) {
   currentPath.value = window.location.pathname
+  if (currentPath.value === '/') {
+    const historyTab = event?.state?.founditTab || window.history.state?.founditTab
+    activeTab.value = PUBLIC_TABS.has(historyTab) ? historyTab : 'home'
+  }
   explainStaffOnlyRoute()
 }
 
@@ -756,6 +815,13 @@ function explainStaffOnlyRoute() {
 
 onMounted(async () => {
   showAuthRedirectError()
+  if (currentPath.value === '/') {
+    const historyTab = window.history.state?.founditTab
+    activeTab.value = PUBLIC_TABS.has(historyTab) ? historyTab : 'home'
+    if (!PUBLIC_TABS.has(historyTab)) {
+      window.history.replaceState({ founditTab: activeTab.value }, '', '/')
+    }
+  }
   await loadData()
   explainStaffOnlyRoute()
   if (isBackendConfigured) {
@@ -1135,8 +1201,24 @@ watch(
 
 // Navigation Handlers
 function handleNavChange(tab) {
-  if (isPrivacyRoute.value) navigateTo('/')
+  if (!PUBLIC_TABS.has(tab)) return
+  const wasOnSecondaryRoute = currentPath.value !== '/'
+  const previousTab = activeTab.value
+  currentPath.value = '/'
   activeTab.value = tab
+  const state = { founditTab: tab }
+  if (wasOnSecondaryRoute) {
+    window.history.replaceState(state, '', '/')
+  } else if (tab === 'home') {
+    window.history.replaceState(state, '', '/')
+  } else if (previousTab !== tab) {
+    // Every public destination gets Home as its immediate Back destination,
+    // even when the user switches directly from one tab to another.
+    if (window.history.state?.founditTab !== 'home') {
+      window.history.replaceState({ founditTab: 'home' }, '', '/')
+    }
+    window.history.pushState(state, '', '/')
+  }
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
 }
@@ -1162,6 +1244,52 @@ function resetFilters() {
   selectedColor.value = ''
   selectedBuilding.value = ''
   selectedSort.value = 'newest'
+}
+
+function readSearchHistory() {
+  try {
+    return parseSearchHistory(localStorage.getItem(SEARCH_HISTORY_KEY))
+  } catch (_) {
+    return []
+  }
+}
+
+function persistSearchHistory() {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(searchHistory.value))
+  } catch (_) {
+    // Searching still works when storage is unavailable.
+  }
+}
+
+function rememberSearchTerm(value) {
+  searchHistory.value = addSearchHistoryTerm(searchHistory.value, value)
+  persistSearchHistory()
+}
+
+function submitSearch() {
+  searchQuery.value = searchQuery.value.trim().replace(/\s+/g, ' ')
+  if (searchQuery.value) rememberSearchTerm(searchQuery.value)
+  handleNavChange('search')
+}
+
+function reuseSearchTerm(term) {
+  searchQuery.value = term
+  submitSearch()
+}
+
+function removeSearchTerm(term) {
+  searchHistory.value = removeSearchHistoryTerm(searchHistory.value, term)
+  persistSearchHistory()
+}
+
+function clearSearchHistory() {
+  searchHistory.value = []
+  persistSearchHistory()
+}
+
+function clearCurrentSearch() {
+  searchQuery.value = ''
 }
 
 function openReportModal(type = 'lost') {
@@ -1194,6 +1322,8 @@ function openQuickFoundSearch() {
     })
     return
   }
+
+  rememberSearchTerm(itemName)
 
   const matches = getQuickFoundMatches(itemName, items.value)
 

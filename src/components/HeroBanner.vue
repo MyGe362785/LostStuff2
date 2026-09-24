@@ -94,6 +94,15 @@
           </button>
         </div>
 
+        <SearchHistory
+          class="mx-auto mt-4 max-w-5xl"
+          :items="searchHistory"
+          :t="t"
+          @select="$emit('select-history', $event)"
+          @remove="$emit('remove-history', $event)"
+          @clear="$emit('clear-history')"
+        />
+
         <div class="mx-auto mt-7 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2">
           <button
             data-tour="report-lost"
@@ -126,6 +135,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { AlertTriangle, ArrowRight, PlusCircle, Search, SearchCheck, X } from 'lucide-vue-next'
+import SearchHistory from './SearchHistory.vue'
 import backpackImage from '../../img/article1.webp'
 import pencilImage from '../../img/article2.webp'
 import tabletImage from '../../img/article3.webp'
@@ -137,12 +147,13 @@ let hasPlayedHeroArtReveal = false
 
 const props = defineProps({
   searchQuery: { type: String, default: '' },
+  searchHistory: { type: Array, default: () => [] },
   activeLostCount: { type: Number, default: 18 },
   currentLang: { type: String, default: 'th' },
   t: { type: Function, required: true },
 })
 
-const emit = defineEmits(['update:searchQuery', 'trigger-search', 'quick-find', 'open-report'])
+const emit = defineEmits(['update:searchQuery', 'trigger-search', 'quick-find', 'open-report', 'select-history', 'remove-history', 'clear-history'])
 const isTh = computed(() => props.currentLang === 'th')
 const shouldAnimateArt = ref(false)
 const popularTags = computed(() => isTh.value
